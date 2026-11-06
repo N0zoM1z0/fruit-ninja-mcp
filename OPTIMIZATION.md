@@ -26,6 +26,7 @@ Use seed 42 for development. Record every attempt and preserve lower scores and 
 | Baseline | Fresh    | Full     |     3 |      3 |     0 |                   5.8% |
 | Coverage | Fresh    | Full     |    16 |     13 |     0 |                  15.1% |
 | Coverage | Standard | Compact  |    78 |     35 |     0 |                  18.2% |
+| Coverage | Async    | Full     |   130 |     55 |     0 |                  27.9% |
 
 These are single development attempts, not replicated estimates. All completed naturally with valid independent clocks. Full provenance and errors are retained in `results/mcp-optimization.json`. Waiting for fresh entry did not help this actor: observation-to-next-request delay still exceeded fruit lifetime. Compact feedback performed close to full feedback, without evidence of a score improvement yet.
 

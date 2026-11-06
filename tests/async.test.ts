@@ -11,6 +11,40 @@ const points = [
   { x: 1100, y: 600, t_ms: 1000 },
 ];
 
+test("a native input failure after async acceptance releases the blade and action slot", async () => {
+  const game = await GameRuntime.launch();
+  const move = game.page.mouse.move.bind(game.page.mouse),
+    up = game.page.mouse.up.bind(game.page.mouse);
+  let moves = 0,
+    releases = 0;
+  try {
+    await game.prepare({ mode: "arcade", seed: 42, duration_seconds: 5 });
+    await game.start();
+    game.page.mouse.move = async (...args) => {
+      if (++moves === 2) throw new Error("Injected native transport failure");
+      return move(...args);
+    };
+    game.page.mouse.up = async (...args) => {
+      releases++;
+      return up(...args);
+    };
+    const accepted = await game.submitPath({ points }, "canvas");
+    assert.equal(accepted.accepted, true);
+    await game.scene();
+    assert.equal(game.actionStatus().pending_action, null);
+    assert.equal(game.actionStatus().previous_action?.status, "failed");
+    assert.match(
+      game.actionStatus().previous_action!.error!,
+      /Injected native transport failure/,
+    );
+    assert.equal(releases, 1);
+  } finally {
+    game.page.mouse.move = move;
+    game.page.mouse.up = up;
+    await game.close();
+  }
+});
+
 test("async acknowledgement overlaps a bounded native path and busy requests never queue", async () => {
   const game = await GameRuntime.launch();
   try {

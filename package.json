@@ -19,10 +19,11 @@
     "play": "tsx src/cli.ts play",
     "trial": "tsx scripts/trial.ts",
     "compare": "tsx scripts/compare.ts",
+    "validate:optimization": "tsx scripts/validate-optimization.ts",
     "export:video": "tsx scripts/export-video.ts",
     "test": "node --import tsx --test tests/*.test.ts",
-    "format": "prettier --write src scripts tests results recordings README.md RESULTS.md REALTIME-PROTOCOL.md package.json tsconfig*.json",
-    "format:check": "prettier --check src scripts tests results recordings README.md RESULTS.md REALTIME-PROTOCOL.md package.json tsconfig*.json"
+    "format": "prettier --write src scripts tests results recordings README.md RESULTS.md REALTIME-PROTOCOL.md OPTIMIZATION.md package.json tsconfig*.json",
+    "format:check": "prettier --check src scripts tests results recordings README.md RESULTS.md REALTIME-PROTOCOL.md OPTIMIZATION.md package.json tsconfig*.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

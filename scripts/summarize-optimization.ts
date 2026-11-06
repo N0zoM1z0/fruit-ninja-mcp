@@ -89,6 +89,7 @@ for (const directory of positionals) {
     round_wall_ms: result.final_scene.clock_audit.finished_wall_elapsed_ms,
     maximum_clock_drift_ms: result.maximum_telemetry_clock_drift_ms,
     path_metrics: {
+      failed_actions: trace.filter((x) => x.type === "path_failed").length,
       count: paths.length,
       paths_with_hits: paths.filter((x) =>
         x.result.events.some((e: any) => e.type === "fruit_sliced"),

@@ -403,6 +403,12 @@ export class GameRuntime {
         };
         this.activeAction = undefined;
         reject(error);
+        void this.log({
+          type: "path_failed",
+          action_id: actionId,
+          space,
+          error: String(error),
+        }).catch((error) => console.error(error));
       },
     );
     const scene = await accepted;

@@ -20,8 +20,8 @@
     "trial": "tsx scripts/trial.ts",
     "replay": "tsx scripts/replay.ts",
     "test": "node --import tsx --test tests/*.test.ts",
-    "format": "prettier --write src scripts tests README.md package.json tsconfig*.json",
-    "format:check": "prettier --check src scripts tests README.md package.json tsconfig*.json"
+    "format": "prettier --write src scripts tests results README.md RESULTS.md package.json tsconfig*.json",
+    "format:check": "prettier --check src scripts tests results README.md RESULTS.md package.json tsconfig*.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

@@ -1,0 +1,90 @@
+{
+  "model": "gpt-6.1-terra",
+  "reasoning_effort": "high",
+  "seed": 2026,
+  "duration_seconds": 20,
+  "clock": "decision",
+  "exit_code": 0,
+  "timed_out": false,
+  "wall_seconds": 180.873,
+  "completed_round": true,
+  "valid_interface": true,
+  "tool_calls": 68,
+  "tool_errors": 0,
+  "invalid_tool_calls": 0,
+  "usage": {
+    "input_tokens": 1978770,
+    "cached_input_tokens": 1928576,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 3674,
+    "reasoning_output_tokens": 35
+  },
+  "final_scene": {
+    "schema_version": 1,
+    "round": 1,
+    "revision": 67,
+    "tick": 2400,
+    "phase": "finished",
+    "mode": "arcade",
+    "clock": "decision",
+    "elapsed_ms": 20000,
+    "remaining_ms": 0,
+    "arena": {
+      "width": 1362,
+      "height": 817
+    },
+    "gravity": 841.51,
+    "stats": {
+      "score": 300,
+      "sliced": 85,
+      "missed": 0,
+      "escaped_fruit": 0,
+      "bombs_hit": 0,
+      "max_combo": 5,
+      "spawned_fruit": 85
+    },
+    "objects": []
+  },
+  "note": "Exploratory MCP-only usability trial; no vision comparison or general performance claim.",
+  "trial_id": "terra-high-seed2026-v2",
+  "codex_version": "codex-cli 0.165.0",
+  "started_at": "2026-11-06T06:30:55.000Z",
+  "upstream": {
+    "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+    "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+    "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+    "file": "index.html"
+  },
+  "runtime_files": [
+    {
+      "path": "dist/bridge.js",
+      "sha256": "60956e873378205419276bbd4aa2188874fc9c6d248d0dd8749ca6ee996b516a"
+    },
+    {
+      "path": "dist/cli.js",
+      "sha256": "ecbcd45f5cead2d40245b6ff21d8e623d1fd534b410a29b2566f0b6fd1a919c8"
+    },
+    {
+      "path": "dist/runtime.js",
+      "sha256": "d846ecd8d66644116418433c01437d4db33a8928de100c8766dbead902e3d9cf"
+    },
+    {
+      "path": "dist/server.js",
+      "sha256": "4ae5d78f4635bf1412974679cc95c2a7531b74ce7dedbe266f58e549462461ee"
+    },
+    {
+      "path": "dist/types.js",
+      "sha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2"
+    },
+    {
+      "path": "dist/upstream.js",
+      "sha256": "ab98abae36a157edc21fca13dfcbc5b613df2eef9b3cdcc242a11479a449186e"
+    }
+  ],
+  "browser_version": "156.0.8078.79",
+  "instrumented_game_sha256": "7ed145825561c497d6172dc51c91c7d5a662de0dc10b5c65a9203c687efc308c",
+  "replay_verified_actions": 67,
+  "raw_artifacts_directory": "artifacts/trials/terra-high-seed2026-v2",
+  "adapter_source_commit": "1321157",
+  "adapter_stage": "current baseline"
+}

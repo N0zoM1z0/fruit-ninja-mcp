@@ -1,0 +1,65 @@
+{
+  "model": "gpt-6.1-terra",
+  "reasoning_effort": "high",
+  "seed": 42,
+  "duration_seconds": 20,
+  "clock": "decision",
+  "exit_code": 0,
+  "timed_out": false,
+  "wall_seconds": 197.729,
+  "completed_round": true,
+  "valid_interface": true,
+  "tool_calls": 73,
+  "tool_errors": 0,
+  "invalid_tool_calls": 0,
+  "usage": {
+    "input_tokens": 2220803,
+    "cached_input_tokens": 2122624,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 4109,
+    "reasoning_output_tokens": 74
+  },
+  "final_scene": {
+    "schema_version": 1,
+    "round": 1,
+    "revision": 72,
+    "tick": 2401,
+    "phase": "finished",
+    "mode": "arcade",
+    "clock": "decision",
+    "elapsed_ms": 20008.333,
+    "remaining_ms": 0,
+    "arena": {
+      "width": 1362,
+      "height": 817
+    },
+    "gravity": 841.51,
+    "stats": {
+      "score": 360,
+      "sliced": 100,
+      "missed": 0,
+      "escaped_fruit": 0,
+      "bombs_hit": 0,
+      "max_combo": 5,
+      "spawned_fruit": 100
+    },
+    "objects": []
+  },
+  "note": "Exploratory MCP-only usability trial; no vision comparison or general performance claim.",
+  "trial_id": "terra-high-seed42-v1",
+  "codex_version": "codex-cli 0.165.0",
+  "started_at": "2026-11-06T06:25:05.529Z",
+  "upstream": {
+    "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+    "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+    "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+    "file": "index.html"
+  },
+  "runtime_files": [],
+  "browser_version": null,
+  "instrumented_game_sha256": null,
+  "replay_verified_actions": 72,
+  "raw_artifacts_directory": "artifacts/trials/terra-high-seed42-v1",
+  "adapter_stage": "initial smoke, before the final integer-tick timer fix",
+  "replay_note": "Verified against the pre-timer-fix adapter. The original upstream float clock ended this round one physics tick late. Historical results remain unchanged; use v2 for reproduction with the current adapter."
+}

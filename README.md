@@ -4,6 +4,8 @@ A real, rendered Fruit Ninja game that an agent plays through visible-object sta
 
 The first milestone is a useful MCP interface and an actual local Codex CLI trial. This repository does not yet contain a vision benchmark or a recorded demo.
 
+The [local trial results](RESULTS.md) include two completed Terra/high playthroughs: **360 points / 100 sliced fruit** and **300 points / 85 sliced fruit**, with no escaped fruit, bomb hits or tool errors. These are MCP-only exploratory runs using the decision clock described below.
+
 ## Quick start
 
 Requires Node.js 20.19+ and Chromium. On this machine Chromium is `/usr/bin/chromium`; elsewhere set `FRUIT_NINJA_CHROMIUM` to its executable path.
@@ -74,7 +76,7 @@ The runner starts the installed local Codex CLI with `gpt-6.1-terra`, `model_rea
 
 The runner saves the exact command, prompt, CLI version, seed, upstream revision, JSONL model events, usage, wall time, tool counts, final state and action trace. The final scene comes from the game, independently of the agent's written claim. This is an exploratory usability trial; a successful run alone does not establish an advantage over vision.
 
-Replay every recorded action and compare the resulting scene hashes:
+Replay every recorded action and compare the resulting scene hashes, using the same adapter version and settings as the recorded run:
 
 ```sh
 npm run replay -- --trace artifacts/trials/terra-high-42/game/trace.jsonl --screenshot artifacts/replayed.png

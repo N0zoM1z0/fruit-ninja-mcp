@@ -1,0 +1,15 @@
+# Evaluator runtime (trusted): Chromium, ffmpeg, git and the docker CLI for sibling sandboxes.
+# The repository is mounted at run time, never copied into this image.
+ARG NODE_IMAGE
+ARG DOCKER_CLI_IMAGE
+FROM ${DOCKER_CLI_IMAGE} AS docker-cli
+FROM ${NODE_IMAGE}
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends chromium ffmpeg git ca-certificates fonts-noto-cjk fonts-dejavu-core tini \
+  && rm -rf /var/lib/apt/lists/*
+COPY --from=docker-cli /usr/local/bin/docker /usr/local/bin/docker
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright FRUIT_NINJA_CHROMIUM=/usr/bin/chromium
+RUN npx -y playwright-core@1.64.1 install ffmpeg && chmod -R a+rX /opt/ms-playwright \
+  && git config --system --add safe.directory '*'
+ENTRYPOINT ["tini", "--"]

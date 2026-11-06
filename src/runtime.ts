@@ -1,10 +1,21 @@
-import { chromium, type Browser, type Page } from "playwright-core";
+import {
+  chromium,
+  type Browser,
+  type JSHandle,
+  type Page,
+} from "playwright-core";
 import { access, appendFile, mkdir, rename, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { instrumentGame, loadGame, upstream } from "./upstream.js";
-import { executeTimedPath, type PointerSample } from "./pointer.js";
+import { loadGame, packagedGame, sha256, upstream } from "./upstream.js";
+import { refereedGame } from "./evaluator/referee.js";
+import {
+  executeTimedPath,
+  validatePath,
+  type PointerSample,
+} from "./public/executor.js";
+import { adapterExpression, lockdownSource } from "./public/lockdown.js";
 import type {
   ActionResult,
   GameEvent,
@@ -19,12 +30,20 @@ import type {
   SubmittedAction,
 } from "./types.js";
 
+export { validatePath };
 export const viewport = { width: 1440, height: 960 };
 export interface RuntimeOptions {
   browser?: string;
   artifacts?: string;
   headless?: boolean;
   recordVideo?: boolean;
+}
+export interface Integrity {
+  violations: { kind: string; detail: unknown; tick: number; at_ms: number }[];
+  unattributed_slices: number;
+  lockdown: boolean;
+  baseline: unknown;
+  config: { mode: string; duration_seconds: number | null };
 }
 export function sceneHash(scene: Scene): string {
   return createHash("sha256").update(JSON.stringify(scene)).digest("hex");
@@ -48,42 +67,15 @@ export async function browserExecutable(explicit?: string): Promise<string> {
   }
   throw new Error("Chromium was not found. Set FRUIT_NINJA_CHROMIUM.");
 }
+export const chromiumArgs = [
+  "--no-sandbox",
+  "--disable-dev-shm-usage",
+  "--disable-background-timer-throttling",
+  "--disable-renderer-backgrounding",
+  "--disable-backgrounding-occluded-windows",
+];
 
-/** Same validation and native mouse executor are used for BOTH interfaces. */
-export function validatePath(
-  points: TimedPoint[],
-  bounds: { width: number; height: number },
-): void {
-  if (!Array.isArray(points) || points.length < 2 || points.length > 32)
-    throw new Error("A drag needs 2..32 timed points");
-  for (let i = 0; i < points.length; i++) {
-    const p = points[i],
-      previous = points[i - 1];
-    if (
-      ![p.x, p.y, p.t_ms].every(Number.isFinite) ||
-      p.x < 0 ||
-      p.y < 0 ||
-      p.x > bounds.width ||
-      p.y > bounds.height ||
-      !Number.isInteger(p.t_ms) ||
-      (i === 0 ? p.t_ms !== 0 : p.t_ms <= previous.t_ms)
-    )
-      throw new Error(
-        "Coordinates must be inside bounds; integer t_ms starts at 0 and strictly increases",
-      );
-    if (
-      previous &&
-      Math.hypot(p.x - previous.x, p.y - previous.y) /
-        ((p.t_ms - previous.t_ms) / 1000) >
-        5000
-    )
-      throw new Error("Blade speed exceeds 5000 px/s");
-  }
-  const duration = points.at(-1)!.t_ms;
-  if (duration < 16 || duration > 1000)
-    throw new Error("A drag must last 16..1000 milliseconds");
-}
-
+/** Evaluator-owned game. The referee is reachable only through a private CDP handle. */
 export class GameRuntime {
   private queue: Promise<unknown> = Promise.resolve();
   private persistence: Promise<unknown> = Promise.resolve();
@@ -98,7 +90,11 @@ export class GameRuntime {
   private previousAction: ActionStatus | null = null;
   private canvasRect!: { x: number; y: number; width: number; height: number };
   private arena = { width: 0, height: 0 };
+  private referee!: JSHandle;
+  private adapter?: JSHandle;
   private readonly epoch = performance.now();
+  lockdown?: Record<string, unknown>;
+  adapterExports: string[] = [];
   private constructor(
     readonly browser: Browser,
     readonly page: Page,
@@ -108,17 +104,12 @@ export class GameRuntime {
   static async launch(options: RuntimeOptions = {}): Promise<GameRuntime> {
     if (options.recordVideo && !options.artifacts)
       throw new Error("Video recording requires an artifacts directory");
-    const html = instrumentGame(await loadGame());
+    const original = await loadGame();
+    const { html, key } = refereedGame(original);
     const browser = await chromium.launch({
       executablePath: await browserExecutable(options.browser),
       headless: options.headless ?? true,
-      args: [
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-background-timer-throttling",
-        "--disable-renderer-backgrounding",
-        "--disable-backgrounding-occluded-windows",
-      ],
+      args: chromiumArgs,
     });
     try {
       const context = await browser.newContext({
@@ -146,7 +137,13 @@ export class GameRuntime {
           void runtime.log({ type: "page_error", error: error.message }),
       );
       await page.setContent(html, { waitUntil: "load" });
-      await page.waitForFunction("!!window.fruitNinjaMcp");
+      // Capture the referee before any other code can run, then remove its global.
+      runtime.referee = await page.evaluateHandle((k) => {
+        const api = (window as any)[k];
+        delete (window as any)[k];
+        if (!api) throw new Error("Referee unavailable");
+        return api;
+      }, key);
       await page.evaluate(() => document.fonts.ready);
       const rect = await page.locator("#game").boundingBox();
       if (!rect) throw new Error("Canvas unavailable");
@@ -155,15 +152,14 @@ export class GameRuntime {
         await mkdir(runtime.artifacts, { recursive: true });
         await runtime.log({
           type: "session",
-          schema_version: 2,
+          schema_version: 3,
           clock: "realtime",
           record_video: options.recordVideo ?? false,
           upstream,
           viewport,
           browser_version: browser.version(),
-          instrumented_game_sha256: createHash("sha256")
-            .update(html)
-            .digest("hex"),
+          packaged_game_sha256: sha256(packagedGame(original)),
+          refereed_template_sha256: sha256(html.replaceAll(key, "KEY")),
         });
         runtime.telemetryTimer = setInterval(() => void runtime.sample(), 100);
       }
@@ -181,7 +177,7 @@ export class GameRuntime {
     this.queue = next.catch(() => {});
     return next;
   }
-  private async log(row: Record<string, unknown>): Promise<void> {
+  async log(row: Record<string, unknown>): Promise<void> {
     if (this.artifacts)
       await appendFile(
         resolve(this.artifacts, "trace.jsonl"),
@@ -229,8 +225,23 @@ export class GameRuntime {
       this.telemetryBusy = false;
     }
   }
+  /** Referee calls; errors reach interfaces as one-line codes, never referee source or stacks. */
+  private async ref(
+    fn: (r: any, arg: any) => unknown,
+    arg?: unknown,
+  ): Promise<any> {
+    try {
+      return await this.referee.evaluate(fn as any, arg);
+    } catch (error) {
+      const line = String(error instanceof Error ? error.message : error)
+        .split("\n")[0]
+        .replace(/^jsHandle\.evaluate:\s*/, "")
+        .replace(/^Error:\s*/, "");
+      throw new Error(line);
+    }
+  }
   private rawScene(): Promise<Scene> {
-    return this.page.evaluate("window.fruitNinjaMcp.scene()") as Promise<Scene>;
+    return this.ref((r: any) => r.scene()) as Promise<Scene>;
   }
   scene(): Promise<Scene> {
     return this.serial(() => this.rawScene());
@@ -239,6 +250,9 @@ export class GameRuntime {
   peek(): Promise<Scene> {
     if (this.closed) return Promise.reject(new Error("Game session is closed"));
     return this.rawScene();
+  }
+  integrity(): Promise<Integrity> {
+    return this.ref((r: any) => r.integrity()) as Promise<Integrity>;
   }
   actionStatus() {
     return {
@@ -260,8 +274,8 @@ export class GameRuntime {
         throw new Error(
           "Observation timeout must be 1..2500 real milliseconds",
         );
-      const result = (await this.page.evaluate(
-        (input) => (window as any).fruitNinjaMcp.observe(input),
+      const result = (await this.ref(
+        (r: any, input) => r.observe(input),
         input,
       )) as ObservationResult;
       await this.log({ type: "observation_wait", input, result });
@@ -269,23 +283,89 @@ export class GameRuntime {
       return result;
     });
   }
+  /** Prepare the one round, then harden the realm before any agent code can be loaded. */
   prepare(input: NewGame): Promise<Scene> {
     return this.serial(async () => {
-      const scene = (await this.page.evaluate(
-        (input) => (window as any).fruitNinjaMcp.prepare(input),
+      if (this.lockdown)
+        throw new Error("A session permits one prepared round.");
+      await this.page.evaluate(
+        (input) => (window as any).__fnPrepare(input),
         input,
-      )) as Scene;
+      );
+      this.lockdown = (await this.page.evaluate(lockdownSource)) as Record<
+        string,
+        unknown
+      >;
+      const baseline = await this.ref((r: any) => r.baseline());
+      const scene = await this.rawScene();
       this.arena = scene.arena;
-      await this.log({ type: "prepare", input, scene });
+      await this.log({
+        type: "prepare",
+        input,
+        lockdown: this.lockdown,
+        baseline,
+        scene,
+      });
       await this.persist(scene);
       return scene;
     });
   }
+  /** Inject a frozen agent adapter into the hardened page. Returns its exported function names. */
+  injectAdapter(source: string): Promise<string[]> {
+    return this.serial(async () => {
+      if (!this.lockdown)
+        throw new Error("Prepare the round before loading an adapter");
+      if (this.adapter) throw new Error("An adapter is already loaded");
+      this.adapter = await this.page.evaluateHandle(adapterExpression(source));
+      this.adapterExports = (await this.adapter.evaluate((exports: any) =>
+        Object.keys(exports ?? {}).filter(
+          (name) => typeof exports[name] === "function",
+        ),
+      )) as string[];
+      await this.log({
+        type: "adapter_loaded",
+        sha256: sha256(source),
+        exports: this.adapterExports,
+      });
+      return this.adapterExports;
+    });
+  }
+  /** Call an exported adapter function. Runs concurrently with an executing path, like peek(). */
+  async adapterCall(
+    fn: string,
+    args: unknown,
+    timeoutMs = 2000,
+  ): Promise<unknown> {
+    if (this.closed) throw new Error("Game session is closed");
+    if (!this.adapter) throw new Error("ADAPTER_MISSING: no adapter is loaded");
+    if (!this.adapterExports.includes(fn))
+      throw new Error(
+        `ADAPTER_MISSING: ${fn} is not an exported adapter function`,
+      );
+    let timer: NodeJS.Timeout | undefined;
+    try {
+      return await Promise.race([
+        this.adapter.evaluate(
+          async (exports: any, [fn, args]) => await exports[fn as string](args),
+          [fn, args] as const,
+        ),
+        new Promise((_, reject) => {
+          timer = setTimeout(
+            () =>
+              reject(
+                new Error(`ADAPTER_TIMEOUT: ${fn} exceeded ${timeoutMs}ms`),
+              ),
+            timeoutMs,
+          );
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
   start(): Promise<Scene> {
     return this.serial(async () => {
-      const scene = (await this.page.evaluate(
-        "window.fruitNinjaMcp.start()",
-      )) as Scene;
+      const scene = (await this.ref((r: any) => r.start())) as Scene;
       await this.log({ type: "start", scene });
       await this.persist(scene);
       return scene;
@@ -295,12 +375,12 @@ export class GameRuntime {
     after = 0,
     limit = 100,
   ): Promise<{ events: GameEvent[]; last_seq: number }> {
-    return this.serial(() =>
-      this.page.evaluate(
-        ({ after, limit }) =>
-          (window as any).fruitNinjaMcp.events(after, limit),
-        { after, limit },
-      ),
+    return this.serial(
+      () =>
+        this.ref((r: any, { after, limit }) => r.events(after, limit), {
+          after,
+          limit,
+        }) as Promise<{ events: GameEvent[]; last_seq: number }>,
     );
   }
   async screenshot(concurrent = false): Promise<Buffer> {
@@ -343,7 +423,12 @@ export class GameRuntime {
       )
         throw new Error("Click outside viewport");
       const start = performance.now();
-      await this.page.mouse.click(x, y);
+      await this.ref((r: any) => r.strokeBegin());
+      try {
+        await this.page.mouse.click(x, y);
+      } finally {
+        await this.ref((r: any) => r.strokeEnd());
+      }
       await this.log({
         type: "click",
         x,
@@ -358,6 +443,10 @@ export class GameRuntime {
   }
   guiDrag(points: TimedPoint[]): Promise<ActionResult> {
     return this.path({ points, observed_at_ms: this.lastCaptureAt }, "screen");
+  }
+  /** Screen-space path for the generated-MCP game port: identical executor to GUI drag. */
+  portPath(points: TimedPoint[]): Promise<ActionResult> {
+    return this.path({ points }, "screen");
   }
   async submitPath(
     input: Swipe,
@@ -440,8 +529,8 @@ export class GameRuntime {
           y: rect.y + (p.y * rect.height) / this.arena.height,
         }));
       }
-      const accepted = (await this.page.evaluate(
-        (expected) => (window as any).fruitNinjaMcp.markAction(expected),
+      const accepted = (await this.ref(
+        (r: any, expected) => r.markAction(expected),
         input.expected_revision,
       )) as { scene: Scene; last_seq: number };
       const before = accepted.scene;
@@ -460,16 +549,21 @@ export class GameRuntime {
         observed_age_ms: observedAge,
       });
       onAccepted?.(before);
-      await this.page.mouse.move(points[0].x, points[0].y);
-      await this.page.mouse.down();
-      const bladeStarted = performance.now();
       let samples: PointerSample[] = [];
+      let bladeStarted = performance.now();
       try {
-        samples = await executeTimedPath(points, {
-          move: (x, y) => this.page.mouse.move(x, y),
-        });
+        await this.page.mouse.move(points[0].x, points[0].y);
+        await this.page.mouse.down();
+        bladeStarted = performance.now();
+        try {
+          samples = await executeTimedPath(points, {
+            move: (x, y) => this.page.mouse.move(x, y),
+          });
+        } finally {
+          await this.page.mouse.up();
+        }
       } finally {
-        await this.page.mouse.up();
+        await this.ref((r: any) => r.strokeEnd());
       }
       // Log after mouse-up; timestamp fields retain real issuance/acknowledgement times.
       await this.log({
@@ -477,10 +571,13 @@ export class GameRuntime {
         host_ms: bladeStarted - this.epoch,
         samples,
       });
-      const completed = (await this.page.evaluate((after) => {
-        const b = (window as any).fruitNinjaMcp;
-        return { scene: b.scene(), events: b.events(after, 200).events };
-      }, accepted.last_seq)) as { scene: Scene; events: GameEvent[] };
+      const completed = (await this.ref(
+        (r: any, after) => ({
+          scene: r.scene(),
+          events: r.events(after, 200).events,
+        }),
+        accepted.last_seq,
+      )) as { scene: Scene; events: GameEvent[] };
       const scene = completed.scene;
       const result = {
         scene,
@@ -505,8 +602,8 @@ export class GameRuntime {
         start = performance.now();
       await sleep(input.duration_ms);
       const scene = await this.rawScene(),
-        events = (await this.page.evaluate(
-          (after) => (window as any).fruitNinjaMcp.events(after, 200),
+        events = (await this.ref(
+          (r: any, after) => r.events(after, 200),
           0,
         )) as { events: GameEvent[] };
       const result = {

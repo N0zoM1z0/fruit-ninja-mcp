@@ -1,0 +1,15 @@
+# Generated-MCP play sandbox (untrusted agent code). Context: .local/context/play. No browser,
+# no game files, no repository: only Node.js, the public toolchain and public helpers.
+ARG NODE_IMAGE
+FROM ${NODE_IMAGE} AS toolchain
+COPY toolchain/package.json toolchain/package-lock.json /opt/toolchain/
+RUN cd /opt/toolchain && npm ci --omit=dev --no-audit --no-fund --ignore-scripts
+FROM ${NODE_IMAGE}
+COPY --from=toolchain /opt/toolchain /opt/toolchain
+COPY fn /opt/toolchain/fn
+RUN ln -s /opt/toolchain/node_modules /node_modules \
+  && useradd -u 10001 -M -d /tmp -s /usr/sbin/nologin mcp \
+  && mkdir -p /opt/mcp /run/fn && chmod -R a+rX,go-w /opt/toolchain
+ENV NODE_PATH=/opt/toolchain/node_modules HOME=/tmp
+USER 10001:10001
+WORKDIR /tmp

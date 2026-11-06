@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "source_commit": "05cd84dbd5ec0ca1572688191682ca9c320bc947",
+  "source_fingerprints_verified": true,
+  "raw_artifacts_directory": "artifacts/recordings/optimized-mcp-seed42-v1",
+  "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+  "configuration": {
+    "model": "gpt-6.1-terra",
+    "reasoning_effort": "high",
+    "policy": "coverage",
+    "mcp_profile": "async",
+    "feedback": "compact",
+    "seed": 42,
+    "duration_seconds": 60,
+    "record_video": true,
+    "codex_version": "codex-cli 0.165.0",
+    "started_at": "2026-11-06T09:51:53.896Z"
+  },
+  "upstream": {
+    "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+    "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+    "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+    "file": "index.html"
+  },
+  "source_files": [
+    {
+      "path": "src/bridge.ts",
+      "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+    },
+    {
+      "path": "src/cli.ts",
+      "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+    },
+    {
+      "path": "src/compact.ts",
+      "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+    },
+    {
+      "path": "src/host.ts",
+      "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+    },
+    {
+      "path": "src/observation.ts",
+      "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+    },
+    {
+      "path": "src/pointer.ts",
+      "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+    },
+    {
+      "path": "src/runtime.ts",
+      "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+    },
+    {
+      "path": "src/server.ts",
+      "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+    },
+    {
+      "path": "src/tool-audit.ts",
+      "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+    },
+    {
+      "path": "src/trial.ts",
+      "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+    },
+    {
+      "path": "src/types.ts",
+      "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+    },
+    {
+      "path": "src/upstream.ts",
+      "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+    }
+  ],
+  "result": {
+    "schema_version": 2,
+    "interface": "mcp",
+    "model": "gpt-6.1-terra",
+    "reasoning_effort": "high",
+    "clock": "realtime",
+    "record_video": true,
+    "policy": "coverage",
+    "mcp_profile": "async",
+    "feedback": "compact",
+    "seed": 42,
+    "duration_seconds": 60,
+    "exit_code": 0,
+    "exit_signal": null,
+    "timed_out": false,
+    "supervisor_stopped_after_finish": false,
+    "actor_exited_during_play": false,
+    "wall_seconds": 81.887,
+    "completed_round": true,
+    "valid_interface": true,
+    "clock_valid": true,
+    "maximum_telemetry_clock_drift_ms": 10.346,
+    "tool_calls": 23,
+    "tool_errors": 1,
+    "invalid_tool_calls": 0,
+    "explicit_observations": 2,
+    "input_actions": 19,
+    "usage": {
+      "input_tokens": 710317,
+      "cached_input_tokens": 672000,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 1880,
+      "reasoning_output_tokens": 29
+    },
+    "final_scene": {
+      "schema_version": 2,
+      "round": 1,
+      "revision": 19,
+      "tick": 7200,
+      "phase": "finished",
+      "mode": "arcade",
+      "clock": "realtime",
+      "elapsed_ms": 60000,
+      "remaining_ms": 0,
+      "arena": {
+        "width": 1362,
+        "height": 817
+      },
+      "gravity": 841.51,
+      "clock_audit": {
+        "started_at_ms": 13679.3,
+        "observed_at_ms": 81357.9,
+        "wall_elapsed_ms": 67678.6,
+        "finished_wall_elapsed_ms": 60003.8,
+        "max_pump_gap_ms": 20.1
+      },
+      "stats": {
+        "score": 189,
+        "sliced": 71,
+        "missed": 0,
+        "escaped_fruit": 136,
+        "bombs_hit": 0,
+        "max_combo": 9,
+        "spawned_fruit": 219
+      },
+      "objects": [
+        {
+          "id": 220,
+          "kind": "fruit",
+          "fruit": "apple",
+          "x": 583.851,
+          "y": 610.38,
+          "vx": -116.666,
+          "vy": 674.808,
+          "radius": 49.44,
+          "hit_radius": 50.429
+        },
+        {
+          "id": 221,
+          "kind": "fruit",
+          "fruit": "plum",
+          "x": 795.885,
+          "y": 530.586,
+          "vx": -37.338,
+          "vy": 635.273,
+          "radius": 46.08,
+          "hit_radius": 47.002
+        },
+        {
+          "id": 222,
+          "kind": "fruit",
+          "fruit": "kiwi",
+          "x": 998.956,
+          "y": 530.893,
+          "vx": 37.354,
+          "vy": 635.68,
+          "radius": 45.6,
+          "hit_radius": 46.512
+        },
+        {
+          "id": 223,
+          "kind": "fruit",
+          "fruit": "plum",
+          "x": 1211.667,
+          "y": 612.771,
+          "vx": 117.032,
+          "vy": 677.782,
+          "radius": 46.08,
+          "hit_radius": 47.002
+        },
+        {
+          "id": 224,
+          "kind": "fruit",
+          "fruit": "apple",
+          "x": 500.474,
+          "y": 359.561,
+          "vx": -29.38,
+          "vy": 141.763,
+          "radius": 49.44,
+          "hit_radius": 50.429
+        },
+        {
+          "id": 225,
+          "kind": "fruit",
+          "fruit": "watermelon",
+          "x": 725.423,
+          "y": 277.382,
+          "vx": 0,
+          "vy": 74.424,
+          "radius": 54.24,
+          "hit_radius": 55.325
+        },
+        {
+          "id": 226,
+          "kind": "fruit",
+          "fruit": "watermelon",
+          "x": 950.203,
+          "y": 358.854,
+          "vx": 29.248,
+          "vy": 137.499,
+          "radius": 54.24,
+          "hit_radius": 55.325
+        },
+        {
+          "id": 227,
+          "kind": "fruit",
+          "fruit": "kiwi",
+          "x": 434.22,
+          "y": 431.829,
+          "vx": -29.088,
+          "vy": -407.695,
+          "radius": 45.6,
+          "hit_radius": 46.512
+        },
+        {
+          "id": 228,
+          "kind": "fruit",
+          "fruit": "kiwi",
+          "x": 537.479,
+          "y": 411.111,
+          "vx": -14.074,
+          "vy": -439.57,
+          "radius": 45.6,
+          "hit_radius": 46.512
+        },
+        {
+          "id": 229,
+          "kind": "fruit",
+          "fruit": "apple",
+          "x": 640.127,
+          "y": 392.819,
+          "vx": 0,
+          "vy": -473.618,
+          "radius": 49.44,
+          "hit_radius": 50.429
+        },
+        {
+          "id": 230,
+          "kind": "fruit",
+          "fruit": "kiwi",
+          "x": 742.775,
+          "y": 411.111,
+          "vx": 14.074,
+          "vy": -439.57,
+          "radius": 45.6,
+          "hit_radius": 46.512
+        },
+        {
+          "id": 231,
+          "kind": "fruit",
+          "fruit": "apple",
+          "x": 845.968,
+          "y": 433.473,
+          "vx": 28.986,
+          "vy": -411.074,
+          "radius": 49.44,
+          "hit_radius": 50.429
+        }
+      ]
+    },
+    "note": "Actual realtime attempt. Zero scores, misses and tool errors are retained. No autopilot or artificial slowdown."
+  },
+  "note": "First recorded take of the selected optimized configuration. One complete original-speed realtime game; no repeated takes or score-based selection. This MCP-only recording is not a new paired comparison."
+}

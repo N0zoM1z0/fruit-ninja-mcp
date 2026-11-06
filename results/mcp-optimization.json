@@ -1,0 +1,1992 @@
+{
+  "schema_version": 1,
+  "clock": "realtime",
+  "record_video": false,
+  "note": "Preserve every attempt. Development seed 42; held-out seeds 2026 and 7 were fixed before selection.",
+  "attempts": [
+    {
+      "trial_id": "coverage-only-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "coverage",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "c1844a5",
+      "started_at": "2026-11-06T09:01:51.683Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 86,
+      "stats": {
+        "score": 86,
+        "sliced": 39,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 1,
+        "max_combo": 8,
+        "spawned_fruit": 178
+      },
+      "tool_calls": 19,
+      "tool_errors": 1,
+      "round_wall_ms": 60005.7,
+      "maximum_clock_drift_ms": 12.141,
+      "path_metrics": {
+        "count": 13,
+        "paths_with_hits": 11,
+        "median_requested_ms": 1000,
+        "median_actual_ms": 1040,
+        "execution_ms": 12907,
+        "execution_fraction": 0.21511666666666668,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/coverage-only-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "f415fae18b2232c01b94a0ce72b527275246b3f71a0b2593740367f33193e459",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "1487b3bdec978eaec385c54a7464f91e00dcdc7138ef27668bfbddc4609efd22"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "3cbdfcbe752e19b11383fed073aa0bc0f8c203971d45230b3702a7a7ada76c1d"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "50627997ef10cf40240ba9ac5f1e9ac75cb5c98c8b636e7f17a83b6bae1544a2"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "56edd96be6ba4b1d62a2c9a44cc85d968786194e15c1e250dc20ac7a9086238f"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "309505fa81991b4a422486f395077aa322b670841b6cf8275af31173b3427d5a"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "392607a8627054eb60e2b57b82f7a5a9b92491465636b9f89768009db63088f2"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "5ea7fac022bb06d8c3a216802b3c8a9be9d07212e1a8ddaf4f0a05bf2dc358a9"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 419552,
+        "cached_input_tokens": 402432,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1551,
+        "reasoning_output_tokens": 70
+      }
+    },
+    {
+      "trial_id": "control-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "c1844a5",
+      "started_at": "2026-11-06T09:04:53.604Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 27,
+      "stats": {
+        "score": 27,
+        "sliced": 17,
+        "missed": 0,
+        "escaped_fruit": 137,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 158
+      },
+      "tool_calls": 23,
+      "tool_errors": 1,
+      "round_wall_ms": 60004.3,
+      "maximum_clock_drift_ms": 16.21,
+      "path_metrics": {
+        "count": 16,
+        "paths_with_hits": 8,
+        "median_requested_ms": 130,
+        "median_actual_ms": 170.5,
+        "execution_ms": 2777,
+        "execution_fraction": 0.046283333333333336,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/control-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "f415fae18b2232c01b94a0ce72b527275246b3f71a0b2593740367f33193e459",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "1487b3bdec978eaec385c54a7464f91e00dcdc7138ef27668bfbddc4609efd22"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "3cbdfcbe752e19b11383fed073aa0bc0f8c203971d45230b3702a7a7ada76c1d"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "50627997ef10cf40240ba9ac5f1e9ac75cb5c98c8b636e7f17a83b6bae1544a2"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "56edd96be6ba4b1d62a2c9a44cc85d968786194e15c1e250dc20ac7a9086238f"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "309505fa81991b4a422486f395077aa322b670841b6cf8275af31173b3427d5a"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "392607a8627054eb60e2b57b82f7a5a9b92491465636b9f89768009db63088f2"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "5ea7fac022bb06d8c3a216802b3c8a9be9d07212e1a8ddaf4f0a05bf2dc358a9"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 513648,
+        "cached_input_tokens": 430208,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1479,
+        "reasoning_output_tokens": 234
+      }
+    },
+    {
+      "trial_id": "fresh-only-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "baseline",
+      "mcp_profile": "fresh",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "7ab53f6",
+      "started_at": "2026-11-06T09:11:02.795Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 3,
+      "stats": {
+        "score": 3,
+        "sliced": 3,
+        "missed": 0,
+        "escaped_fruit": 151,
+        "bombs_hit": 0,
+        "max_combo": 2,
+        "spawned_fruit": 158
+      },
+      "tool_calls": 20,
+      "tool_errors": 1,
+      "round_wall_ms": 60002.2,
+      "maximum_clock_drift_ms": 14.276,
+      "path_metrics": {
+        "count": 15,
+        "paths_with_hits": 2,
+        "median_requested_ms": 230,
+        "median_actual_ms": 267,
+        "execution_ms": 3490,
+        "execution_fraction": 0.058166666666666665,
+        "median_observation_age_ms": 2817.800000000003,
+        "observation_wait_ms": 6357.3
+      },
+      "raw_artifacts_directory": "artifacts/optimization/fresh-only-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "4c2744b5a47743b3472a1f81d2ef1ff3bf96122406bd87488619ecb0ab0c6d62"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "ffe1d1fab17efc43f5f8ea8f9707b4f4ea934dc1e9e9b23f6ec376c7020c061e"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "55618813065fe63fab7e43e5deeb0de0c7f70686f7f5cb07e768d33cf16f1c4a"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "e916537a5ad7250e5d146b4fbe5a48582499fd6b34e801585ee4d70d8ba28d0f"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "b1661cfbf5b16a45d9746d3db2e2cfc0f22a034c4e48553e080b075bf38f756a"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e5024a57b9004aa6610d7510150c3b84286c4bedcfe0fc5bf7883a450ffabb10"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 499008,
+        "cached_input_tokens": 435712,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1450,
+        "reasoning_output_tokens": 233
+      }
+    },
+    {
+      "trial_id": "fresh-coverage-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "coverage",
+      "mcp_profile": "fresh",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "7ab53f6",
+      "started_at": "2026-11-06T09:12:56.346Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 16,
+      "stats": {
+        "score": 16,
+        "sliced": 13,
+        "missed": 0,
+        "escaped_fruit": 141,
+        "bombs_hit": 0,
+        "max_combo": 3,
+        "spawned_fruit": 158
+      },
+      "tool_calls": 15,
+      "tool_errors": 0,
+      "round_wall_ms": 60003.7,
+      "maximum_clock_drift_ms": 29.823,
+      "path_metrics": {
+        "count": 12,
+        "paths_with_hits": 8,
+        "median_requested_ms": 700,
+        "median_actual_ms": 751,
+        "execution_ms": 9034,
+        "execution_fraction": 0.15056666666666665,
+        "median_observation_age_ms": 3598.0999999999985,
+        "observation_wait_ms": 8712.199999999999
+      },
+      "raw_artifacts_directory": "artifacts/optimization/fresh-coverage-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "4c2744b5a47743b3472a1f81d2ef1ff3bf96122406bd87488619ecb0ab0c6d62"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "ffe1d1fab17efc43f5f8ea8f9707b4f4ea934dc1e9e9b23f6ec376c7020c061e"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "55618813065fe63fab7e43e5deeb0de0c7f70686f7f5cb07e768d33cf16f1c4a"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "e916537a5ad7250e5d146b4fbe5a48582499fd6b34e801585ee4d70d8ba28d0f"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "b1661cfbf5b16a45d9746d3db2e2cfc0f22a034c4e48553e080b075bf38f756a"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e5024a57b9004aa6610d7510150c3b84286c4bedcfe0fc5bf7883a450ffabb10"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 356103,
+        "cached_input_tokens": 324480,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1315,
+        "reasoning_output_tokens": 15
+      }
+    },
+    {
+      "trial_id": "compact-coverage-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "coverage",
+      "mcp_profile": "standard",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "e98a644",
+      "started_at": "2026-11-06T09:22:01.023Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 78,
+      "stats": {
+        "score": 78,
+        "sliced": 35,
+        "missed": 0,
+        "escaped_fruit": 139,
+        "bombs_hit": 0,
+        "max_combo": 5,
+        "spawned_fruit": 178
+      },
+      "tool_calls": 20,
+      "tool_errors": 1,
+      "round_wall_ms": 60004.5,
+      "maximum_clock_drift_ms": 10.81,
+      "path_metrics": {
+        "count": 14,
+        "paths_with_hits": 10,
+        "median_requested_ms": 775,
+        "median_actual_ms": 808,
+        "execution_ms": 10934,
+        "execution_fraction": 0.18223333333333333,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/compact-coverage-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "807dfeadb132d4026acb2d6441a463e3cf73eea36df11cd930019ebfd1ad11fa"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "55618813065fe63fab7e43e5deeb0de0c7f70686f7f5cb07e768d33cf16f1c4a"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "2c615fa2b89724b826f74252b73173b21b5701bdaa9a644df1d2940315558a81"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "464253f1d8c85a29f2180e6b449e323faf26c6b2917e0f8eb20f33c0938151f3"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "d18855be5ec2a66c866c97b40336efa08de05a54a50509264e3c694c6d780d43"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 506126,
+        "cached_input_tokens": 469632,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1367,
+        "reasoning_output_tokens": 29
+      }
+    },
+    {
+      "trial_id": "async-coverage-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "858262c",
+      "started_at": "2026-11-06T09:24:49.395Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 130,
+      "stats": {
+        "score": 130,
+        "sliced": 55,
+        "missed": 0,
+        "escaped_fruit": 138,
+        "bombs_hit": 0,
+        "max_combo": 8,
+        "spawned_fruit": 199
+      },
+      "tool_calls": 24,
+      "tool_errors": 1,
+      "round_wall_ms": 60002.3,
+      "maximum_clock_drift_ms": 10.741,
+      "path_metrics": {
+        "count": 19,
+        "paths_with_hits": 18,
+        "median_requested_ms": 800,
+        "median_actual_ms": 857,
+        "execution_ms": 16731,
+        "execution_fraction": 0.27885,
+        "median_observation_age_ms": 2923.7999999999884,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/async-coverage-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "743b683a37bdda63f57584f65bc11c136103e885d18de18b1990dd32ce3f4b2e"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "bca3f2d49e21242c4b145a45eb4973a5d66e431b59708c80f823e3dfb8494fd2"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 610702,
+        "cached_input_tokens": 585728,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2043,
+        "reasoning_output_tokens": 62
+      }
+    },
+    {
+      "trial_id": "async-compact-coverage-seed42",
+      "interface": "mcp",
+      "seed": 42,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "8d3a06c",
+      "started_at": "2026-11-06T09:27:27.658Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 137,
+      "stats": {
+        "score": 137,
+        "sliced": 57,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 0,
+        "max_combo": 9,
+        "spawned_fruit": 195
+      },
+      "tool_calls": 23,
+      "tool_errors": 0,
+      "round_wall_ms": 60002.3,
+      "maximum_clock_drift_ms": 15.541,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 19,
+        "paths_with_hits": 16,
+        "median_requested_ms": 750,
+        "median_actual_ms": 790,
+        "execution_ms": 15411,
+        "execution_fraction": 0.25685,
+        "median_observation_age_ms": 2804.199999999997,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/async-compact-coverage-seed42",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "743b683a37bdda63f57584f65bc11c136103e885d18de18b1990dd32ce3f4b2e"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 631408,
+        "cached_input_tokens": 584320,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1653,
+        "reasoning_output_tokens": 0
+      }
+    },
+    {
+      "trial_id": "baseline-mcp-seed2026",
+      "interface": "mcp",
+      "seed": 2026,
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "dc023f7",
+      "started_at": "2026-11-06T09:29:16.776Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 15,
+      "stats": {
+        "score": 15,
+        "sliced": 10,
+        "missed": 0,
+        "escaped_fruit": 150,
+        "bombs_hit": 0,
+        "max_combo": 5,
+        "spawned_fruit": 165
+      },
+      "tool_calls": 24,
+      "tool_errors": 0,
+      "round_wall_ms": 60003,
+      "maximum_clock_drift_ms": 8.488,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 19,
+        "paths_with_hits": 5,
+        "median_requested_ms": 250,
+        "median_actual_ms": 296,
+        "execution_ms": 5294,
+        "execution_fraction": 0.08823333333333333,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v1/baseline-mcp-seed2026",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 493428,
+        "cached_input_tokens": 463488,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1568,
+        "reasoning_output_tokens": 129
+      }
+    },
+    {
+      "trial_id": "selected-mcp-seed2026",
+      "interface": "mcp",
+      "seed": 2026,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "dc023f7",
+      "started_at": "2026-11-06T09:30:36.444Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 223,
+      "stats": {
+        "score": 223,
+        "sliced": 80,
+        "missed": 0,
+        "escaped_fruit": 116,
+        "bombs_hit": 0,
+        "max_combo": 9,
+        "spawned_fruit": 202
+      },
+      "tool_calls": 24,
+      "tool_errors": 1,
+      "round_wall_ms": 60002,
+      "maximum_clock_drift_ms": 17.829,
+      "path_metrics": {
+        "failed_actions": 1,
+        "count": 19,
+        "paths_with_hits": 17,
+        "median_requested_ms": 900,
+        "median_actual_ms": 940,
+        "execution_ms": 17796,
+        "execution_fraction": 0.2966,
+        "median_observation_age_ms": 2887.0999999999985,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v1/selected-mcp-seed2026",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 547403,
+        "cached_input_tokens": 498176,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1854,
+        "reasoning_output_tokens": 50
+      }
+    },
+    {
+      "trial_id": "selected-gui-seed2026",
+      "interface": "gui",
+      "seed": 2026,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "dc023f7",
+      "started_at": "2026-11-06T09:31:55.952Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": false,
+      "score": 58,
+      "stats": {
+        "score": 58,
+        "sliced": 27,
+        "missed": 0,
+        "escaped_fruit": 150,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 182
+      },
+      "tool_calls": 14,
+      "tool_errors": 1,
+      "round_wall_ms": 60003.2,
+      "maximum_clock_drift_ms": 474.388,
+      "path_metrics": {
+        "failed_actions": 1,
+        "count": 9,
+        "paths_with_hits": 8,
+        "median_requested_ms": 850,
+        "median_actual_ms": 923,
+        "execution_ms": 8451,
+        "execution_fraction": 0.14085,
+        "median_observation_age_ms": 5944.700000000004,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v1/selected-gui-seed2026",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 283074,
+        "cached_input_tokens": 253184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1419,
+        "reasoning_output_tokens": 13
+      }
+    },
+    {
+      "trial_id": "selected-mcp-seed7",
+      "interface": "mcp",
+      "seed": 7,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "dc023f7",
+      "started_at": "2026-11-06T09:33:23.397Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 130,
+      "stats": {
+        "score": 130,
+        "sliced": 54,
+        "missed": 0,
+        "escaped_fruit": 136,
+        "bombs_hit": 0,
+        "max_combo": 7,
+        "spawned_fruit": 197
+      },
+      "tool_calls": 24,
+      "tool_errors": 0,
+      "round_wall_ms": 60005.7,
+      "maximum_clock_drift_ms": 8.771,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 20,
+        "paths_with_hits": 15,
+        "median_requested_ms": 700,
+        "median_actual_ms": 740,
+        "execution_ms": 14819,
+        "execution_fraction": 0.24698333333333333,
+        "median_observation_age_ms": 2793.050000000003,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v1/selected-mcp-seed7",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 513971,
+        "cached_input_tokens": 474880,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1800,
+        "reasoning_output_tokens": 51
+      }
+    },
+    {
+      "trial_id": "baseline-mcp-seed7",
+      "interface": "mcp",
+      "seed": 7,
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "dc023f7",
+      "started_at": "2026-11-06T09:34:44.257Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 25,
+      "stats": {
+        "score": 25,
+        "sliced": 15,
+        "missed": 0,
+        "escaped_fruit": 138,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 158
+      },
+      "tool_calls": 24,
+      "tool_errors": 1,
+      "round_wall_ms": 60001,
+      "maximum_clock_drift_ms": 8.424,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 18,
+        "paths_with_hits": 6,
+        "median_requested_ms": 230,
+        "median_actual_ms": 270,
+        "execution_ms": 4713,
+        "execution_fraction": 0.07855,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v1/baseline-mcp-seed7",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 546192,
+        "cached_input_tokens": 511488,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1577,
+        "reasoning_output_tokens": 253
+      }
+    },
+    {
+      "trial_id": "selected-gui-seed7",
+      "interface": "gui",
+      "seed": 7,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "dc023f7",
+      "started_at": "2026-11-06T09:36:04.630Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 63,
+      "stats": {
+        "score": 63,
+        "sliced": 35,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 0,
+        "max_combo": 8,
+        "spawned_fruit": 176
+      },
+      "tool_calls": 15,
+      "tool_errors": 1,
+      "round_wall_ms": 60001.6,
+      "maximum_clock_drift_ms": 6.507,
+      "path_metrics": {
+        "failed_actions": 1,
+        "count": 10,
+        "paths_with_hits": 10,
+        "median_requested_ms": 750,
+        "median_actual_ms": 804.5,
+        "execution_ms": 8553,
+        "execution_fraction": 0.14255,
+        "median_observation_age_ms": 5483.85,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v1/selected-gui-seed7",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "07c663720e7dea23cde535b4e0dbe31b13fa6ed18c5d816591646c7596f532af"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 306849,
+        "cached_input_tokens": 288640,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1426,
+        "reasoning_output_tokens": 0
+      }
+    },
+    {
+      "trial_id": "held-out-v2/baseline-mcp-seed2026",
+      "interface": "mcp",
+      "seed": 2026,
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "38c8115",
+      "started_at": "2026-11-06T09:38:52.038Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 55,
+      "stats": {
+        "score": 55,
+        "sliced": 28,
+        "missed": 0,
+        "escaped_fruit": 149,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 182
+      },
+      "tool_calls": 23,
+      "tool_errors": 0,
+      "round_wall_ms": 60004.3,
+      "maximum_clock_drift_ms": 8.707,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 17,
+        "paths_with_hits": 11,
+        "median_requested_ms": 210,
+        "median_actual_ms": 249,
+        "execution_ms": 4245,
+        "execution_fraction": 0.07075,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v2/baseline-mcp-seed2026",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 519517,
+        "cached_input_tokens": 461056,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1448,
+        "reasoning_output_tokens": 65
+      }
+    },
+    {
+      "trial_id": "held-out-v2/selected-mcp-seed2026",
+      "interface": "mcp",
+      "seed": 2026,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "38c8115",
+      "started_at": "2026-11-06T09:40:11.630Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 225,
+      "stats": {
+        "score": 225,
+        "sliced": 87,
+        "missed": 0,
+        "escaped_fruit": 126,
+        "bombs_hit": 0,
+        "max_combo": 9,
+        "spawned_fruit": 225
+      },
+      "tool_calls": 26,
+      "tool_errors": 0,
+      "round_wall_ms": 60002.2,
+      "maximum_clock_drift_ms": 9.99,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 22,
+        "paths_with_hits": 21,
+        "median_requested_ms": 900,
+        "median_actual_ms": 938,
+        "execution_ms": 20137,
+        "execution_fraction": 0.3356166666666667,
+        "median_observation_age_ms": 2658.9500000000044,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v2/selected-mcp-seed2026",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 794656,
+        "cached_input_tokens": 715648,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1896,
+        "reasoning_output_tokens": 15
+      }
+    },
+    {
+      "trial_id": "held-out-v2/selected-gui-seed2026",
+      "interface": "gui",
+      "seed": 2026,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "38c8115",
+      "started_at": "2026-11-06T09:41:28.881Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 28,
+      "stats": {
+        "score": 28,
+        "sliced": 17,
+        "missed": 0,
+        "escaped_fruit": 143,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 165
+      },
+      "tool_calls": 14,
+      "tool_errors": 1,
+      "round_wall_ms": 60003.3,
+      "maximum_clock_drift_ms": 6.836,
+      "path_metrics": {
+        "failed_actions": 1,
+        "count": 9,
+        "paths_with_hits": 6,
+        "median_requested_ms": 900,
+        "median_actual_ms": 940,
+        "execution_ms": 8245,
+        "execution_fraction": 0.13741666666666666,
+        "median_observation_age_ms": 5802.399999999998,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v2/selected-gui-seed2026",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 281422,
+        "cached_input_tokens": 263808,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1409,
+        "reasoning_output_tokens": 38
+      }
+    },
+    {
+      "trial_id": "held-out-v2/selected-mcp-seed7",
+      "interface": "mcp",
+      "seed": 7,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "38c8115",
+      "started_at": "2026-11-06T09:42:56.171Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 357,
+      "stats": {
+        "score": 357,
+        "sliced": 107,
+        "missed": 0,
+        "escaped_fruit": 131,
+        "bombs_hit": 0,
+        "max_combo": 11,
+        "spawned_fruit": 256
+      },
+      "tool_calls": 24,
+      "tool_errors": 0,
+      "round_wall_ms": 60006.2,
+      "maximum_clock_drift_ms": 9.397,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 19,
+        "paths_with_hits": 17,
+        "median_requested_ms": 800,
+        "median_actual_ms": 847,
+        "execution_ms": 16131,
+        "execution_fraction": 0.26885,
+        "median_observation_age_ms": 2797.2000000000044,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v2/selected-mcp-seed7",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 607548,
+        "cached_input_tokens": 573312,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1892,
+        "reasoning_output_tokens": 26
+      }
+    },
+    {
+      "trial_id": "held-out-v2/baseline-mcp-seed7",
+      "interface": "mcp",
+      "seed": 7,
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "38c8115",
+      "started_at": "2026-11-06T09:44:18.037Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 25,
+      "stats": {
+        "score": 25,
+        "sliced": 19,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 0,
+        "max_combo": 3,
+        "spawned_fruit": 158
+      },
+      "tool_calls": 24,
+      "tool_errors": 1,
+      "round_wall_ms": 60004.6,
+      "maximum_clock_drift_ms": 11.799,
+      "path_metrics": {
+        "failed_actions": 0,
+        "count": 18,
+        "paths_with_hits": 11,
+        "median_requested_ms": 210,
+        "median_actual_ms": 246.5,
+        "execution_ms": 4289,
+        "execution_fraction": 0.07148333333333333,
+        "median_observation_age_ms": null,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v2/baseline-mcp-seed7",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 543244,
+        "cached_input_tokens": 518400,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1765,
+        "reasoning_output_tokens": 228
+      }
+    },
+    {
+      "trial_id": "held-out-v2/selected-gui-seed7",
+      "interface": "gui",
+      "seed": 7,
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "model": "gpt-6.1-terra",
+      "reasoning_effort": "high",
+      "source_commit": "38c8115",
+      "started_at": "2026-11-06T09:45:40.449Z",
+      "record_video": false,
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "score": 68,
+      "stats": {
+        "score": 68,
+        "sliced": 38,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 0,
+        "max_combo": 6,
+        "spawned_fruit": 175
+      },
+      "tool_calls": 14,
+      "tool_errors": 1,
+      "round_wall_ms": 60004.1,
+      "maximum_clock_drift_ms": 5.15,
+      "path_metrics": {
+        "failed_actions": 1,
+        "count": 9,
+        "paths_with_hits": 9,
+        "median_requested_ms": 850,
+        "median_actual_ms": 976,
+        "execution_ms": 8842,
+        "execution_fraction": 0.14736666666666667,
+        "median_observation_age_ms": 6201.4000000000015,
+        "observation_wait_ms": 0
+      },
+      "raw_artifacts_directory": "artifacts/optimization/held-out-v2/selected-gui-seed7",
+      "upstream": {
+        "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+        "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+        "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+        "file": "index.html"
+      },
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740",
+      "source_files": [
+        {
+          "path": "src/bridge.ts",
+          "sha256": "bde19565a11931b2c0e336cb2319a28bfae25cb795519d593ec99211c01921c2"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "93f09340902718b845e3e04a576532ba85cb269d30fc967a62927a3e2ad6e6dd"
+        },
+        {
+          "path": "src/compact.ts",
+          "sha256": "7017646835e2f9b808f5d63a11a403fce4e5d0016f48f7d736cf8b0f824c705e"
+        },
+        {
+          "path": "src/host.ts",
+          "sha256": "b1023fce6a39f9f30a3fde8d34827802b2015507e552864d3ca9e01ea154d159"
+        },
+        {
+          "path": "src/observation.ts",
+          "sha256": "6799b8e50b4e1b6309af0651ce24998d0104fd812b19f1720eb4a4e783ae5150"
+        },
+        {
+          "path": "src/pointer.ts",
+          "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+        },
+        {
+          "path": "src/runtime.ts",
+          "sha256": "65a25e3459e02ac10d8b3aa2b36090df58fad083b33a58f631dc2c5bcddff0e4"
+        },
+        {
+          "path": "src/server.ts",
+          "sha256": "1e6a797efc7d0663b1e31a72a5b42dba39e53b297514c965786e55fc7bc689eb"
+        },
+        {
+          "path": "src/tool-audit.ts",
+          "sha256": "90a66b5b9dfe878beb826a8e003a7e904dd8d11539e29020e72b91370c4e41e1"
+        },
+        {
+          "path": "src/trial.ts",
+          "sha256": "f6aa2a0701e0087a0633e4871f90128523767e11e54967cf2e8980605a6bb72e"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e9aeb2d6773864e058a432291e791a93c823c7e1d8c475536bc713122f98a794"
+        },
+        {
+          "path": "src/upstream.ts",
+          "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+        }
+      ],
+      "usage": {
+        "input_tokens": 282426,
+        "cached_input_tokens": 265600,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1515,
+        "reasoning_output_tokens": 43
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+# Realtime MCP optimization
+
+Keep the original game speed, 60-second arcade duration, Terra/high model, native mouse executor, 1000ms path limit, collision rules and independent clock audit. No recording is enabled in this optimization and held-out validation series; the later [recorded demonstration](recordings/optimized-seed42-v1/README.md) is separate. No server-side target choice, automatic path planning, future-spawn access or score changes.
+
+## Diagnosis
+
+In the recorded seed-42 MCP attempt, 19 executed paths consumed 3.763 seconds in total. Their requested median duration was 150ms. Estimated observation age at action acceptance had a median of 2.314 seconds, while visible fruit had an estimated median remaining visible lifetime of 1.336 seconds. These are reconstructed from recorded observations, input timestamps and public kinematics, not a direct model-thinking measurement.
+
+The main hypotheses are that observation timing and intentional action coverage matter more than shaving a few further milliseconds from native input.
+
+## Staged experiments
+
+1. **Coverage guidance only:** preserve tools and feedback, encourage the actor to author deliberate 600–900ms bounded paths and reach 20 fruit early. The same guidance is available to the GUI arm when compared. The server still chooses no coordinates.
+2. **Fresh observations:** wait in real time for newly visible fruit and return immediately at entry, with visible lifetime/phase information. Never return objects that are still outside the viewport. Evaluate separately before combining.
+3. **Compact feedback:** retain decision-relevant objects, timing and score; keep full audit state in independent artifacts. Measure actual call timing rather than assuming smaller responses improve latency.
+4. **Overlap if justified:** permit a bounded actor-authored action to execute while planning continues, with explicit pending-action state and no backend replanning. Introduce only after the simpler variants are measured.
+
+Use seed 42 for development. Record every attempt and preserve lower scores and errors. Before claiming an improvement, compare the selected configuration with baseline on seeds **2026 and 7**, chosen before tuning. Rerun GUI with the selected common guidance and unchanged shared action limits. Report score, sliced/escaped fruit, action coverage, effective observation age, tool errors and clock validity. A small sample selects a practical configuration; it does not establish a global optimum or a stable win rate.
+
+## Development observations
+
+| Policy   | Profile  | Feedback | Score | Sliced | Bombs | Native execution / 60s |
+| -------- | -------- | -------- | ----: | -----: | ----: | ---------------------: |
+| Baseline | Standard | Full     |    27 |     17 |     0 |                   4.6% |
+| Coverage | Standard | Full     |    86 |     39 |     1 |                  21.5% |
+| Baseline | Fresh    | Full     |     3 |      3 |     0 |                   5.8% |
+| Coverage | Fresh    | Full     |    16 |     13 |     0 |                  15.1% |
+| Coverage | Standard | Compact  |    78 |     35 |     0 |                  18.2% |
+| Coverage | Async    | Full     |   130 |     55 |     0 |                  27.9% |
+| Coverage | Async    | Compact  |   137 |     57 |     0 |                  25.7% |
+
+These are single development attempts, not replicated estimates. All completed naturally with valid independent clocks. Full provenance and errors are retained in `results/mcp-optimization.json`. Waiting for fresh entry did not help this actor: observation-to-next-request delay still exceeded fruit lifetime. Compact feedback performed close to full feedback, without evidence of a score improvement yet.
+
+## Asynchronous execution contract
+
+The optional `async` profile replaces `swipe` with `submit_swipe`, and GUI `drag` with `submit_drag`. Each request accepts one actor-authored path under the same 1000ms, 32-point, 5000px/s limits. It acknowledges after validation and before native execution finishes, so inference can overlap that execution. A busy request accepts no new action and queues nothing. No action repeats, chooses targets, extends itself, or changes its coordinates after submission. Mouse-up still ends every accepted path.
+
+MCP acknowledgements include the current visible scene and generic execution status. GUI acknowledgements include a current screenshot and generic execution status only; they never contain score, objects, events, coordinates extracted from the game, or other dynamic application state. Observations can occur during execution. Full native input, outcomes and wall-time telemetry remain independent of the actor. The two interfaces have identical execution capabilities.
+
+## Selection before held-out validation
+
+Select **coverage + async + compact** for validation on seeds 2026 and 7, against baseline + standard + full. The same coverage guidance and asynchronous executor are provided to the GUI arm. The 137-point development attempt slightly exceeds async/full at 130; that seven-point difference does not establish a reliable advantage of compact feedback. Selection uses only development seed 42; do not tune the selected configuration after seeing held-out results. The previous 71-point realtime baseline and lower-scoring variants remain unchanged.
+
+## First held-out cohort and audit correction
+
+The first cohort used source `dc023f7`: baseline MCP scored 15 / 25, selected MCP 223 / 130, and selected GUI 58 / 63 on seeds 2026 / 7. [Its original report](results/optimization-validation-v1.json) retains `all_rounds_valid: false`. The GUI seed-2026 clock audit failed at 474.388ms maximum telemetry drift. Its browser-reported natural round duration was 60003.2ms and maximum pump gap 17.4ms.
+
+The telemetry implementation assigned `host_ms` after queued state-file writes and rename. A delayed filesystem operation therefore attached a later host timestamp to an earlier browser snapshot. Fix the timestamp at snapshot receipt, before entering the persistence queue, and add `persisted_host_ms` separately to expose I/O delay. A regression test deliberately blocks persistence for 300ms; it fails on the old implementation and passes with the corrected timestamp while the real game continues moving.
+
+Preserve the original cohort and its failed audit unchanged. Repeat **all six conditions** after this measurement correction, using the same preselected profiles, policies, feedback, seeds and game parameters. Do not select the better score across cohorts. The second cohort is the primary complete validation even if its scores are lower. No gameplay or agent-guidance tuning is made after selection.
+
+## Primary corrected-clock validation
+
+The second cohort uses source `38c8115`, with all source fingerprints and the common instrumented-game hash verified. See [the complete report](results/optimization-validation-v2.json). All six rounds completed naturally and passed interface/clock audits. No gameplay policy was changed between cohorts.
+
+| Seed | Baseline MCP | Selected MCP | Selected GUI |
+| ---- | -----------: | -----------: | -----------: |
+| 2026 |           55 |          225 |           28 |
+| 7    |           25 |          357 |           68 |
+| Mean |           40 |          291 |           48 |
+
+Selected MCP sliced 87 / 107 fruit, had zero bomb hits and zero tool errors, and achieved combos of 9 / 11. Baseline seed 7 and both GUI trials each had one input rejected after the natural deadline. Maximum telemetry drift across the six rounds was 11.799ms; actual round durations were 60002.2–60006.2ms. All 19 development and validation attempts, including the failed original GUI audit, remain in `results/mcp-optimization.json`.
+
+The selected setup is the best tested practical configuration. The two held-out seeds and repeated cohorts show a promising improvement, with substantial variability; they do not establish a global optimum or stable score multiplier. No new recording was made.
+
+```sh
+# Rebuild aggregate evidence from the preserved second cohort.
+node --import tsx scripts/report-optimization.ts --trials artifacts/optimization/held-out-v2 --output results/optimization-validation-v2.json
+
+# Run a new complete validation with the same selected settings.
+npm run validate:optimization -- --mcp-profile async --feedback compact --output artifacts/optimization/new-validation
+```

@@ -10,6 +10,7 @@ const { positionals, values } = parseArgs({
   options: {
     output: { type: "string", default: "results/mcp-optimization.json" },
     revision: { type: "string" },
+    prefix: { type: "string", default: "" },
   },
 });
 if (!positionals.length || !values.revision)
@@ -68,7 +69,7 @@ for (const directory of positionals) {
       isToolFailure(x.item),
   );
   const entry = {
-    trial_id: basename(dir),
+    trial_id: values.prefix + basename(dir),
     interface: result.interface,
     seed: result.seed,
     policy: meta.policy ?? "baseline",

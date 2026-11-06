@@ -27,7 +27,7 @@ Use seed 42 for development. Record every attempt and preserve lower scores and 
 | Coverage | Fresh    | Full     |    16 |     13 |     0 |                  15.1% |
 | Coverage | Standard | Compact  |    78 |     35 |     0 |                  18.2% |
 | Coverage | Async    | Full     |   130 |     55 |     0 |                  27.9% |
-| Coverage | Async    | Compact  |   137 |     57 |     0 |                  28.4% |
+| Coverage | Async    | Compact  |   137 |     57 |     0 |                  25.7% |
 
 These are single development attempts, not replicated estimates. All completed naturally with valid independent clocks. Full provenance and errors are retained in `results/mcp-optimization.json`. Waiting for fresh entry did not help this actor: observation-to-next-request delay still exceeded fruit lifetime. Compact feedback performed close to full feedback, without evidence of a score improvement yet.
 
@@ -40,3 +40,11 @@ MCP acknowledgements include the current visible scene and generic execution sta
 ## Selection before held-out validation
 
 Select **coverage + async + compact** for validation on seeds 2026 and 7, against baseline + standard + full. The same coverage guidance and asynchronous executor are provided to the GUI arm. The 137-point development attempt slightly exceeds async/full at 130; that seven-point difference does not establish a reliable advantage of compact feedback. Selection uses only development seed 42; do not tune the selected configuration after seeing held-out results. The previous 71-point realtime baseline and lower-scoring variants remain unchanged.
+
+## First held-out cohort and audit correction
+
+The first cohort used source `dc023f7`: baseline MCP scored 15 / 25, selected MCP 223 / 130, and selected GUI 58 / 63 on seeds 2026 / 7. [Its original report](results/optimization-validation-v1.json) retains `all_rounds_valid: false`. The GUI seed-2026 clock audit failed at 474.388ms maximum telemetry drift. Its browser-reported natural round duration was 60003.2ms and maximum pump gap 17.4ms.
+
+The telemetry implementation assigned `host_ms` after queued state-file writes and rename. A delayed filesystem operation therefore attached a later host timestamp to an earlier browser snapshot. Fix the timestamp at snapshot receipt, before entering the persistence queue, and add `persisted_host_ms` separately to expose I/O delay. A regression test deliberately blocks persistence for 300ms; it fails on the old implementation and passes with the corrected timestamp while the real game continues moving.
+
+Preserve the original cohort and its failed audit unchanged. Repeat **all six conditions** after this measurement correction, using the same preselected profiles, policies, feedback, seeds and game parameters. Do not select the better score across cohorts. The second cohort is the primary complete validation even if its scores are lower. No gameplay or agent-guidance tuning is made after selection.

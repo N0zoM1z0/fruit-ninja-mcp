@@ -192,6 +192,8 @@ export class GameRuntime {
       );
   }
   private persist(scene: Scene): Promise<void> {
+    // Capture receipt before queued filesystem work; I/O latency is not clock drift.
+    const sampledHostMs = performance.now() - this.epoch;
     const next = this.persistence.then(async () => {
       if (!this.artifacts) return;
       const path = resolve(this.artifacts, "state.json");
@@ -199,8 +201,11 @@ export class GameRuntime {
       await rename(path + ".tmp", path);
       await appendFile(
         resolve(this.artifacts, "timeline.jsonl"),
-        JSON.stringify({ host_ms: performance.now() - this.epoch, scene }) +
-          "\n",
+        JSON.stringify({
+          host_ms: sampledHostMs,
+          persisted_host_ms: performance.now() - this.epoch,
+          scene,
+        }) + "\n",
       );
       if (scene.phase === "finished" && !this.finalSaved) {
         this.finalSaved = true;

@@ -39,7 +39,8 @@ video pipeline. The earlier prebuilt-MCP experiment is preserved as an evaluator
 - **Game port:** the generated MCP's only channel. It offers adapter calls (JSON, no pixels)
   and the GUI's executor, with at most one native input per player tool call.
 
-Details, controls and known gaps: [ARCHITECTURE.md](ARCHITECTURE.md). The builder-visible
+Details, controls and known gaps: [ARCHITECTURE.md](ARCHITECTURE.md). Verified results for
+commit `b5482c2`: [docs/PHASE0-EVIDENCE.md](docs/PHASE0-EVIDENCE.md). The builder-visible
 contract is [sandbox/public/CONTRACT.md](sandbox/public/CONTRACT.md), and the port API is
 [PORT.md](sandbox/public/PORT.md).
 

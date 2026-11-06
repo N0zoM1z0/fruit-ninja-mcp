@@ -37,8 +37,13 @@ async function main(): Promise<void> {
     return;
   }
   if (command === "codex-config") {
+    if (
+      !["standard", "fresh", "async"].includes(values["mcp-profile"]!) ||
+      !["full", "compact"].includes(values.feedback!)
+    )
+      throw new Error("Choose a valid MCP profile and feedback mode");
     console.log(
-      `model = "gpt-6.1-terra"\nmodel_reasoning_effort = "high"\n\n[mcp_servers.fruit_ninja]\ncommand = ${JSON.stringify(process.execPath)}\nargs = ${JSON.stringify([resolve(root, "dist/cli.js"), "serve"])}\nstartup_timeout_sec = 30\ntool_timeout_sec = 30\ndefault_tools_approval_mode = "auto"`,
+      `model = "gpt-6.1-terra"\nmodel_reasoning_effort = "high"\n\n[mcp_servers.fruit_ninja]\ncommand = ${JSON.stringify(process.execPath)}\nargs = ${JSON.stringify([resolve(root, "dist/cli.js"), "serve", "--mcp-profile", values["mcp-profile"]!, "--feedback", values.feedback!])}\nstartup_timeout_sec = 30\ntool_timeout_sec = 30\ndefault_tools_approval_mode = "auto"`,
     );
     return;
   }

@@ -26,6 +26,10 @@ The earlier decision-clock prototype and its scores are **not realtime evidence*
 
 The GUI driver also uses MCP transport. The comparison concerns application-specific information versus pixels, not protocol serialization. Identical path expressiveness makes the initial comparison primarily an observation comparison.
 
+The optional `async` profile acknowledges a single bounded path before it finishes, allowing the actor to plan during native execution. It provides this capability to both interfaces: `submit_swipe` for MCP and `submit_drag` for GUI. Every path retains the same limits. At most one executes, a busy request queues nothing, and no path repeats or replans. MCP may read current visible state during execution; GUI may capture current pixels. GUI acknowledgements can include generic input status (acceptance, action ID, pending/completed/failed status and input duration) but never dynamic game state or slice events. Record the profile and feedback format for every trial.
+
+Optimization uses development seed 42 and held-out seeds 2026 and 7, fixed in [the experiment plan](OPTIMIZATION.md) before selecting a variant. Coverage guidance is supplied equally to MCP and GUI. Retain all variants and results, including those that reduce score.
+
 ## Evidence and reporting
 
 Retain exact prompts and arguments, CLI/model settings, runtime and game hashes, native pointer events with wall timestamps, independent clock/state telemetry, screenshots, model tool events, errors, usage and final game scores. The evaluator can inspect state; GUI actors cannot.

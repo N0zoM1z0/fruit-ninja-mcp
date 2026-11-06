@@ -61,6 +61,28 @@ The shared executor adapts interior samples to elapsed wall time instead of repl
 
 This is a coordinate example, not a built-in strategy. MCP paths use canvas pixels, origin upper left; GUI paths use full-screenshot pixels. The MCP response includes the arena dimensions and px/s velocities. Optional `observed_at_ms` records how old an MCP observation was at action acceptance. A revision protects against another action, not the passage of time.
 
+## Optimization profiles
+
+`--mcp-profile async` replaces `swipe` with `submit_swipe` (GUI: `drag` with `submit_drag`). The tool returns acceptance and a current observation while the single submitted native path continues, allowing the model to plan during execution. A busy submission accepts nothing and queues nothing. Every path still ends in mouse-up within the same bounded action contract. MCP receives visible state; GUI receives pixels plus generic executor status only.
+
+`--feedback compact` reduces numeric display precision to 0.1 pixels and omits diagnostic fields and fruit names from MCP responses. Full precision and clock audits remain in independent artifacts. `--mcp-profile fresh` adds visibility-triggered real-time observation waits and public kinematic lifetime estimates. These experimental options are retained even when they score worse; see [optimization evidence](OPTIMIZATION.md).
+
+```sh
+# Configure interactive Codex with execution/planning overlap.
+node dist/cli.js codex-config --mcp-profile async --feedback compact
+
+# Reproduce the latency-aware coverage policy with local Terra/high; no video.
+npm run trial -- --policy coverage --mcp-profile async --feedback compact --seed 42 --duration 60 --output artifacts/optimized-new
+
+# Apply identical coverage guidance and overlap capability to both interfaces.
+npm run compare -- --policy coverage --mcp-profile async --feedback compact --seed 2026 --output artifacts/paired-new
+
+# Sequential validation: baseline MCP, selected MCP and selected GUI on seeds 2026 and 7.
+npm run validate:optimization -- --mcp-profile async --feedback compact --output artifacts/validation-new
+```
+
+The coverage policy asks the actor to author longer useful paths, reuse observations, reduce idle waits and seek combos/frenzy. It supplies no coordinates or target choices. For interactive use, give the same guidance to the actor: plan deliberate continuous 600–900ms paths when safe, choose every vertex from observations, account for stale state, reuse the submission result and plan immediately while the current path executes. The server has no automatic sweep, homing or gameplay controller.
+
 ## Realtime comparison
 
 ```sh

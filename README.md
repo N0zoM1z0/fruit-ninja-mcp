@@ -4,6 +4,8 @@
 
 Once a round starts, fruit keep moving during model inference, screenshots, observations, input calls, focus changes and actor disconnects. No tool advances or freezes time. The evaluator owns the game independently of the actor. See [the comparison protocol](REALTIME-PROTOCOL.md) and [results](RESULTS.md).
 
+The current recommended configuration uses **coverage guidance, async execution and compact feedback**. In the primary held-out 60-second tests, optimized MCP scored **225 / 357**, matched baseline MCP **55 / 25**, and GUI with equivalent guidance and input capabilities **28 / 68**. All six clock/interface audits passed. These are small-sample results; see [the full evidence and limitations](RESULTS.md#current-optimized-configuration-held-out-validation).
+
 The former decision-clock prototype is archived at Git tag `decision-prototype-v0.1.0`. Its 360/300-point scores are **not realtime evidence**. Current source has no decision-step mode.
 
 ## Setup

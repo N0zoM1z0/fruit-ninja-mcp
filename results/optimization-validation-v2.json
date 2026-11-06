@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "source_commit": "38c811565001400aa08a3a5453549130785bb137",
+  "model": "gpt-6.1-terra",
+  "reasoning_effort": "high",
+  "duration_seconds": 60,
+  "clock": "realtime",
+  "record_video": false,
+  "held_out_seeds": [2026, 7],
+  "source_fingerprints_verified": true,
+  "identical_instrumented_game": true,
+  "all_rounds_valid": true,
+  "trials_directory": "artifacts/optimization/held-out-v2",
+  "rows": [
+    {
+      "trial_id": "baseline-mcp-seed2026",
+      "seed": 2026,
+      "interface": "mcp",
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "name": "baseline-mcp-seed2026",
+      "stats": {
+        "score": 55,
+        "sliced": 28,
+        "missed": 0,
+        "escaped_fruit": 149,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 182
+      },
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "round_wall_ms": 60004.3,
+      "maximum_clock_drift_ms": 8.707,
+      "tool_calls": 23,
+      "tool_errors": 0,
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740"
+    },
+    {
+      "trial_id": "selected-mcp-seed2026",
+      "seed": 2026,
+      "interface": "mcp",
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "name": "selected-mcp-seed2026",
+      "stats": {
+        "score": 225,
+        "sliced": 87,
+        "missed": 0,
+        "escaped_fruit": 126,
+        "bombs_hit": 0,
+        "max_combo": 9,
+        "spawned_fruit": 225
+      },
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "round_wall_ms": 60002.2,
+      "maximum_clock_drift_ms": 9.99,
+      "tool_calls": 26,
+      "tool_errors": 0,
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740"
+    },
+    {
+      "trial_id": "selected-gui-seed2026",
+      "seed": 2026,
+      "interface": "gui",
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "name": "selected-gui-seed2026",
+      "stats": {
+        "score": 28,
+        "sliced": 17,
+        "missed": 0,
+        "escaped_fruit": 143,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 165
+      },
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "round_wall_ms": 60003.3,
+      "maximum_clock_drift_ms": 6.836,
+      "tool_calls": 14,
+      "tool_errors": 1,
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740"
+    },
+    {
+      "trial_id": "selected-mcp-seed7",
+      "seed": 7,
+      "interface": "mcp",
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "name": "selected-mcp-seed7",
+      "stats": {
+        "score": 357,
+        "sliced": 107,
+        "missed": 0,
+        "escaped_fruit": 131,
+        "bombs_hit": 0,
+        "max_combo": 11,
+        "spawned_fruit": 256
+      },
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "round_wall_ms": 60006.2,
+      "maximum_clock_drift_ms": 9.397,
+      "tool_calls": 24,
+      "tool_errors": 0,
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740"
+    },
+    {
+      "trial_id": "baseline-mcp-seed7",
+      "seed": 7,
+      "interface": "mcp",
+      "policy": "baseline",
+      "mcp_profile": "standard",
+      "feedback": "full",
+      "name": "baseline-mcp-seed7",
+      "stats": {
+        "score": 25,
+        "sliced": 19,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 0,
+        "max_combo": 3,
+        "spawned_fruit": 158
+      },
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "round_wall_ms": 60004.6,
+      "maximum_clock_drift_ms": 11.799,
+      "tool_calls": 24,
+      "tool_errors": 1,
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740"
+    },
+    {
+      "trial_id": "selected-gui-seed7",
+      "seed": 7,
+      "interface": "gui",
+      "policy": "coverage",
+      "mcp_profile": "async",
+      "feedback": "compact",
+      "name": "selected-gui-seed7",
+      "stats": {
+        "score": 68,
+        "sliced": 38,
+        "missed": 0,
+        "escaped_fruit": 134,
+        "bombs_hit": 0,
+        "max_combo": 6,
+        "spawned_fruit": 175
+      },
+      "completed_round": true,
+      "valid_interface": true,
+      "clock_valid": true,
+      "round_wall_ms": 60004.1,
+      "maximum_clock_drift_ms": 5.15,
+      "tool_calls": 14,
+      "tool_errors": 1,
+      "instrumented_game_sha256": "41a4e9ade6ee6db211f808a1282bddcb6e71835dde22306b6b3a0bbcacd29740"
+    }
+  ],
+  "means": {
+    "baseline_mcp": {
+      "attempts": 2,
+      "score": 40,
+      "sliced": 23.5
+    },
+    "selected_mcp": {
+      "attempts": 2,
+      "score": 291,
+      "sliced": 97
+    },
+    "selected_gui": {
+      "attempts": 2,
+      "score": 48,
+      "sliced": 27.5
+    }
+  },
+  "note": "One attempt per condition and held-out seed, selected using development seed 42 only. This is a small practical validation, not a stable win-rate or global-optimum claim. GUI and selected MCP share coverage guidance and asynchronous native-input capabilities. All outcomes are retained."
+}

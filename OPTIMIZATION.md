@@ -48,3 +48,25 @@ The first cohort used source `dc023f7`: baseline MCP scored 15 / 25, selected MC
 The telemetry implementation assigned `host_ms` after queued state-file writes and rename. A delayed filesystem operation therefore attached a later host timestamp to an earlier browser snapshot. Fix the timestamp at snapshot receipt, before entering the persistence queue, and add `persisted_host_ms` separately to expose I/O delay. A regression test deliberately blocks persistence for 300ms; it fails on the old implementation and passes with the corrected timestamp while the real game continues moving.
 
 Preserve the original cohort and its failed audit unchanged. Repeat **all six conditions** after this measurement correction, using the same preselected profiles, policies, feedback, seeds and game parameters. Do not select the better score across cohorts. The second cohort is the primary complete validation even if its scores are lower. No gameplay or agent-guidance tuning is made after selection.
+
+## Primary corrected-clock validation
+
+The second cohort uses source `38c8115`, with all source fingerprints and the common instrumented-game hash verified. See [the complete report](results/optimization-validation-v2.json). All six rounds completed naturally and passed interface/clock audits. No gameplay policy was changed between cohorts.
+
+| Seed | Baseline MCP | Selected MCP | Selected GUI |
+| ---- | -----------: | -----------: | -----------: |
+| 2026 |           55 |          225 |           28 |
+| 7    |           25 |          357 |           68 |
+| Mean |           40 |          291 |           48 |
+
+Selected MCP sliced 87 / 107 fruit, had zero bomb hits and zero tool errors, and achieved combos of 9 / 11. Baseline seed 7 and both GUI trials each had one input rejected after the natural deadline. Maximum telemetry drift across the six rounds was 11.799ms; actual round durations were 60002.2–60006.2ms. All 19 development and validation attempts, including the failed original GUI audit, remain in `results/mcp-optimization.json`.
+
+The selected setup is the best tested practical configuration. The two held-out seeds and repeated cohorts show a promising improvement, with substantial variability; they do not establish a global optimum or stable score multiplier. No new recording was made.
+
+```sh
+# Rebuild aggregate evidence from the preserved second cohort.
+node --import tsx scripts/report-optimization.ts --trials artifacts/optimization/held-out-v2 --output results/optimization-validation-v2.json
+
+# Run a new complete validation with the same selected settings.
+npm run validate:optimization -- --mcp-profile async --feedback compact --output artifacts/optimization/new-validation
+```

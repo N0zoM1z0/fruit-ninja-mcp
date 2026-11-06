@@ -2,6 +2,28 @@
 
 The current implementation runs **realtime MCP versus screenshot-only GUI** under [REALTIME-PROTOCOL.md](REALTIME-PROTOCOL.md). Historical decision-clock scores are separate and are not evidence for realtime play.
 
+## Current optimized configuration: held-out validation
+
+Recommended configuration: **coverage guidance + async execution + compact MCP feedback**. Seven development attempts on seed 42 selected this configuration before testing seeds 2026 and 7. See [the experiment plan and all variants](OPTIMIZATION.md), [all attempt summaries](results/mcp-optimization.json), and [the primary held-out report](results/optimization-validation-v2.json).
+
+All conditions use local Codex CLI 0.165.0, `gpt-6.1-terra` / `high`, the same pinned game, 60-second realtime arcade rounds, native browser mouse events, and the same 1000ms / 32-point / 5000px/s limits. Source `38c8115` was verified against every trial's source fingerprints. The six runs have identical instrumented-game hashes. No video was recorded.
+
+| Held-out seed | Baseline MCP | Optimized MCP | GUI with the same coverage guidance and async executor |
+| ------------- | -----------: | ------------: | -----------------------------------------------------: |
+| 2026          |           55 |           225 |                                                     28 |
+| 7             |           25 |           357 |                                                     68 |
+| Mean          |           40 |           291 |                                                     48 |
+
+Optimized MCP sliced 87 / 107 fruit with maximum combos 9 / 11, zero bombs and zero tool errors. Baseline MCP sliced 28 / 19; GUI sliced 17 / 38. All six interface and clock audits passed, with natural round durations of 60002.2–60006.2ms and maximum independent telemetry drift of 11.799ms. One baseline input and one input in each GUI run were rejected after the natural deadline; those errors remain in the reports. Normal arcade frenzy changes later wave frequency, so spawn counts differ as a consequence of successful play under identical rules.
+
+The changes keep the actor responsible for every coordinate. Coverage guidance encourages longer useful paths instead of tiny swipes at expired observations. `submit_swipe` acknowledges one bounded native path before execution ends so planning can overlap it; GUI receives the equivalent `submit_drag`. Busy requests queue nothing. Compact feedback retains visible positions, velocities, hit radii, timing and score while full telemetry remains independent. Visibility-triggered waiting scored poorly during development and is an optional experimental profile.
+
+In the seed-2026 optimized pair, MCP and GUI both requested median 900ms paths; actual medians were 938 / 940ms. MCP completed 22 paths and GUI 9. Their median observation-to-action ages were 2659 / 5802ms. Across both held-out seeds, optimized MCP native action durations occupied about 30.2% of round time, versus 7.1% for baseline MCP and 14.2% for GUI. These measurements support a useful difference in observation and decision cadence with a shared input executor. They do not isolate perception cost from model reasoning or tool transport time.
+
+The [first complete cohort](results/optimization-validation-v1.json) remains unchanged: baseline MCP 15 / 25, selected MCP 223 / 130, GUI 58 / 63. One GUI clock audit failed because telemetry attached its host timestamp after a delayed filesystem write. The measurement fix records snapshot receipt before persistence and separately records persistence time; a 300ms blocked-queue regression fails before the fix and passes afterward. All six conditions were repeated with unchanged gameplay configuration. **The second cohort is primary regardless of which cohort scored higher; results are not mixed or selected by score.**
+
+There is one attempt per condition and seed in each cohort. Model decisions vary substantially, and many fruit still escape. This selects the best tested practical configuration; it does not establish a global optimum, stable win rate, or general score multiplier. Typecheck, build, formatting and 18 real-game/unit tests passed, including asynchronous input ownership, busy rejection, native failure recovery, GUI information boundaries and telemetry timing.
+
 ## Realtime baseline: seed 42, 60-second arcade
 
 [Machine-readable result](results/realtime-baseline-seed42-v1.json), source `7043319`, local Codex CLI 0.165.0, `gpt-6.1-terra` / `high`. One sequential attempt per interface with matching source, instrumented game, seed, viewport, speed, scoring and native input executor.

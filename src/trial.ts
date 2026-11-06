@@ -19,6 +19,7 @@ export interface TrialOptions {
   duration: number;
   timeout: number;
   record_video?: boolean;
+  policy?: "baseline" | "coverage";
 }
 async function fingerprints(directory: string, extension: string) {
   return Promise.all(
@@ -36,6 +37,9 @@ async function fingerprints(directory: string, extension: string) {
 export async function runTrial(options: TrialOptions) {
   const { model, seed, duration, timeout } = options,
     mode = options.interface;
+  const policy = options.policy ?? "baseline";
+  if (!["baseline", "coverage"].includes(policy))
+    throw new Error("Unknown agent policy");
   if (
     !["mcp", "gui"].includes(mode) ||
     !Number.isInteger(seed) ||
@@ -67,7 +71,11 @@ export async function runTrial(options: TrialOptions) {
     mode === "mcp"
       ? "Your interface provides current visible-object state. Read get_game_rules and get_scene, then start_game once. Paths use CANVAS pixels. Reuse the scene returned by each action. Velocity can help predict where moving fruit will be when your path arrives; your observation may already be stale by then. No future state is available."
       : "Your interface is screenshot-only GUI. Read get_controls and get_screenshot, find the start button in the pixels, and click it. Then use drag with FULL-IMAGE pixel coordinates to move the mouse with its left button held. Action results are real screenshots only. There is no object state, text extraction, targeting or native game command. Judge fruit, bombs and score from pixels.";
-  const prompt = common + "\n\n" + specific;
+  const coverage =
+    policy === "coverage"
+      ? "\n\nLatency-aware playing guidance: observations may be seconds old. Do not spend every turn constructing a tiny precise swipe at expired fruit positions. When safe, deliberately use a continuous 600–900ms path with a few chosen vertices to cover useful screen space over time. Keep every point inside bounds and every segment under 5000px/s. Choose all coordinates yourself from your observations; there is no built-in sweep. Favor simple, useful coverage over elaborate per-fruit arithmetic. Reuse each action result, minimize separate waits/observations while playing, and aim to reach 20 sliced fruit early to activate arcade frenzy. Three or more hits with gaps below 340ms can earn a combo bonus. Still avoid observed bombs and adjust if your previous path missed."
+      : "";
+  const prompt = common + "\n\n" + specific + coverage;
   const args = [
     "exec",
     "--ignore-user-config",
@@ -113,6 +121,7 @@ export async function runTrial(options: TrialOptions) {
     reasoning_effort: "high",
     clock: "realtime",
     record_video: options.record_video ?? false,
+    policy,
     seed,
     duration_seconds: duration,
     codex_version: execFileSync("codex", ["--version"], {
@@ -294,6 +303,7 @@ export async function runTrial(options: TrialOptions) {
     reasoning_effort: "high",
     clock: "realtime",
     record_video: options.record_video ?? false,
+    policy,
     seed,
     duration_seconds: duration,
     exit_code: exitCode,

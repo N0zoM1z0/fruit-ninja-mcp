@@ -1,6 +1,21 @@
 # Results
 
-The current implementation targets **realtime MCP versus screenshot-only GUI** under [REALTIME-PROTOCOL.md](REALTIME-PROTOCOL.md). The paired realtime baseline will be recorded separately below. None of the historical scores in this file establish realtime play or an advantage over GUI.
+The current implementation runs **realtime MCP versus screenshot-only GUI** under [REALTIME-PROTOCOL.md](REALTIME-PROTOCOL.md). Historical decision-clock scores are separate and are not evidence for realtime play.
+
+## Realtime baseline: seed 42, 60-second arcade
+
+[Machine-readable result](results/realtime-baseline-seed42-v1.json), source `7043319`, local Codex CLI 0.165.0, `gpt-6.1-terra` / `high`. One sequential attempt per interface with matching source, instrumented game, seed, viewport, speed, scoring and native input executor.
+
+| Interface                             | Score | Sliced | Escaped | Spawned | Bomb hits | Max combo | Calls | Errors | Actual round wall time |
+| ------------------------------------- | ----: | -----: | ------: | ------: | --------: | --------: | ----: | -----: | ---------------------: |
+| MCP state + actor-authored paths      |    71 |     33 |     148 |     184 |         0 |         6 |    21 |      0 |              60.0068 s |
+| Screenshot GUI + actor-authored paths |     7 |      4 |     150 |     158 |         0 |         3 |    15 |      0 |              60.0038 s |
+
+Both clock audits passed. Maximum independent telemetry clock drift was 16.366 ms for MCP and 8.028 ms for GUI; model thinking and screenshots did not stop time. Both interface audits passed. No actor reset, pause, future state or hidden targeting policy was used. End-to-end actor/runtime time was 77.232 s and 86.691 s respectively, including pre-start setup and post-round reporting; it is not the round duration.
+
+Spawn counts differ because normal arcade frenzy changes wave frequency after successful slicing. The same seeded game and rules were used; the game was not forced to follow a fixed spawn transcript after different actions. Fruit still airborne at the deadline are counted as spawned but neither sliced nor escaped.
+
+This run shows a useful difference in this setting, not a stable success rate or general speedup. Many fruit were missed in both arms. The trace also exposes substantial native-input scheduling overhead: some requested 180 ms MCP strokes took about 800 ms. This baseline is preserved before optimizing the shared executor; any revised executor will be tested in both arms with the same game speed and rules.
 
 ## Historical decision-clock trials (not realtime)
 

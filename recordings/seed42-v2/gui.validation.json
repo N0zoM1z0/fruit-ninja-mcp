@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "source_and_export": {
+    "webm": {
+      "bytes": 28576492,
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "vp9",
+          "width": 1440,
+          "height": 960,
+          "r_frame_rate": "25/1",
+          "nb_read_packets": "2346"
+        }
+      ],
+      "format": {
+        "duration": "93.840000"
+      }
+    },
+    "mp4": {
+      "bytes": 8737568,
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1440,
+          "height": 960,
+          "r_frame_rate": "25/1",
+          "nb_read_packets": "2346"
+        }
+      ],
+      "format": {
+        "duration": "93.840000"
+      }
+    }
+  },
+  "all_source_frames_retained": true
+}

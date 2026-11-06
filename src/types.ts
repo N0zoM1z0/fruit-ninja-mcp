@@ -1,6 +1,6 @@
 export type GameMode = "classic" | "arcade" | "zen";
 export type Interface = "mcp" | "gui";
-export type McpProfile = "standard" | "fresh";
+export type McpProfile = "standard" | "fresh" | "async";
 export type Feedback = "full" | "compact";
 export interface Observe {
   until: "immediate" | "new_fruit";
@@ -85,6 +85,20 @@ export interface ActionResult {
   actual_duration_ms: number;
   observed_age_ms: number | null;
   events: GameEvent[];
+}
+export interface ActionStatus {
+  action_id: number;
+  status: "completed" | "failed";
+  actual_duration_ms?: number;
+  events?: GameEvent[];
+  error?: string;
+}
+export interface SubmittedAction {
+  accepted: boolean;
+  action_id: number;
+  scene: Scene;
+  pending_action: { action_id: number; status: "executing" } | null;
+  previous_action: ActionStatus | null;
 }
 export interface Swipe {
   expected_revision?: number;

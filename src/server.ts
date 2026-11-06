@@ -122,7 +122,9 @@ export function buildServer(
       {
         type: "image",
         mimeType: "image/png",
-        data: (await runtime.screenshot()).toString("base64"),
+        data: (await runtime.screenshot(profile === "async")).toString(
+          "base64",
+        ),
       },
     ],
   });
@@ -134,6 +136,12 @@ export function buildServer(
       async () => ({
         ...rules,
         viewport,
+        ...(profile === "async"
+          ? {
+              execution:
+                "submit_drag acknowledges one bounded path immediately and captures a screenshot while it executes. Plan the next path during execution. At most one path can execute; busy requests are rejected without queuing. Action status contains only generic executor information.",
+            }
+          : {}),
         coordinates:
           "Full screenshot pixels. Find the start button and arena visually. Drag points use t_ms starting at 0.",
       }),
@@ -159,10 +167,35 @@ export function buildServer(
       },
     );
     tool(
-      "drag",
-      "Native mouse-down path in full screenshot pixels, then release. 2..32 points; t_ms starts at 0 and strictly increases, total 16..1000ms, max 5000px/s. The path takes real wall time; returns only a screenshot.",
+      profile === "async" ? "submit_drag" : "drag",
+      profile === "async"
+        ? "Submit your native mouse-down path in full screenshot pixels. Acknowledge acceptance immediately with a current screenshot; the path continues while you plan. One active path only, no queued strokes. 2..32 points, 16..1000ms, max 5000px/s. Generic action status contains no game state."
+        : "Native mouse-down path in full screenshot pixels, then release. 2..32 points; t_ms starts at 0 and strictly increases, total 16..1000ms, max 5000px/s. The path takes real wall time; returns only a screenshot.",
       { points: z.array(point).min(2).max(32) },
       async ({ points }) => {
+        if (profile === "async") {
+          const result = await runtime.submitPath({ points }, "screen");
+          const previous = result.previous_action;
+          const status = {
+            accepted: result.accepted,
+            action_id: result.action_id,
+            pending_action: result.pending_action,
+            previous_action: previous
+              ? {
+                  action_id: previous.action_id,
+                  status: previous.status,
+                  actual_duration_ms: previous.actual_duration_ms,
+                  error: previous.error,
+                }
+              : null,
+          };
+          return {
+            content: [
+              { type: "text", text: JSON.stringify(status) },
+              ...(await screenshot()).content,
+            ],
+          };
+        }
         await runtime.guiDrag(points);
         return screenshot();
       },
@@ -186,6 +219,12 @@ export function buildServer(
       ...rules,
       mcp_profile: profile,
       feedback,
+      ...(profile === "async"
+        ? {
+            execution:
+              "submit_swipe acknowledges your bounded path immediately with current state. The native mouse continues that fixed path while you plan. One active path only; busy requests never queue another stroke. No automatic target selection, chaining or replanning.",
+          }
+        : {}),
       ...(profile === "fresh"
         ? {
             observation:
@@ -202,8 +241,12 @@ export function buildServer(
     "Read a timestamped CURRENT scene: visible fruit/bombs, velocities, hit radii, score, events and wall-clock audit. Time does not stop. Read rules and prepare before starting.",
     {},
     async () => {
-      const scene = await runtime.scene();
-      return deliver(scene);
+      const scene = await (profile === "async"
+        ? runtime.peek()
+        : runtime.scene());
+      return profile === "async"
+        ? { scene: deliver(scene), ...runtime.actionStatus() }
+        : deliver(scene);
     },
     true,
   );
@@ -235,8 +278,10 @@ export function buildServer(
       true,
     );
   tool(
-    "swipe",
-    "Execute your timed canvas path using native browser mouse events. The world keeps moving. No automatic aiming. Returns scene/events. In the fresh profile, observe_after defaults to new_fruit: after the stroke the response waits in real time for newly visible fruit, giving the next decision a fresher observation. Choose immediate to inspect the stroke outcome now.",
+    profile === "async" ? "submit_swipe" : "swipe",
+    profile === "async"
+      ? "Submit your timed canvas path and return current scene and acceptance immediately. The fixed path continues for at most 1000ms while you plan. One active path only; busy requests never queue future strokes. Every coordinate and timing comes from you; no backend aiming or replanning. Inspect pending_action and previous_action for execution status."
+      : "Execute your timed canvas path using native browser mouse events. The world keeps moving. No automatic aiming. Returns scene/events. In the fresh profile, observe_after defaults to new_fruit: after the stroke the response waits in real time for newly visible fruit, giving the next decision a fresher observation. Choose immediate to inspect the stroke outcome now.",
     {
       points: z.array(point).min(2).max(32),
       expected_revision: z.number().int().min(0).optional(),
@@ -250,6 +295,16 @@ export function buildServer(
         : {}),
     },
     async (input) => {
+      if (profile === "async") {
+        const result = await runtime.submitPath(
+          {
+            ...input,
+            observed_at_ms: input.observed_at_ms ?? lastObservationAt,
+          },
+          "canvas",
+        );
+        return { ...result, scene: deliver(result.scene) };
+      }
       const result = await runtime.swipe({
         ...input,
         ...(profile === "fresh" && input.observed_at_ms === undefined

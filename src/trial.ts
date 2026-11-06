@@ -44,7 +44,7 @@ export async function runTrial(options: TrialOptions) {
   const feedback = options.feedback ?? "full";
   if (!["full", "compact"].includes(feedback))
     throw new Error("Unknown feedback mode");
-  if (!["standard", "fresh"].includes(profile))
+  if (!["standard", "fresh", "async"].includes(profile))
     throw new Error("Unknown MCP profile");
   if (!["baseline", "coverage"].includes(policy))
     throw new Error("Unknown agent policy");
@@ -87,7 +87,11 @@ export async function runTrial(options: TrialOptions) {
     mode === "mcp" && profile === "fresh"
       ? "\n\nYour MCP profile is fresh. start_game returns when first fruit becomes visible. swipe defaults to observe_after=new_fruit: after the path the response waits in real time for newly entering fruit and returns a fresh scene. Reuse it directly without another observation or unnecessary wait. Choose observe_after=immediate if the current group is still useful. Fruit include time_to_exit_ms and time_to_apex_ms. reaction_latency_estimate_ms measures recent observation-to-next-request delay; account for fruit motion during that delay. The backend only waits for visibility and computes public kinematics. It does not choose targets or aim; you choose every path."
       : "";
-  const prompt = common + "\n\n" + specific + coverage + fresh;
+  const overlap =
+    profile === "async"
+      ? `\n\nYour executor uses ${mode === "mcp" ? "submit_swipe" : "submit_drag"} instead of ${mode === "mcp" ? "swipe" : "drag"}. It acknowledges a single bounded path immediately and returns ${mode === "mcp" ? "current state" : "a current screenshot"} near the beginning of the path. The fixed native mouse path continues while you think. Use that overlap to plan your next path; do not wait separately for completion or poll after every submission. Only one action may execute at once. A busy response accepts no new action and queues nothing. Every accepted path is still at most 1000ms, 32 points, 5000px/s. No repeating, chaining, automatic targeting or backend replanning.`
+      : "";
+  const prompt = common + "\n\n" + specific + coverage + fresh + overlap;
   const args = [
     "exec",
     "--ignore-user-config",
@@ -257,13 +261,19 @@ export async function runTrial(options: TrialOptions) {
           "get_game_rules",
           "get_scene",
           "start_game",
-          "swipe",
+          profile === "async" ? "submit_swipe" : "swipe",
           "wait",
           "get_events",
           "get_screenshot",
           ...(profile === "fresh" ? ["observe"] : []),
         ]
-      : ["get_controls", "get_screenshot", "click", "drag", "wait"],
+      : [
+          "get_controls",
+          "get_screenshot",
+          "click",
+          profile === "async" ? "submit_drag" : "drag",
+          "wait",
+        ],
   );
   for (const row of rows) {
     const item = row.item;
@@ -273,7 +283,12 @@ export async function runTrial(options: TrialOptions) {
       if (item.server !== server || !allowed.has(item.tool)) invalid++;
       if (["get_scene", "get_screenshot", "observe"].includes(item.tool))
         observations++;
-      if (["swipe", "drag", "click"].includes(item.tool)) actions++;
+      if (
+        ["swipe", "drag", "submit_swipe", "submit_drag", "click"].includes(
+          item.tool,
+        )
+      )
+        actions++;
     }
     if (
       row.type === "item.completed" &&

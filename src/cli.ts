@@ -74,14 +74,14 @@ async function main(): Promise<void> {
     });
     if (!["mcp", "gui"].includes(values.interface!))
       throw new Error("Choose mcp or gui interface");
-    if (!["standard", "fresh"].includes(values["mcp-profile"]!))
-      throw new Error("Choose standard or fresh MCP profile");
+    if (!["standard", "fresh", "async"].includes(values["mcp-profile"]!))
+      throw new Error("Choose standard, fresh or async MCP profile");
     if (!["full", "compact"].includes(values.feedback!))
       throw new Error("Choose full or compact feedback");
     await serve(
       runtime,
       values.interface as "mcp" | "gui",
-      values["mcp-profile"] as "standard" | "fresh",
+      values["mcp-profile"] as "standard" | "fresh" | "async",
       values.feedback as "full" | "compact",
     );
   } catch (error) {

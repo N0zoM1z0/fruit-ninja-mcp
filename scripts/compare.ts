@@ -28,7 +28,7 @@ const common = {
   timeout: Number(values.timeout),
   record_video: values["record-video"],
   policy: values.policy as "baseline" | "coverage",
-  mcp_profile: values["mcp-profile"] as "standard" | "fresh",
+  mcp_profile: values["mcp-profile"] as "standard" | "fresh" | "async",
   feedback: values.feedback as "full" | "compact",
 };
 await writeFile(

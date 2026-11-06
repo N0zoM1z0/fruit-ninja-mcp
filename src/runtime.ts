@@ -15,6 +15,8 @@ import type {
   Wait,
   Observe,
   ObservationResult,
+  ActionStatus,
+  SubmittedAction,
 } from "./types.js";
 
 export const viewport = { width: 1440, height: 960 };
@@ -91,6 +93,9 @@ export class GameRuntime {
   private finalSaved = false;
   private frame = 0;
   private lastCaptureAt?: number;
+  private actionId = 0;
+  private activeAction?: number;
+  private previousAction: ActionStatus | null = null;
   private canvasRect!: { x: number; y: number; width: number; height: number };
   private arena = { width: 0, height: 0 };
   private readonly epoch = performance.now();
@@ -225,6 +230,20 @@ export class GameRuntime {
   scene(): Promise<Scene> {
     return this.serial(() => this.rawScene());
   }
+  /** Read current state while a single bounded native path may still be executing. */
+  peek(): Promise<Scene> {
+    if (this.closed) return Promise.reject(new Error("Game session is closed"));
+    return this.rawScene();
+  }
+  actionStatus() {
+    return {
+      pending_action:
+        this.activeAction === undefined
+          ? null
+          : { action_id: this.activeAction, status: "executing" as const },
+      previous_action: this.previousAction,
+    };
+  }
   observe(input: Observe): Promise<ObservationResult> {
     return this.serial(async () => {
       if (
@@ -279,8 +298,8 @@ export class GameRuntime {
       ),
     );
   }
-  async screenshot(): Promise<Buffer> {
-    return this.serial(async () => {
+  async screenshot(concurrent = false): Promise<Buffer> {
+    const capture = async () => {
       const before = await this.rawScene(),
         start = performance.now();
       const bytes = await this.page.screenshot({ type: "png" });
@@ -300,7 +319,12 @@ export class GameRuntime {
         capture_wall_ms: performance.now() - start,
       });
       return bytes;
-    });
+    };
+    if (concurrent) {
+      if (this.closed) throw new Error("Game session is closed");
+      return capture();
+    }
+    return this.serial(capture);
   }
   click(x: number, y: number): Promise<void> {
     return this.serial(async () => {
@@ -330,9 +354,69 @@ export class GameRuntime {
   guiDrag(points: TimedPoint[]): Promise<ActionResult> {
     return this.path({ points, observed_at_ms: this.lastCaptureAt }, "screen");
   }
+  async submitPath(
+    input: Swipe,
+    space: "canvas" | "screen",
+  ): Promise<SubmittedAction> {
+    // Reserve the slot before yielding. A second request never queues a future stroke.
+    if (this.activeAction !== undefined) {
+      return {
+        accepted: false,
+        action_id: this.activeAction,
+        scene: await this.peek(),
+        ...this.actionStatus(),
+      };
+    }
+    validatePath(input.points, space === "canvas" ? this.arena : viewport);
+    const actionId = ++this.actionId;
+    this.activeAction = actionId;
+    let accept!: (scene: Scene) => void, reject!: (reason: unknown) => void;
+    const accepted = new Promise<Scene>((resolve, fail) => {
+      accept = resolve;
+      reject = fail;
+    });
+    const job = this.path(
+      {
+        ...input,
+        observed_at_ms:
+          input.observed_at_ms ??
+          (space === "screen" ? this.lastCaptureAt : undefined),
+      },
+      space,
+      accept,
+    );
+    void job.then(
+      (result) => {
+        this.previousAction = {
+          action_id: actionId,
+          status: "completed",
+          actual_duration_ms: result.actual_duration_ms,
+          events: result.events,
+        };
+        this.activeAction = undefined;
+      },
+      (error) => {
+        this.previousAction = {
+          action_id: actionId,
+          status: "failed",
+          error: String(error),
+        };
+        this.activeAction = undefined;
+        reject(error);
+      },
+    );
+    const scene = await accepted;
+    return {
+      accepted: true,
+      action_id: actionId,
+      scene,
+      ...this.actionStatus(),
+    };
+  }
   private path(
     input: Swipe,
     space: "canvas" | "screen",
+    onAccepted?: (scene: Scene) => void,
   ): Promise<ActionResult> {
     return this.serial(async () => {
       validatePath(input.points, space === "canvas" ? this.arena : viewport);
@@ -364,6 +448,7 @@ export class GameRuntime {
         input,
         observed_age_ms: observedAge,
       });
+      onAccepted?.(before);
       await this.page.mouse.move(points[0].x, points[0].y);
       await this.page.mouse.down();
       const bladeStarted = performance.now();

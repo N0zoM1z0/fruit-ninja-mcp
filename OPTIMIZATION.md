@@ -16,3 +16,21 @@ The main hypotheses are that observation timing and intentional action coverage 
 4. **Overlap if justified:** permit a bounded actor-authored action to execute while planning continues, with explicit pending-action state and no backend replanning. Introduce only after the simpler variants are measured.
 
 Use seed 42 for development. Record every attempt and preserve lower scores and errors. Before claiming an improvement, compare the selected configuration with baseline on seeds **2026 and 7**, chosen before tuning. Rerun GUI with the selected common guidance and unchanged shared action limits. Report score, sliced/escaped fruit, action coverage, effective observation age, tool errors and clock validity. A small sample selects a practical configuration; it does not establish a global optimum or a stable win rate.
+
+## Development observations
+
+| Policy   | Profile  | Feedback | Score | Sliced | Bombs | Native execution / 60s |
+| -------- | -------- | -------- | ----: | -----: | ----: | ---------------------: |
+| Baseline | Standard | Full     |    27 |     17 |     0 |                   4.6% |
+| Coverage | Standard | Full     |    86 |     39 |     1 |                  21.5% |
+| Baseline | Fresh    | Full     |     3 |      3 |     0 |                   5.8% |
+| Coverage | Fresh    | Full     |    16 |     13 |     0 |                  15.1% |
+| Coverage | Standard | Compact  |    78 |     35 |     0 |                  18.2% |
+
+These are single development attempts, not replicated estimates. All completed naturally with valid independent clocks. Full provenance and errors are retained in `results/mcp-optimization.json`. Waiting for fresh entry did not help this actor: observation-to-next-request delay still exceeded fruit lifetime. Compact feedback performed close to full feedback, without evidence of a score improvement yet.
+
+## Asynchronous execution contract
+
+The optional `async` profile replaces `swipe` with `submit_swipe`, and GUI `drag` with `submit_drag`. Each request accepts one actor-authored path under the same 1000ms, 32-point, 5000px/s limits. It acknowledges after validation and before native execution finishes, so inference can overlap that execution. A busy request accepts no new action and queues nothing. No action repeats, chooses targets, extends itself, or changes its coordinates after submission. Mouse-up still ends every accepted path.
+
+MCP acknowledgements include the current visible scene and generic execution status. GUI acknowledgements include a current screenshot and generic execution status only; they never contain score, objects, events, coordinates extracted from the game, or other dynamic application state. Observations can occur during execution. Full native input, outcomes and wall-time telemetry remain independent of the actor. The two interfaces have identical execution capabilities.

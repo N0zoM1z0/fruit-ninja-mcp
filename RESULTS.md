@@ -24,6 +24,12 @@ The [first complete cohort](results/optimization-validation-v1.json) remains unc
 
 There is one attempt per condition and seed in each cohort. Model decisions vary substantially, and many fruit still escape. This selects the best tested practical configuration; it does not establish a global optimum, stable win rate, or general score multiplier. Typecheck, build, formatting and 18 real-game/unit tests passed, including asynchronous input ownership, busy rejection, native failure recovery, GUI information boundaries and telemetry timing.
 
+## Optimized MCP recording: seed 42
+
+[Watch the complete recording](recordings/optimized-seed42-v1/README.md), [machine-readable result](results/optimized-mcp-recorded-seed42-v1.json). The first recorded take of coverage + async + compact scored **189**, sliced 71 / 219 fruit, escaped 136, hit zero bombs and reached combo 9. Same Terra/high actor, seed 42, 60-second realtime arcade and bounded native input; source `05cd84d`, with source fingerprints verified. There were no repeated takes or score-based selection.
+
+The actual round lasted 60003.8ms; maximum independent telemetry drift was 10.346ms. Both clock and interface audits passed. One late input was rejected after the natural deadline and remains counted. The uncut 81.48-second H.264 export retains all 2,037 source frames at original speed, including setup, the full round and the result. This is an MCP-only recording; the matched comparisons above remain the evaluation evidence.
+
 ## Realtime baseline: seed 42, 60-second arcade
 
 [Machine-readable result](results/realtime-baseline-seed42-v1.json), source `7043319`, local Codex CLI 0.165.0, `gpt-6.1-terra` / `high`. One sequential attempt per interface with matching source, instrumented game, seed, viewport, speed, scoring and native input executor.

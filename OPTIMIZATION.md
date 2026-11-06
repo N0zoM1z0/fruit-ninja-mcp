@@ -1,6 +1,6 @@
 # Realtime MCP optimization
 
-Keep the original game speed, 60-second arcade duration, Terra/high model, native mouse executor, 1000ms path limit, collision rules and independent clock audit. No recording is enabled in this series. No server-side target choice, automatic path planning, future-spawn access or score changes.
+Keep the original game speed, 60-second arcade duration, Terra/high model, native mouse executor, 1000ms path limit, collision rules and independent clock audit. No recording is enabled in this optimization and held-out validation series; the later [recorded demonstration](recordings/optimized-seed42-v1/README.md) is separate. No server-side target choice, automatic path planning, future-spawn access or score changes.
 
 ## Diagnosis
 

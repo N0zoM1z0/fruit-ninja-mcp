@@ -20,6 +20,7 @@ async function main(): Promise<void> {
       duration: { type: "string" },
       interface: { type: "string", default: "mcp" },
       "record-video": { type: "boolean", default: false },
+      "mcp-profile": { type: "string", default: "standard" },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -72,7 +73,13 @@ async function main(): Promise<void> {
     });
     if (!["mcp", "gui"].includes(values.interface!))
       throw new Error("Choose mcp or gui interface");
-    await serve(runtime, values.interface as "mcp" | "gui");
+    if (!["standard", "fresh"].includes(values["mcp-profile"]!))
+      throw new Error("Choose standard or fresh MCP profile");
+    await serve(
+      runtime,
+      values.interface as "mcp" | "gui",
+      values["mcp-profile"] as "standard" | "fresh",
+    );
   } catch (error) {
     await runtime.close();
     throw error;

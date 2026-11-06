@@ -1,5 +1,17 @@
 export type GameMode = "classic" | "arcade" | "zen";
 export type Interface = "mcp" | "gui";
+export type McpProfile = "standard" | "fresh";
+export interface Observe {
+  until: "immediate" | "new_fruit";
+  timeout_ms: number;
+}
+export interface ObservationResult {
+  scene: Scene;
+  trigger:
+    "immediate" | "new_fruit" | "timeout" | "round_finished" | "not_started";
+  waited_ms: number;
+  new_fruit_ids: number[];
+}
 export interface TimedPoint {
   x: number;
   y: number;

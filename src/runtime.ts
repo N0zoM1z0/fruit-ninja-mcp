@@ -13,6 +13,8 @@ import type {
   Swipe,
   TimedPoint,
   Wait,
+  Observe,
+  ObservationResult,
 } from "./types.js";
 
 export const viewport = { width: 1440, height: 960 };
@@ -222,6 +224,26 @@ export class GameRuntime {
   }
   scene(): Promise<Scene> {
     return this.serial(() => this.rawScene());
+  }
+  observe(input: Observe): Promise<ObservationResult> {
+    return this.serial(async () => {
+      if (
+        !["immediate", "new_fruit"].includes(input.until) ||
+        !Number.isInteger(input.timeout_ms) ||
+        input.timeout_ms < 1 ||
+        input.timeout_ms > 2500
+      )
+        throw new Error(
+          "Observation timeout must be 1..2500 real milliseconds",
+        );
+      const result = (await this.page.evaluate(
+        (input) => (window as any).fruitNinjaMcp.observe(input),
+        input,
+      )) as ObservationResult;
+      await this.log({ type: "observation_wait", input, result });
+      await this.persist(result.scene);
+      return result;
+    });
   }
   prepare(input: NewGame): Promise<Scene> {
     return this.serial(async () => {

@@ -7,6 +7,8 @@ export const bridgeSource = String.raw`
   let reefFinished = false, reefStartedAt = null, reefFinishedWall = null;
   let reefLastPump = 0, reefMaxGap = 0, reefPumping = false;
   let reefConfig = {mode: 'arcade', seed: 42, duration_seconds: 60};
+  const reefVisibleFruit = new Map();
+  let reefVisibleSequence = 0;
   const reefRoundNumber = value => Math.round(value * 1000) / 1000;
 
   function reefEvent(type, extra = {}) {
@@ -54,6 +56,11 @@ export const bridgeSource = String.raw`
       while (reefTick < targetTick && phase === 'playing') {
         reefTick++;
         update(FIXED_STEP);
+        for (const e of entities) {
+          if (!e.dead && !e.bomb && !reefVisibleFruit.has(e.id) &&
+              e.x+e.r>0 && e.x-e.r<W && e.y+e.r>0 && e.y-e.r<H)
+            reefVisibleFruit.set(e.id, ++reefVisibleSequence);
+        }
         reefFinishIfNeeded();
       }
       renderAlpha = 1;
@@ -104,6 +111,7 @@ export const bridgeSource = String.raw`
     reefSpawnRandom = seeded(reefConfig.seed);
     reefEntityId = reefTick = reefBombsHit = reefEscaped = reefSpawned = 0;
     reefEvents = []; reefFinished = false; reefRound++; reefRevision++;
+    reefVisibleFruit.clear(); reefVisibleSequence = 0;
     startGame(); phase = 'playing'; countdown = 0; $('countdown').hidden = true;
     reefStartedAt = reefLastPump = performance.now();
     reefFinishedWall = null; reefMaxGap = 0;
@@ -113,6 +121,21 @@ export const bridgeSource = String.raw`
   }
   window.fruitNinjaMcp = {
     scene: reefScene,
+    observe: async options => {
+      reefPump();
+      const began=performance.now(),sequence=reefVisibleSequence;
+      if (options.until === 'new_fruit' && phase === 'playing') {
+        while (phase === 'playing' && reefVisibleSequence === sequence && performance.now()-began < options.timeout_ms) {
+          await new Promise(done=>setTimeout(done,8));
+          reefPump();
+        }
+      }
+      const scene=reefScene();
+      const ids=scene.objects.filter(e=>e.kind==='fruit' && (reefVisibleFruit.get(e.id)||0)>sequence).map(e=>e.id);
+      const trigger=scene.phase==='finished'?'round_finished':scene.phase==='ready'?'not_started':
+        options.until==='immediate'?'immediate':ids.length?'new_fruit':'timeout';
+      return {scene,trigger,waited_ms:reefRoundNumber(performance.now()-began),new_fruit_ids:ids};
+    },
     prepare: reefPrepare,
     start: () => {
       if (!reefStartPreparedGame()) throw new Error('ROUND_ALREADY_STARTED: resets and restarts are disabled');

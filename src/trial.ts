@@ -9,7 +9,7 @@ import { root, upstream } from "./upstream.js";
 import { GameRuntime } from "./runtime.js";
 import { hostGame } from "./host.js";
 import { isToolFailure } from "./tool-audit.js";
-import type { Interface, Scene } from "./types.js";
+import type { Interface, Scene, McpProfile } from "./types.js";
 
 export interface TrialOptions {
   output: string;
@@ -20,6 +20,7 @@ export interface TrialOptions {
   timeout: number;
   record_video?: boolean;
   policy?: "baseline" | "coverage";
+  mcp_profile?: McpProfile;
 }
 async function fingerprints(directory: string, extension: string) {
   return Promise.all(
@@ -38,6 +39,9 @@ export async function runTrial(options: TrialOptions) {
   const { model, seed, duration, timeout } = options,
     mode = options.interface;
   const policy = options.policy ?? "baseline";
+  const profile = options.mcp_profile ?? "standard";
+  if (!["standard", "fresh"].includes(profile))
+    throw new Error("Unknown MCP profile");
   if (!["baseline", "coverage"].includes(policy))
     throw new Error("Unknown agent policy");
   if (
@@ -63,7 +67,7 @@ export async function runTrial(options: TrialOptions) {
     artifacts: game,
     recordVideo: options.record_video,
   });
-  const host = await hostGame(runtime, mode);
+  const host = await hostGame(runtime, mode, profile);
   await runtime.prepare({ mode: "arcade", seed, duration_seconds: duration });
   const server = mode === "mcp" ? "fruit_ninja" : "desktop";
   const common = `Play ONE ${duration}-second REALTIME arcade round of Fruit Ninja. Maximize score by slicing fruit, aim for combos, and avoid bombs. The round is prepared but not started. Read the controls and get an initial observation, then start when ready. From the start onward, the game runs continuously during your thinking, every tool call, screenshots and input. Fruit will be missed while you are thinking. Do not pause, reset, restart, or stop just because strokes miss. Continue until the round ends, then report what you observed. The independent evaluator obtains the final score from the game.\n\nUse only your explicitly assigned ${server} tools. No shell, files, code execution, developer console, DOM, OCR, accessibility, network tools, other servers, or delegated agents. You decide every path and timing; the executor has no aiming policy. Both arms have identical bounded mouse paths: 2..32 points, 16..1000ms, maximum 5000px/s. Prepare before starting; after starting, unnecessary observation calls also cost real game time. Your total wall-time budget is ${timeout} seconds.`;
@@ -75,7 +79,11 @@ export async function runTrial(options: TrialOptions) {
     policy === "coverage"
       ? "\n\nLatency-aware playing guidance: observations may be seconds old. Do not spend every turn constructing a tiny precise swipe at expired fruit positions. When safe, deliberately use a continuous 600–900ms path with a few chosen vertices to cover useful screen space over time. Keep every point inside bounds and every segment under 5000px/s. Choose all coordinates yourself from your observations; there is no built-in sweep. Favor simple, useful coverage over elaborate per-fruit arithmetic. Reuse each action result, minimize separate waits/observations while playing, and aim to reach 20 sliced fruit early to activate arcade frenzy. Three or more hits with gaps below 340ms can earn a combo bonus. Still avoid observed bombs and adjust if your previous path missed."
       : "";
-  const prompt = common + "\n\n" + specific + coverage;
+  const fresh =
+    mode === "mcp" && profile === "fresh"
+      ? "\n\nYour MCP profile is fresh. start_game returns when first fruit becomes visible. swipe defaults to observe_after=new_fruit: after the path the response waits in real time for newly entering fruit and returns a fresh scene. Reuse it directly without another observation or unnecessary wait. Choose observe_after=immediate if the current group is still useful. Fruit include time_to_exit_ms and time_to_apex_ms. reaction_latency_estimate_ms measures recent observation-to-next-request delay; account for fruit motion during that delay. The backend only waits for visibility and computes public kinematics. It does not choose targets or aim; you choose every path."
+      : "";
+  const prompt = common + "\n\n" + specific + coverage + fresh;
   const args = [
     "exec",
     "--ignore-user-config",
@@ -122,6 +130,7 @@ export async function runTrial(options: TrialOptions) {
     clock: "realtime",
     record_video: options.record_video ?? false,
     policy,
+    mcp_profile: profile,
     seed,
     duration_seconds: duration,
     codex_version: execFileSync("codex", ["--version"], {
@@ -247,6 +256,7 @@ export async function runTrial(options: TrialOptions) {
           "wait",
           "get_events",
           "get_screenshot",
+          ...(profile === "fresh" ? ["observe"] : []),
         ]
       : ["get_controls", "get_screenshot", "click", "drag", "wait"],
   );
@@ -256,7 +266,8 @@ export async function runTrial(options: TrialOptions) {
       calls++;
       if (isToolFailure(item)) errors++;
       if (item.server !== server || !allowed.has(item.tool)) invalid++;
-      if (["get_scene", "get_screenshot"].includes(item.tool)) observations++;
+      if (["get_scene", "get_screenshot", "observe"].includes(item.tool))
+        observations++;
       if (["swipe", "drag", "click"].includes(item.tool)) actions++;
     }
     if (
@@ -304,6 +315,7 @@ export async function runTrial(options: TrialOptions) {
     clock: "realtime",
     record_video: options.record_video ?? false,
     policy,
+    mcp_profile: profile,
     seed,
     duration_seconds: duration,
     exit_code: exitCode,

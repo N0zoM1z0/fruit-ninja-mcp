@@ -3,11 +3,15 @@ import { randomUUID } from "node:crypto";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { buildServer } from "./server.js";
 import type { GameRuntime } from "./runtime.js";
-import type { Interface } from "./types.js";
+import type { Interface, McpProfile } from "./types.js";
 
 /** The evaluator owns the game; an actor disconnect cannot stop its clock. */
-export async function hostGame(runtime: GameRuntime, mode: Interface) {
-  const mcp = buildServer(runtime, mode);
+export async function hostGame(
+  runtime: GameRuntime,
+  mode: Interface,
+  profile: McpProfile = "standard",
+) {
+  const mcp = buildServer(runtime, mode, profile);
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: () => randomUUID(),
     enableJsonResponse: true,

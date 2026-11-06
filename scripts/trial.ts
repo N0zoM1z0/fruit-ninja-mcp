@@ -11,6 +11,7 @@ const { values } = parseArgs({
     timeout: { type: "string", default: "180" },
     "record-video": { type: "boolean", default: false },
     policy: { type: "string", default: "baseline" },
+    "mcp-profile": { type: "string", default: "standard" },
   },
 });
 const result = await runTrial({
@@ -24,6 +25,7 @@ const result = await runTrial({
   timeout: Number(values.timeout),
   record_video: values["record-video"],
   policy: values.policy as "baseline" | "coverage",
+  mcp_profile: values["mcp-profile"] as "standard" | "fresh",
 });
 if (!result.completed_round || !result.valid_interface || !result.clock_valid)
   process.exitCode = 1;

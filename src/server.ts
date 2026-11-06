@@ -3,7 +3,13 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { GameRuntime, viewport } from "./runtime.js";
-import type { Interface } from "./types.js";
+import type {
+  Interface,
+  McpProfile,
+  Scene,
+  ObservationResult,
+} from "./types.js";
+import { enrichObservation } from "./observation.js";
 
 const point = z
   .object({
@@ -35,7 +41,22 @@ export const rules = {
 export function buildServer(
   runtime: GameRuntime,
   mode: Interface = "mcp",
+  profile: McpProfile = "standard",
 ): McpServer {
+  let lastObservationAt: number | undefined;
+  const latencies: number[] = [];
+  const deliver = (scene: Scene) => {
+    lastObservationAt = scene.clock_audit.observed_at_ms;
+    const sorted = [...latencies].sort((a, b) => a - b),
+      estimate = sorted.length
+        ? Math.round(sorted[Math.floor(sorted.length / 2)])
+        : null;
+    return profile === "fresh" ? enrichObservation(scene, estimate) : scene;
+  };
+  const deliverObservation = (observation: ObservationResult) => ({
+    ...observation,
+    scene: deliver(observation.scene),
+  });
   const server = new McpServer(
     {
       name: mode === "mcp" ? "fruit-ninja-mcp" : "fruit-ninja-gui",
@@ -158,6 +179,13 @@ export function buildServer(
     {},
     async () => ({
       ...rules,
+      mcp_profile: profile,
+      ...(profile === "fresh"
+        ? {
+            observation:
+              "start_game waits for first visible fruit; swipe waits for newly visible fruit after its path unless observe_after=immediate. These are real waits while the world runs. Lifetime estimates use only visible position, velocity and gravity. reaction_latency_estimate_ms is the recent observation-to-next-request delay; account for it. No future spawns are revealed.",
+          }
+        : {}),
       coordinates:
         "Canvas pixels, origin top-left, velocities px/s and gravity px/s². Scene includes only current visible objects, with no future spawn or RNG access.",
     }),
@@ -167,30 +195,97 @@ export function buildServer(
     "get_scene",
     "Read a timestamped CURRENT scene: visible fruit/bombs, velocities, hit radii, score, events and wall-clock audit. Time does not stop. Read rules and prepare before starting.",
     {},
-    () => runtime.scene(),
+    async () => {
+      const scene = await runtime.scene();
+      return profile === "fresh" ? deliver(scene) : scene;
+    },
     true,
   );
   tool(
     "start_game",
     "Start the one prepared round NOW. From this moment the world moves during inference, screenshots and every call. No reset or restart is permitted.",
     {},
-    () => runtime.start(),
+    async () => {
+      const scene = await runtime.start();
+      if (profile === "fresh") {
+        if (lastObservationAt !== undefined)
+          latencies.push(scene.clock_audit.observed_at_ms - lastObservationAt);
+        return deliverObservation(
+          await runtime.observe({ until: "new_fruit", timeout_ms: 1800 }),
+        );
+      }
+      return scene;
+    },
   );
+  if (profile === "fresh")
+    tool(
+      "observe",
+      "Observe immediately, or wait in REAL time until a new fruit first intersects the visible viewport AFTER this request. Returns current visible objects, public kinematic lifetime estimates and a trigger. No future spawns or hidden objects are returned. Time continues throughout the wait.",
+      {
+        until: z.enum(["immediate", "new_fruit"]).default("new_fruit"),
+        timeout_ms: z.number().int().min(1).max(2500).default(1800),
+      },
+      async (input) => deliverObservation(await runtime.observe(input)),
+      true,
+    );
   tool(
     "swipe",
-    "Execute your timed canvas path using native browser mouse events. The world keeps moving in real time. Returns the current scene/events after execution. No automatic aiming. Optional observed_at_ms records observation age; expected_revision only protects against another action, not advancing time.",
+    "Execute your timed canvas path using native browser mouse events. The world keeps moving. No automatic aiming. Returns scene/events. In the fresh profile, observe_after defaults to new_fruit: after the stroke the response waits in real time for newly visible fruit, giving the next decision a fresher observation. Choose immediate to inspect the stroke outcome now.",
     {
       points: z.array(point).min(2).max(32),
       expected_revision: z.number().int().min(0).optional(),
       observed_at_ms: z.number().finite().min(0).optional(),
+      ...(profile === "fresh"
+        ? {
+            observe_after: z
+              .enum(["immediate", "new_fruit"])
+              .default("new_fruit"),
+          }
+        : {}),
     },
-    (input) => runtime.swipe(input),
+    async (input) => {
+      const result = await runtime.swipe({
+        ...input,
+        ...(profile === "fresh" && input.observed_at_ms === undefined
+          ? { observed_at_ms: lastObservationAt }
+          : {}),
+      });
+      if (profile !== "fresh") return result;
+      if (result.observed_age_ms !== null) {
+        latencies.push(result.observed_age_ms);
+        if (latencies.length > 5) latencies.shift();
+      }
+      if (
+        (input as { observe_after?: string }).observe_after !== "immediate" &&
+        result.scene.phase === "playing"
+      ) {
+        const observation = await runtime.observe({
+          until: "new_fruit",
+          timeout_ms: 1800,
+        });
+        return {
+          ...result,
+          scene: deliver(observation.scene),
+          observation: {
+            trigger: observation.trigger,
+            waited_ms: observation.waited_ms,
+            new_fruit_ids: observation.new_fruit_ids,
+          },
+        };
+      }
+      return { ...result, scene: deliver(result.scene) };
+    },
   );
   tool(
     "wait",
     "Sleep in real time for 1..3000ms with the blade lifted, then return the current scene. This does not control or pause the game clock.",
     { duration_ms: z.number().int().min(1).max(3000) },
-    (input) => runtime.wait(input),
+    async (input) => {
+      const result = await runtime.wait(input);
+      return profile === "fresh"
+        ? { ...result, scene: deliver(result.scene) }
+        : result;
+    },
   );
   tool(
     "get_events",
@@ -215,8 +310,9 @@ export function buildServer(
 export async function serve(
   runtime: GameRuntime,
   mode: Interface = "mcp",
+  profile: McpProfile = "standard",
 ): Promise<void> {
-  const server = buildServer(runtime, mode);
+  const server = buildServer(runtime, mode, profile);
   const close = async () => {
     await server.close();
     await runtime.close();

@@ -202,7 +202,7 @@ test("a round ends on its own wall-clock deadline without tool calls", async () 
 });
 test("GUI tools return images only and expose no application state or start shortcut", async () => {
   const g = await game(),
-    server = buildServer(g, "gui"),
+    server = buildServer(g, "gui", "fresh"),
     client = new Client({ name: "gui-test", version: "1" });
   const [a, b] = InMemoryTransport.createLinkedPair();
   await server.connect(b);

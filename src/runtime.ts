@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { instrumentGame, loadGame, upstream } from "./upstream.js";
+import { executeTimedPath, type PointerSample } from "./pointer.js";
 import type {
   ActionResult,
   GameEvent,
@@ -19,6 +20,7 @@ export interface RuntimeOptions {
   browser?: string;
   artifacts?: string;
   headless?: boolean;
+  recordVideo?: boolean;
 }
 export function sceneHash(scene: Scene): string {
   return createHash("sha256").update(JSON.stringify(scene)).digest("hex");
@@ -87,6 +89,8 @@ export class GameRuntime {
   private finalSaved = false;
   private frame = 0;
   private lastCaptureAt?: number;
+  private canvasRect!: { x: number; y: number; width: number; height: number };
+  private arena = { width: 0, height: 0 };
   private readonly epoch = performance.now();
   private constructor(
     readonly browser: Browser,
@@ -95,6 +99,8 @@ export class GameRuntime {
   ) {}
 
   static async launch(options: RuntimeOptions = {}): Promise<GameRuntime> {
+    if (options.recordVideo && !options.artifacts)
+      throw new Error("Video recording requires an artifacts directory");
     const html = instrumentGame(await loadGame());
     const browser = await chromium.launch({
       executablePath: await browserExecutable(options.browser),
@@ -111,6 +117,14 @@ export class GameRuntime {
       const context = await browser.newContext({
         viewport,
         deviceScaleFactor: 1,
+        ...(options.recordVideo
+          ? {
+              recordVideo: {
+                dir: resolve(options.artifacts!, "raw-video"),
+                size: viewport,
+              },
+            }
+          : {}),
       });
       await context.route("**/*", (route) => route.abort());
       const page = await context.newPage();
@@ -127,12 +141,16 @@ export class GameRuntime {
       await page.setContent(html, { waitUntil: "load" });
       await page.waitForFunction("!!window.fruitNinjaMcp");
       await page.evaluate(() => document.fonts.ready);
+      const rect = await page.locator("#game").boundingBox();
+      if (!rect) throw new Error("Canvas unavailable");
+      runtime.canvasRect = rect;
       if (runtime.artifacts) {
         await mkdir(runtime.artifacts, { recursive: true });
         await runtime.log({
           type: "session",
           schema_version: 2,
           clock: "realtime",
+          record_video: options.recordVideo ?? false,
           upstream,
           viewport,
           browser_version: browser.version(),
@@ -211,6 +229,7 @@ export class GameRuntime {
         (input) => (window as any).fruitNinjaMcp.prepare(input),
         input,
       )) as Scene;
+      this.arena = scene.arena;
       await this.log({ type: "prepare", input, scene });
       await this.persist(scene);
       return scene;
@@ -294,25 +313,21 @@ export class GameRuntime {
     space: "canvas" | "screen",
   ): Promise<ActionResult> {
     return this.serial(async () => {
-      const before = await this.rawScene();
-      validatePath(input.points, space === "canvas" ? before.arena : viewport);
+      validatePath(input.points, space === "canvas" ? this.arena : viewport);
       let points = input.points;
       if (space === "canvas") {
-        const rect = await this.page.locator("#game").boundingBox();
-        if (!rect) throw new Error("Canvas unavailable");
+        const rect = this.canvasRect;
         points = points.map((p) => ({
           ...p,
-          x: rect.x + (p.x * rect.width) / before.arena.width,
-          y: rect.y + (p.y * rect.height) / before.arena.height,
+          x: rect.x + (p.x * rect.width) / this.arena.width,
+          y: rect.y + (p.y * rect.height) / this.arena.height,
         }));
       }
-      await this.page.evaluate(
+      const accepted = (await this.page.evaluate(
         (expected) => (window as any).fruitNinjaMcp.markAction(expected),
         input.expected_revision,
-      );
-      const prior = (await this.page.evaluate(
-        "window.fruitNinjaMcp.events(0,0)",
-      )) as { last_seq: number };
+      )) as { scene: Scene; last_seq: number };
+      const before = accepted.scene;
       const started = performance.now(),
         observedAge =
           input.observed_at_ms === undefined
@@ -330,40 +345,30 @@ export class GameRuntime {
       await this.page.mouse.move(points[0].x, points[0].y);
       await this.page.mouse.down();
       const bladeStarted = performance.now();
+      let samples: PointerSample[] = [];
       try {
-        for (let segment = 1; segment < points.length; segment++) {
-          const a = points[segment - 1],
-            b = points[segment];
-          const samples = Math.max(1, Math.ceil((b.t_ms - a.t_ms) / 8));
-          for (let i = 1; i <= samples; i++) {
-            const t = a.t_ms + ((b.t_ms - a.t_ms) * i) / samples;
-            const delay = bladeStarted + t - performance.now();
-            if (delay > 0) await sleep(delay);
-            const x = a.x + ((b.x - a.x) * i) / samples,
-              y = a.y + ((b.y - a.y) * i) / samples;
-            await this.page.mouse.move(x, y);
-            await this.log({
-              type: "mouse_move",
-              x,
-              y,
-              requested_t_ms: t,
-              actual_t_ms: performance.now() - bladeStarted,
-            });
-          }
-        }
+        samples = await executeTimedPath(points, {
+          move: (x, y) => this.page.mouse.move(x, y),
+        });
       } finally {
         await this.page.mouse.up();
       }
-      const scene = await this.rawScene();
-      const events = (await this.page.evaluate(
-        (after) => (window as any).fruitNinjaMcp.events(after, 200),
-        prior.last_seq,
-      )) as { events: GameEvent[] };
+      // Log after mouse-up; timestamp fields retain real issuance/acknowledgement times.
+      await this.log({
+        type: "mouse_samples",
+        host_ms: bladeStarted - this.epoch,
+        samples,
+      });
+      const completed = (await this.page.evaluate((after) => {
+        const b = (window as any).fruitNinjaMcp;
+        return { scene: b.scene(), events: b.events(after, 200).events };
+      }, accepted.last_seq)) as { scene: Scene; events: GameEvent[] };
+      const scene = completed.scene;
       const result = {
         scene,
         actual_duration_ms: Math.round(performance.now() - started),
         observed_age_ms: observedAge,
-        events: events.events,
+        events: completed.events,
       };
       await this.log({ type: "path_finished", space, result });
       await this.persist(scene);
@@ -404,6 +409,10 @@ export class GameRuntime {
     await this.queue;
     while (this.telemetryBusy) await sleep(10);
     await this.persistence;
+    const video = this.page.video();
+    await this.page.context().close();
+    if (video && this.artifacts)
+      await rename(await video.path(), resolve(this.artifacts, "game.webm"));
     await this.browser.close();
   }
 }

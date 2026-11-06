@@ -17,6 +17,7 @@ export interface TrialOptions {
   seed: number;
   duration: number;
   timeout: number;
+  record_video?: boolean;
 }
 async function fingerprints(directory: string, extension: string) {
   return Promise.all(
@@ -53,7 +54,10 @@ export async function runTrial(options: TrialOptions) {
   await mkdir(dirname(output), { recursive: true });
   await mkdir(output);
   await mkdir(work);
-  const runtime = await GameRuntime.launch({ artifacts: game });
+  const runtime = await GameRuntime.launch({
+    artifacts: game,
+    recordVideo: options.record_video,
+  });
   const host = await hostGame(runtime, mode);
   await runtime.prepare({ mode: "arcade", seed, duration_seconds: duration });
   const server = mode === "mcp" ? "fruit_ninja" : "desktop";
@@ -107,6 +111,7 @@ export async function runTrial(options: TrialOptions) {
     model,
     reasoning_effort: "high",
     clock: "realtime",
+    record_video: options.record_video ?? false,
     seed,
     duration_seconds: duration,
     codex_version: execFileSync("codex", ["--version"], {
@@ -287,6 +292,7 @@ export async function runTrial(options: TrialOptions) {
     model,
     reasoning_effort: "high",
     clock: "realtime",
+    record_video: options.record_video ?? false,
     seed,
     duration_seconds: duration,
     exit_code: exitCode,

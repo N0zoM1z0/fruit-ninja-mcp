@@ -9,6 +9,7 @@ const { values } = parseArgs({
     seed: { type: "string", default: "42" },
     duration: { type: "string", default: "60" },
     timeout: { type: "string", default: "180" },
+    "record-video": { type: "boolean", default: false },
   },
 });
 const output = resolve(
@@ -22,6 +23,7 @@ const common = {
   seed: Number(values.seed),
   duration: Number(values.duration),
   timeout: Number(values.timeout),
+  record_video: values["record-video"],
 };
 await writeFile(
   resolve(output, "protocol.json"),

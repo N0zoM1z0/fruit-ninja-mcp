@@ -7,6 +7,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { GameRuntime, validatePath } from "../src/runtime.js";
 import { buildServer } from "../src/server.js";
 import { hostGame } from "../src/host.js";
+import { executeTimedPath } from "../src/pointer.js";
 
 async function game() {
   const runtime = await GameRuntime.launch();
@@ -49,6 +50,28 @@ test("bounded paths reject invalid input without any execution", () => {
       bounds,
     ),
   );
+});
+
+test("slow native acknowledgements do not replay obsolete samples or skip corners", async () => {
+  let wall = 0;
+  const points = [
+    { x: 100, y: 100, t_ms: 0 },
+    { x: 400, y: 100, t_ms: 100 },
+    { x: 400, y: 300, t_ms: 180 },
+  ];
+  const samples = await executeTimedPath(points, {
+    now: () => wall,
+    sleep: async (ms) => {
+      wall += ms;
+    },
+    move: async () => {
+      wall += 25;
+    },
+  });
+  assert.ok(wall >= 180 && wall < 300, `180ms path took ${wall}ms`);
+  for (const corner of points.slice(1))
+    assert.ok(samples.some((p) => p.x === corner.x && p.y === corner.y));
+  for (const p of samples) assert.ok(p.issued_t_ms >= p.requested_t_ms);
 });
 test("the world runs while the actor is idle, observing, blurred or trying to pause", async () => {
   const g = await game();
@@ -105,6 +128,10 @@ test("native timed mouse input cuts real moving fruit and consumes wall time", a
       ),
     );
     assert.ok(result.actual_duration_ms >= 90);
+    assert.ok(
+      result.actual_duration_ms < 350,
+      `100ms native path took ${result.actual_duration_ms}ms`,
+    );
   } finally {
     await g.close();
   }

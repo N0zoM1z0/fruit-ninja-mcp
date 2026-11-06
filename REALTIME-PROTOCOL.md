@@ -14,6 +14,7 @@ The earlier decision-clock prototype and its scores are **not realtime evidence*
 - After starting, the world follows monotonic wall time independently of inference, observations, input calls, screenshots, focus, or the model exiting early. Pause controls are disabled for both arms. No slow motion or camera shake is enabled in either arm.
 - The clock uses 120 Hz physics ticks derived from wall time. Delayed callbacks catch up instead of dropping elapsed time. Record clock lag and actual wall duration; infrastructure problems remain visible.
 - A timed path takes real wall time to execute. Use actual browser mouse events in both arms. The executor interpolates only the coordinates the actor supplies; it does not choose or track targets.
+- When native acknowledgements are late, the shared scheduler may skip obsolete interior interpolation samples. It must emit every actor-supplied corner, enforce the speed limit, and record actual issuance/acknowledgement times. No event is backdated, and no simulation time is removed.
 - A path has 2–32 points, lasts 16–1000 ms, and is limited to 5000 px/s in both arms. No future commands, repeated macros, target-ID slicing, homing, auto-aim or hidden controller policy.
 - A locked trial permits one start and no reset, reseed, pause, or restart. If an actor stops early, the game continues to its natural end before grading.
 

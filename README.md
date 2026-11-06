@@ -47,6 +47,8 @@ The GUI driver also uses MCP as transport. This compares application information
 
 Every path has 2–32 points, lasts 16–1000 requested milliseconds, and is limited to 5000 px/s. Its real execution time is recorded; scheduling overhead is not removed from game time. All corners are preserved. The executor never selects targets, tracks fruit or replans a path.
 
+The shared executor adapts interior samples to elapsed wall time instead of replaying samples whose scheduled time has passed. Every actor-supplied corner is still emitted, with the speed limit enforced. Native input acknowledgements are measured and per-sample logging is buffered until mouse-up. Canvas geometry is cached for the fixed viewport. These changes apply identically to both interfaces.
+
 ```json
 {
   "points": [
@@ -67,11 +69,18 @@ npm run compare -- --seed 42 --duration 60 --output artifacts/comparisons/realti
 
 # One arm for diagnostics.
 npm run trial -- --interface gui --seed 42 --duration 60 --output artifacts/gui-diagnostic
+
+# Record one full realtime game in each arm; retain original-speed raw WebM.
+npm run compare -- --record-video --seed 42 --duration 60 --output artifacts/comparisons/recorded-42
+npm run export:video -- --trial artifacts/comparisons/recorded-42/mcp
+npm run export:video -- --trial artifacts/comparisons/recorded-42/gui
 ```
 
 The runner disables user configuration, project instructions, shell, web and multi-agent features. Each actor has an empty workspace and only its assigned server. The GUI starts by clicking; MCP starts through its native start tool. Both may inspect the ready screen before starting. If the actor exits early, the independent game continues to its natural end and is still graded. A setup timeout, late shutdown, invalid interface or clock problem is retained explicitly.
 
 Evidence includes prompts, exact arguments, model/CLI settings, source/build/game fingerprints, timestamped native mouse events, independent 100ms state telemetry, screenshots, errors, usage and final scores. The final game state is authoritative. Real-time traces are timing evidence, not deterministic decision-step replay fixtures.
+
+Video export preserves original speed and the entire round, with a short pre-roll and final-result display. Only setup and excess post-round idle are trimmed; uncut source video and export hashes/timing remain available.
 
 ## Clock and game provenance
 

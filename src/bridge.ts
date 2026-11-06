@@ -95,6 +95,7 @@ export const bridgeSource = String.raw`
     modes.zen.seconds = options.mode === 'zen' ? (options.duration_seconds ?? 90) : 90;
     prefs.motion = false; soundOn = false; setSound();
     $('pause-button').disabled = true;
+    $('fullscreen-button').disabled = true;
     return reefScene();
   }
   function reefStartPreparedGame() {
@@ -123,6 +124,7 @@ export const bridgeSource = String.raw`
         throw new Error('STALE_REVISION: another action has already executed');
       if (phase !== 'playing') throw new Error('ROUND_NOT_PLAYING');
       reefRevision++;
+      return {scene:reefScene(),last_seq:reefEvents.length};
     },
     events: (after, limit) => {
       reefPump();

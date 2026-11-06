@@ -19,6 +19,7 @@ async function main(): Promise<void> {
       seed: { type: "string", default: "42" },
       duration: { type: "string" },
       interface: { type: "string", default: "mcp" },
+      "record-video": { type: "boolean", default: false },
       help: { type: "boolean", short: "h" },
     },
   });
@@ -61,6 +62,7 @@ async function main(): Promise<void> {
     browser: values.browser,
     headless: !values.headed,
     artifacts: values.artifacts,
+    recordVideo: values["record-video"],
   });
   try {
     await runtime.prepare({

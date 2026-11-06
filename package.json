@@ -19,6 +19,7 @@
     "play": "tsx src/cli.ts play",
     "trial": "tsx scripts/trial.ts",
     "compare": "tsx scripts/compare.ts",
+    "export:video": "tsx scripts/export-video.ts",
     "test": "node --import tsx --test tests/*.test.ts",
     "format": "prettier --write src scripts tests results README.md RESULTS.md REALTIME-PROTOCOL.md package.json tsconfig*.json",
     "format:check": "prettier --check src scripts tests results README.md RESULTS.md REALTIME-PROTOCOL.md package.json tsconfig*.json"

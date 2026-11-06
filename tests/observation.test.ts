@@ -5,6 +5,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { GameRuntime } from "../src/runtime.js";
 import { buildServer } from "../src/server.js";
 import { enrichObservation } from "../src/observation.js";
+import { compactObservation } from "../src/compact.js";
 import type { Scene } from "../src/types.js";
 
 test("new-fruit observation waits for visible entry without stopping the clock", async () => {
@@ -109,6 +110,48 @@ test("fresh MCP start returns a newly visible scene and explicit observation con
       arguments: { until: "new_fruit", timeout_ms: 40 },
     });
     assert.equal((waiting.structuredContent as any).trigger, "timeout");
+  } finally {
+    await client.close();
+    await server.close();
+    await game.close();
+  }
+});
+
+test("compact feedback preserves live decision state and keeps full telemetry unchanged", async () => {
+  const game = await GameRuntime.launch(),
+    server = buildServer(game, "mcp", "standard", "compact"),
+    client = new Client({ name: "compact-contract", version: "1" });
+  const [a, b] = InMemoryTransport.createLinkedPair();
+  await server.connect(b);
+  await client.connect(a);
+  try {
+    await game.prepare({ mode: "arcade", seed: 42, duration_seconds: 5 });
+    const start = await client.callTool({ name: "start_game", arguments: {} });
+    assert.ok(!start.isError);
+    assert.equal((start.structuredContent as any).phase, "playing");
+    await game.observe({ until: "new_fruit", timeout_ms: 1000 });
+    const scene = await game.scene(),
+      original = JSON.stringify(scene);
+    const compact = compactObservation(scene);
+    assert.equal(JSON.stringify(scene), original);
+    assert.equal(compact.captured_at_ms, scene.clock_audit.observed_at_ms);
+    assert.deepEqual(compact.stats, scene.stats);
+    assert.ok(JSON.stringify(compact).length < original.length);
+    assert.ok(!("clock_audit" in compact));
+    for (let i = 0; i < scene.objects.length; i++) {
+      assert.equal(compact.objects[i].id, scene.objects[i].id);
+      assert.equal(compact.objects[i].kind, scene.objects[i].kind);
+      assert.ok(!("fruit" in compact.objects[i]));
+      for (const key of ["x", "y", "vx", "vy", "radius", "hit_radius"] as const)
+        assert.ok(
+          Math.abs(compact.objects[i][key] - scene.objects[i][key]) <= 0.051,
+        );
+    }
+    const result = await client.callTool({ name: "get_scene", arguments: {} });
+    const payload = result.structuredContent as any;
+    assert.ok(!result.isError && payload.captured_at_ms > 0);
+    assert.ok(!("clock_audit" in payload));
+    assert.equal(payload.stats.spawned_fruit, scene.stats.spawned_fruit);
   } finally {
     await client.close();
     await server.close();

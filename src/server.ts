@@ -8,8 +8,10 @@ import type {
   McpProfile,
   Scene,
   ObservationResult,
+  Feedback,
 } from "./types.js";
 import { enrichObservation } from "./observation.js";
+import { compactObservation } from "./compact.js";
 
 const point = z
   .object({
@@ -42,6 +44,7 @@ export function buildServer(
   runtime: GameRuntime,
   mode: Interface = "mcp",
   profile: McpProfile = "standard",
+  feedback: Feedback = "full",
 ): McpServer {
   let lastObservationAt: number | undefined;
   const latencies: number[] = [];
@@ -51,7 +54,9 @@ export function buildServer(
       estimate = sorted.length
         ? Math.round(sorted[Math.floor(sorted.length / 2)])
         : null;
-    return profile === "fresh" ? enrichObservation(scene, estimate) : scene;
+    const value =
+      profile === "fresh" ? enrichObservation(scene, estimate) : scene;
+    return feedback === "compact" ? compactObservation(value) : value;
   };
   const deliverObservation = (observation: ObservationResult) => ({
     ...observation,
@@ -180,6 +185,7 @@ export function buildServer(
     async () => ({
       ...rules,
       mcp_profile: profile,
+      feedback,
       ...(profile === "fresh"
         ? {
             observation:
@@ -197,7 +203,7 @@ export function buildServer(
     {},
     async () => {
       const scene = await runtime.scene();
-      return profile === "fresh" ? deliver(scene) : scene;
+      return deliver(scene);
     },
     true,
   );
@@ -214,7 +220,7 @@ export function buildServer(
           await runtime.observe({ until: "new_fruit", timeout_ms: 1800 }),
         );
       }
-      return scene;
+      return deliver(scene);
     },
   );
   if (profile === "fresh")
@@ -250,7 +256,10 @@ export function buildServer(
           ? { observed_at_ms: lastObservationAt }
           : {}),
       });
-      if (profile !== "fresh") return result;
+      if (profile !== "fresh")
+        return feedback === "compact"
+          ? { ...result, scene: deliver(result.scene) }
+          : result;
       if (result.observed_age_ms !== null) {
         latencies.push(result.observed_age_ms);
         if (latencies.length > 5) latencies.shift();
@@ -282,7 +291,7 @@ export function buildServer(
     { duration_ms: z.number().int().min(1).max(3000) },
     async (input) => {
       const result = await runtime.wait(input);
-      return profile === "fresh"
+      return profile === "fresh" || feedback === "compact"
         ? { ...result, scene: deliver(result.scene) }
         : result;
     },
@@ -311,8 +320,9 @@ export async function serve(
   runtime: GameRuntime,
   mode: Interface = "mcp",
   profile: McpProfile = "standard",
+  feedback: Feedback = "full",
 ): Promise<void> {
-  const server = buildServer(runtime, mode, profile);
+  const server = buildServer(runtime, mode, profile, feedback);
   const close = async () => {
     await server.close();
     await runtime.close();

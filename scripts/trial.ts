@@ -12,6 +12,7 @@ const { values } = parseArgs({
     "record-video": { type: "boolean", default: false },
     policy: { type: "string", default: "baseline" },
     "mcp-profile": { type: "string", default: "standard" },
+    feedback: { type: "string", default: "full" },
   },
 });
 const result = await runTrial({
@@ -26,6 +27,7 @@ const result = await runTrial({
   record_video: values["record-video"],
   policy: values.policy as "baseline" | "coverage",
   mcp_profile: values["mcp-profile"] as "standard" | "fresh",
+  feedback: values.feedback as "full" | "compact",
 });
 if (!result.completed_round || !result.valid_interface || !result.clock_valid)
   process.exitCode = 1;

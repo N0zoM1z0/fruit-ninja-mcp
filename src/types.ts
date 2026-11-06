@@ -1,6 +1,7 @@
 export type GameMode = "classic" | "arcade" | "zen";
 export type Interface = "mcp" | "gui";
 export type McpProfile = "standard" | "fresh";
+export type Feedback = "full" | "compact";
 export interface Observe {
   until: "immediate" | "new_fruit";
   timeout_ms: number;

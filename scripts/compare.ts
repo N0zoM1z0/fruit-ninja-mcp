@@ -12,6 +12,7 @@ const { values } = parseArgs({
     "record-video": { type: "boolean", default: false },
     policy: { type: "string", default: "baseline" },
     "mcp-profile": { type: "string", default: "standard" },
+    feedback: { type: "string", default: "full" },
   },
 });
 const output = resolve(
@@ -28,6 +29,7 @@ const common = {
   record_video: values["record-video"],
   policy: values.policy as "baseline" | "coverage",
   mcp_profile: values["mcp-profile"] as "standard" | "fresh",
+  feedback: values.feedback as "full" | "compact",
 };
 await writeFile(
   resolve(output, "protocol.json"),

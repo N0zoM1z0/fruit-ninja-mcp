@@ -9,7 +9,7 @@ import { root, upstream } from "./upstream.js";
 import { GameRuntime } from "./runtime.js";
 import { hostGame } from "./host.js";
 import { isToolFailure } from "./tool-audit.js";
-import type { Interface, Scene, McpProfile } from "./types.js";
+import type { Interface, Scene, McpProfile, Feedback } from "./types.js";
 
 export interface TrialOptions {
   output: string;
@@ -21,6 +21,7 @@ export interface TrialOptions {
   record_video?: boolean;
   policy?: "baseline" | "coverage";
   mcp_profile?: McpProfile;
+  feedback?: Feedback;
 }
 async function fingerprints(directory: string, extension: string) {
   return Promise.all(
@@ -40,6 +41,9 @@ export async function runTrial(options: TrialOptions) {
     mode = options.interface;
   const policy = options.policy ?? "baseline";
   const profile = options.mcp_profile ?? "standard";
+  const feedback = options.feedback ?? "full";
+  if (!["full", "compact"].includes(feedback))
+    throw new Error("Unknown feedback mode");
   if (!["standard", "fresh"].includes(profile))
     throw new Error("Unknown MCP profile");
   if (!["baseline", "coverage"].includes(policy))
@@ -67,7 +71,7 @@ export async function runTrial(options: TrialOptions) {
     artifacts: game,
     recordVideo: options.record_video,
   });
-  const host = await hostGame(runtime, mode, profile);
+  const host = await hostGame(runtime, mode, profile, feedback);
   await runtime.prepare({ mode: "arcade", seed, duration_seconds: duration });
   const server = mode === "mcp" ? "fruit_ninja" : "desktop";
   const common = `Play ONE ${duration}-second REALTIME arcade round of Fruit Ninja. Maximize score by slicing fruit, aim for combos, and avoid bombs. The round is prepared but not started. Read the controls and get an initial observation, then start when ready. From the start onward, the game runs continuously during your thinking, every tool call, screenshots and input. Fruit will be missed while you are thinking. Do not pause, reset, restart, or stop just because strokes miss. Continue until the round ends, then report what you observed. The independent evaluator obtains the final score from the game.\n\nUse only your explicitly assigned ${server} tools. No shell, files, code execution, developer console, DOM, OCR, accessibility, network tools, other servers, or delegated agents. You decide every path and timing; the executor has no aiming policy. Both arms have identical bounded mouse paths: 2..32 points, 16..1000ms, maximum 5000px/s. Prepare before starting; after starting, unnecessary observation calls also cost real game time. Your total wall-time budget is ${timeout} seconds.`;
@@ -131,6 +135,7 @@ export async function runTrial(options: TrialOptions) {
     record_video: options.record_video ?? false,
     policy,
     mcp_profile: profile,
+    feedback,
     seed,
     duration_seconds: duration,
     codex_version: execFileSync("codex", ["--version"], {
@@ -316,6 +321,7 @@ export async function runTrial(options: TrialOptions) {
     record_video: options.record_video ?? false,
     policy,
     mcp_profile: profile,
+    feedback,
     seed,
     duration_seconds: duration,
     exit_code: exitCode,

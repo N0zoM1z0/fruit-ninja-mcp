@@ -1,0 +1,9 @@
+{
+  "model": "gpt-6.1-terra",
+  "reasoning_effort": "high",
+  "expected": "6E7BE21B",
+  "answer": "6E7BE21B",
+  "passed": true,
+  "exit_code": 0,
+  "method": "The actor read a fresh random verification code from the same screenshot-only GUI HTTP tool; the code was absent from its text prompt."
+}

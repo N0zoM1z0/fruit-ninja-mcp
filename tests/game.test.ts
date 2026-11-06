@@ -8,6 +8,7 @@ import { GameRuntime, validatePath } from "../src/runtime.js";
 import { buildServer } from "../src/server.js";
 import { hostGame } from "../src/host.js";
 import { executeTimedPath } from "../src/pointer.js";
+import { isToolFailure } from "../src/tool-audit.js";
 
 async function game() {
   const runtime = await GameRuntime.launch();
@@ -49,6 +50,46 @@ test("bounded paths reject invalid input without any execution", () => {
       ],
       bounds,
     ),
+  );
+});
+
+test("CLI audit counts a plain MCP error even when isError was dropped", () => {
+  assert.equal(
+    isToolFailure({
+      status: "completed",
+      error: null,
+      result: {
+        content: [
+          { type: "text", text: "page.evaluate: Error: ROUND_NOT_PLAYING" },
+        ],
+        structured_content: null,
+      },
+    }),
+    true,
+  );
+  assert.equal(
+    isToolFailure({
+      status: "completed",
+      result: {
+        content: [
+          {
+            type: "text",
+            text: '{"content":[{"type":"image","data":"example"}]}',
+          },
+        ],
+        structured_content: null,
+      },
+    }),
+    false,
+  );
+  assert.equal(
+    isToolFailure({
+      result: {
+        content: [{ type: "text", text: '{"phase":"playing"}' }],
+        structured_content: { phase: "playing" },
+      },
+    }),
+    false,
   );
 });
 

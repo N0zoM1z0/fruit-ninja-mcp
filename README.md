@@ -80,7 +80,9 @@ The runner disables user configuration, project instructions, shell, web and mul
 
 Evidence includes prompts, exact arguments, model/CLI settings, source/build/game fingerprints, timestamped native mouse events, independent 100ms state telemetry, screenshots, errors, usage and final scores. The final game state is authoritative. Real-time traces are timing evidence, not deterministic decision-step replay fixtures.
 
-Video export preserves original speed and the entire round, with a short pre-roll and final-result display. Only setup and excess post-round idle are trimmed; uncut source video and export hashes/timing remain available.
+Video export preserves original speed and the complete uncut capture, including setup, the entire round and the final result. No trimming or time scaling is applied; source video and export hashes remain available.
+
+Recording also requires Playwright's FFmpeg build (`npx playwright-core install ffmpeg`); MP4 export requires `ffmpeg` and `ffprobe` on PATH. The [recorded pair](recordings/seed42-v2/README.md) has original-speed full-game MP4 files and provenance.
 
 ## Clock and game provenance
 

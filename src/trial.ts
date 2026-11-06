@@ -8,6 +8,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { root, upstream } from "./upstream.js";
 import { GameRuntime } from "./runtime.js";
 import { hostGame } from "./host.js";
+import { isToolFailure } from "./tool-audit.js";
 import type { Interface, Scene } from "./types.js";
 
 export interface TrialOptions {
@@ -244,7 +245,7 @@ export async function runTrial(options: TrialOptions) {
     const item = row.item;
     if (row.type === "item.completed" && item?.type === "mcp_tool_call") {
       calls++;
-      if (item.error || item.result?.isError) errors++;
+      if (isToolFailure(item)) errors++;
       if (item.server !== server || !allowed.has(item.tool)) invalid++;
       if (["get_scene", "get_screenshot"].includes(item.tool)) observations++;
       if (["swipe", "drag", "click"].includes(item.tool)) actions++;

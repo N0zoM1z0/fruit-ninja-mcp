@@ -182,7 +182,12 @@
       "median_actual_ms": 682,
       "median_overrun_ratio": 4.3875
     },
-    "raw_artifacts_directory": "artifacts/comparisons/realtime-baseline-seed42-v1/mcp"
+    "raw_artifacts_directory": "artifacts/comparisons/realtime-baseline-seed42-v1/mcp",
+    "error_audit": {
+      "method": "Recognize plain-text MCP errors omitted from Codex isError metadata",
+      "errors": [],
+      "raw_artifacts_unchanged": true
+    }
   },
   "gui": {
     "schema_version": 2,
@@ -203,7 +208,7 @@
     "clock_valid": true,
     "maximum_telemetry_clock_drift_ms": 8.028,
     "tool_calls": 15,
-    "tool_errors": 0,
+    "tool_errors": 1,
     "invalid_tool_calls": 0,
     "explicit_observations": 3,
     "input_actions": 11,
@@ -382,7 +387,18 @@
       "median_actual_ms": 416,
       "median_overrun_ratio": 2.25
     },
-    "raw_artifacts_directory": "artifacts/comparisons/realtime-baseline-seed42-v1/gui"
+    "raw_artifacts_directory": "artifacts/comparisons/realtime-baseline-seed42-v1/gui",
+    "original_runner_tool_errors": 0,
+    "error_audit": {
+      "method": "Recognize plain-text MCP errors omitted from Codex isError metadata",
+      "errors": [
+        {
+          "tool": "drag",
+          "reason": "ROUND_NOT_PLAYING: input arrived after natural round completion"
+        }
+      ],
+      "raw_artifacts_unchanged": true
+    }
   },
   "note": "One sequential paired attempt. Preserve both results regardless of which arm wins; no broad reliability claim.",
   "source_commit": "7043319",

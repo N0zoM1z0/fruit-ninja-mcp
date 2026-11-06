@@ -1,0 +1,435 @@
+{
+  "clock": "realtime",
+  "model": "gpt-6.1-terra",
+  "reasoning_effort": "high",
+  "seed": 42,
+  "duration_seconds": 60,
+  "valid": true,
+  "score_difference": 18,
+  "mcp": {
+    "schema_version": 2,
+    "interface": "mcp",
+    "model": "gpt-6.1-terra",
+    "reasoning_effort": "high",
+    "clock": "realtime",
+    "record_video": true,
+    "seed": 42,
+    "duration_seconds": 60,
+    "exit_code": 0,
+    "exit_signal": null,
+    "timed_out": false,
+    "supervisor_stopped_after_finish": false,
+    "actor_exited_during_play": false,
+    "wall_seconds": 80.398,
+    "completed_round": true,
+    "valid_interface": true,
+    "clock_valid": true,
+    "maximum_telemetry_clock_drift_ms": 72.545,
+    "tool_calls": 27,
+    "tool_errors": 1,
+    "invalid_tool_calls": 0,
+    "explicit_observations": 2,
+    "input_actions": 20,
+    "usage": {
+      "input_tokens": 639973,
+      "cached_input_tokens": 606080,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 1442,
+      "reasoning_output_tokens": 65
+    },
+    "final_scene": {
+      "schema_version": 2,
+      "round": 1,
+      "revision": 20,
+      "tick": 7200,
+      "phase": "finished",
+      "mode": "arcade",
+      "clock": "realtime",
+      "elapsed_ms": 60000,
+      "remaining_ms": 0,
+      "arena": {
+        "width": 1362,
+        "height": 817
+      },
+      "gravity": 841.51,
+      "clock_audit": {
+        "started_at_ms": 12977.6,
+        "observed_at_ms": 80004.4,
+        "wall_elapsed_ms": 67026.8,
+        "finished_wall_elapsed_ms": 60007.2,
+        "max_pump_gap_ms": 17
+      },
+      "stats": {
+        "score": 29,
+        "sliced": 19,
+        "missed": 0,
+        "escaped_fruit": 136,
+        "bombs_hit": 0,
+        "max_combo": 4,
+        "spawned_fruit": 158
+      },
+      "objects": [
+        {
+          "id": 168,
+          "kind": "fruit",
+          "fruit": "plum",
+          "x": 637.403,
+          "y": 359.694,
+          "vx": -28.575,
+          "vy": -277.588,
+          "radius": 46.08,
+          "hit_radius": 47.002
+        },
+        {
+          "id": 169,
+          "kind": "fruit",
+          "fruit": "plum",
+          "x": 847.977,
+          "y": 308.783,
+          "vx": 0,
+          "vy": -339.298,
+          "radius": 46.08,
+          "hit_radius": 47.002
+        },
+        {
+          "id": 170,
+          "kind": "fruit",
+          "fruit": "kiwi",
+          "x": 1058.561,
+          "y": 359.557,
+          "vx": 28.587,
+          "vy": -277.172,
+          "radius": 45.6,
+          "hit_radius": 46.512
+        },
+        {
+          "id": 171,
+          "kind": "bomb",
+          "fruit": null,
+          "x": 76.032,
+          "y": 419.698,
+          "vx": 0,
+          "vy": -202.431,
+          "radius": 46.08,
+          "hit_radius": 38.246
+        }
+      ]
+    },
+    "note": "Actual realtime attempt. Zero scores, misses and tool errors are retained. No autopilot or artificial slowdown.",
+    "runtime_files": [
+      {
+        "path": "dist/bridge.js",
+        "sha256": "0be5c3ef301b6021e1086704617a9c7f6dd31c316793cc8ca4131c1c96c8c4ab"
+      },
+      {
+        "path": "dist/cli.js",
+        "sha256": "64f2399167726dd6abf1395573bb48c6c7a98b1a06a7c4a98b8f422aca3f8298"
+      },
+      {
+        "path": "dist/host.js",
+        "sha256": "bb32168440baf566eeb589b90a8676b914fa4ba2a306b5e904ac7d5759296b84"
+      },
+      {
+        "path": "dist/pointer.js",
+        "sha256": "17a3a591f42f25a3c59da3e3ad9fd9b2c100f00b89821f366d716292eee81bc7"
+      },
+      {
+        "path": "dist/runtime.js",
+        "sha256": "80e72bb36735dd29e0b9c5908d497fe207c45074210afc1865aca9dbfde5625a"
+      },
+      {
+        "path": "dist/server.js",
+        "sha256": "2e4bb55ad9f7e69ec1ac3bb86ae5c0415139f178e8e9f7819624b5fd28da8e8b"
+      },
+      {
+        "path": "dist/trial.js",
+        "sha256": "3da479bcd0072c4ad2e887375b34a652a3fb2edfad5a64598375a77927df36a0"
+      },
+      {
+        "path": "dist/types.js",
+        "sha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2"
+      },
+      {
+        "path": "dist/upstream.js",
+        "sha256": "75a6001a3dd49143cd9be325c75ed5d39eb578f2822398cf2fa9a8b6968cd64c"
+      }
+    ],
+    "source_files": [
+      {
+        "path": "src/bridge.ts",
+        "sha256": "1487b3bdec978eaec385c54a7464f91e00dcdc7138ef27668bfbddc4609efd22"
+      },
+      {
+        "path": "src/cli.ts",
+        "sha256": "3cbdfcbe752e19b11383fed073aa0bc0f8c203971d45230b3702a7a7ada76c1d"
+      },
+      {
+        "path": "src/host.ts",
+        "sha256": "50627997ef10cf40240ba9ac5f1e9ac75cb5c98c8b636e7f17a83b6bae1544a2"
+      },
+      {
+        "path": "src/pointer.ts",
+        "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+      },
+      {
+        "path": "src/runtime.ts",
+        "sha256": "56edd96be6ba4b1d62a2c9a44cc85d968786194e15c1e250dc20ac7a9086238f"
+      },
+      {
+        "path": "src/server.ts",
+        "sha256": "309505fa81991b4a422486f395077aa322b670841b6cf8275af31173b3427d5a"
+      },
+      {
+        "path": "src/trial.ts",
+        "sha256": "aad342ee50650da1660473f0ba3c6da98fc84a5577a0c0fcc8b9ad8c7aa14746"
+      },
+      {
+        "path": "src/types.ts",
+        "sha256": "5ea7fac022bb06d8c3a216802b3c8a9be9d07212e1a8ddaf4f0a05bf2dc358a9"
+      },
+      {
+        "path": "src/upstream.ts",
+        "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+      }
+    ],
+    "codex_version": "codex-cli 0.165.0",
+    "started_at": "2026-11-06T07:10:34.173Z",
+    "instrumented_game_sha256": "f415fae18b2232c01b94a0ce72b527275246b3f71a0b2593740367f33193e459",
+    "browser_version": "156.0.8078.79",
+    "path_timing": {
+      "count": 19,
+      "median_requested_ms": 150,
+      "median_actual_ms": 197,
+      "median_overrun_ratio": 1.3241379310344827
+    },
+    "raw_artifacts_directory": "artifacts/comparisons/realtime-optimized-recorded-seed42-v2/mcp",
+    "original_runner_tool_errors": 0,
+    "error_audit": {
+      "method": "Recognize plain-text MCP errors omitted from Codex isError metadata",
+      "errors": [
+        {
+          "tool": "swipe",
+          "reason": "ROUND_NOT_PLAYING: input arrived after natural round completion"
+        }
+      ],
+      "raw_artifacts_unchanged": true
+    }
+  },
+  "gui": {
+    "schema_version": 2,
+    "interface": "gui",
+    "model": "gpt-6.1-terra",
+    "reasoning_effort": "high",
+    "clock": "realtime",
+    "record_video": true,
+    "seed": 42,
+    "duration_seconds": 60,
+    "exit_code": 0,
+    "exit_signal": null,
+    "timed_out": false,
+    "supervisor_stopped_after_finish": false,
+    "actor_exited_during_play": false,
+    "wall_seconds": 89.404,
+    "completed_round": true,
+    "valid_interface": true,
+    "clock_valid": true,
+    "maximum_telemetry_clock_drift_ms": 19.884,
+    "tool_calls": 15,
+    "tool_errors": 0,
+    "invalid_tool_calls": 0,
+    "explicit_observations": 1,
+    "input_actions": 11,
+    "usage": {
+      "input_tokens": 423093,
+      "cached_input_tokens": 386432,
+      "cache_write_input_tokens": 0,
+      "output_tokens": 988,
+      "reasoning_output_tokens": 0
+    },
+    "final_scene": {
+      "schema_version": 2,
+      "round": 1,
+      "revision": 11,
+      "tick": 7200,
+      "phase": "finished",
+      "mode": "arcade",
+      "clock": "realtime",
+      "elapsed_ms": 60000,
+      "remaining_ms": 0,
+      "arena": {
+        "width": 1362,
+        "height": 817
+      },
+      "gravity": 841.51,
+      "clock_audit": {
+        "started_at_ms": 15893.7,
+        "observed_at_ms": 88187.4,
+        "wall_elapsed_ms": 72293.7,
+        "finished_wall_elapsed_ms": 60005.6,
+        "max_pump_gap_ms": 16.7
+      },
+      "stats": {
+        "score": 11,
+        "sliced": 8,
+        "missed": 0,
+        "escaped_fruit": 146,
+        "bombs_hit": 0,
+        "max_combo": 3,
+        "spawned_fruit": 158
+      },
+      "objects": [
+        {
+          "id": 165,
+          "kind": "fruit",
+          "fruit": "apple",
+          "x": 855.619,
+          "y": 758.609,
+          "vx": 0,
+          "vy": 934.094,
+          "radius": 49.44,
+          "hit_radius": 50.429
+        },
+        {
+          "id": 168,
+          "kind": "fruit",
+          "fruit": "plum",
+          "x": 637.403,
+          "y": 359.694,
+          "vx": -28.575,
+          "vy": -277.588,
+          "radius": 46.08,
+          "hit_radius": 47.002
+        },
+        {
+          "id": 169,
+          "kind": "fruit",
+          "fruit": "plum",
+          "x": 847.977,
+          "y": 308.783,
+          "vx": 0,
+          "vy": -339.298,
+          "radius": 46.08,
+          "hit_radius": 47.002
+        },
+        {
+          "id": 170,
+          "kind": "fruit",
+          "fruit": "kiwi",
+          "x": 1058.561,
+          "y": 359.557,
+          "vx": 28.587,
+          "vy": -277.172,
+          "radius": 45.6,
+          "hit_radius": 46.512
+        },
+        {
+          "id": 171,
+          "kind": "bomb",
+          "fruit": null,
+          "x": 76.032,
+          "y": 419.698,
+          "vx": 0,
+          "vy": -202.431,
+          "radius": 46.08,
+          "hit_radius": 38.246
+        }
+      ]
+    },
+    "note": "Actual realtime attempt. Zero scores, misses and tool errors are retained. No autopilot or artificial slowdown.",
+    "runtime_files": [
+      {
+        "path": "dist/bridge.js",
+        "sha256": "0be5c3ef301b6021e1086704617a9c7f6dd31c316793cc8ca4131c1c96c8c4ab"
+      },
+      {
+        "path": "dist/cli.js",
+        "sha256": "64f2399167726dd6abf1395573bb48c6c7a98b1a06a7c4a98b8f422aca3f8298"
+      },
+      {
+        "path": "dist/host.js",
+        "sha256": "bb32168440baf566eeb589b90a8676b914fa4ba2a306b5e904ac7d5759296b84"
+      },
+      {
+        "path": "dist/pointer.js",
+        "sha256": "17a3a591f42f25a3c59da3e3ad9fd9b2c100f00b89821f366d716292eee81bc7"
+      },
+      {
+        "path": "dist/runtime.js",
+        "sha256": "80e72bb36735dd29e0b9c5908d497fe207c45074210afc1865aca9dbfde5625a"
+      },
+      {
+        "path": "dist/server.js",
+        "sha256": "2e4bb55ad9f7e69ec1ac3bb86ae5c0415139f178e8e9f7819624b5fd28da8e8b"
+      },
+      {
+        "path": "dist/trial.js",
+        "sha256": "3da479bcd0072c4ad2e887375b34a652a3fb2edfad5a64598375a77927df36a0"
+      },
+      {
+        "path": "dist/types.js",
+        "sha256": "01ae2a5b120382f9a648ced7ee8507493a134f216d100fc61600c6c9738235d2"
+      },
+      {
+        "path": "dist/upstream.js",
+        "sha256": "75a6001a3dd49143cd9be325c75ed5d39eb578f2822398cf2fa9a8b6968cd64c"
+      }
+    ],
+    "source_files": [
+      {
+        "path": "src/bridge.ts",
+        "sha256": "1487b3bdec978eaec385c54a7464f91e00dcdc7138ef27668bfbddc4609efd22"
+      },
+      {
+        "path": "src/cli.ts",
+        "sha256": "3cbdfcbe752e19b11383fed073aa0bc0f8c203971d45230b3702a7a7ada76c1d"
+      },
+      {
+        "path": "src/host.ts",
+        "sha256": "50627997ef10cf40240ba9ac5f1e9ac75cb5c98c8b636e7f17a83b6bae1544a2"
+      },
+      {
+        "path": "src/pointer.ts",
+        "sha256": "adbbc281b7d9b7377b087aa456fa4e7ac6bdbab384e1ea60d83df6566be0fa76"
+      },
+      {
+        "path": "src/runtime.ts",
+        "sha256": "56edd96be6ba4b1d62a2c9a44cc85d968786194e15c1e250dc20ac7a9086238f"
+      },
+      {
+        "path": "src/server.ts",
+        "sha256": "309505fa81991b4a422486f395077aa322b670841b6cf8275af31173b3427d5a"
+      },
+      {
+        "path": "src/trial.ts",
+        "sha256": "aad342ee50650da1660473f0ba3c6da98fc84a5577a0c0fcc8b9ad8c7aa14746"
+      },
+      {
+        "path": "src/types.ts",
+        "sha256": "5ea7fac022bb06d8c3a216802b3c8a9be9d07212e1a8ddaf4f0a05bf2dc358a9"
+      },
+      {
+        "path": "src/upstream.ts",
+        "sha256": "fec85577b98f74554f692ef9ab3bd5da12f924f7b26e26b85a1670bd8d62ed37"
+      }
+    ],
+    "codex_version": "codex-cli 0.165.0",
+    "started_at": "2026-11-06T07:11:55.240Z",
+    "instrumented_game_sha256": "f415fae18b2232c01b94a0ce72b527275246b3f71a0b2593740367f33193e459",
+    "browser_version": "156.0.8078.79",
+    "path_timing": {
+      "count": 10,
+      "median_requested_ms": 150,
+      "median_actual_ms": 197,
+      "median_overrun_ratio": 1.3053571428571429
+    },
+    "raw_artifacts_directory": "artifacts/comparisons/realtime-optimized-recorded-seed42-v2/gui",
+    "error_audit": {
+      "method": "Recognize plain-text MCP errors omitted from Codex isError metadata",
+      "errors": [],
+      "raw_artifacts_unchanged": true
+    }
+  },
+  "note": "One sequential paired attempt. Preserve both results regardless of which arm wins; no broad reliability claim.",
+  "source_commit": "691851d",
+  "trial_stage": "adaptive native input, both arms video-recorded"
+}

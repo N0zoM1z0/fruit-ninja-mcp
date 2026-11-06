@@ -23,27 +23,24 @@ const probe = JSON.parse(
     { encoding: "utf8" },
   ),
 );
-const total = Number(probe.format.duration),
-  wallAtLastObservation = result.final_scene.clock_audit.wall_elapsed_ms / 1000;
-// Keep pre-roll and the entire game. Only pre-start setup and excess post-round idle are trimmed.
-const start = Math.max(0, total - wallAtLastObservation - 1),
-  duration = Math.min(total - start, result.duration_seconds + 4);
+const total = Number(probe.format.duration);
+// Preserve every source frame; encoder tail timing is not a game-start reference.
+const start = 0,
+  duration = total;
 const args = [
   "-hide_banner",
   "-loglevel",
   "error",
   "-y",
-  "-ss",
-  String(start),
   "-i",
   source,
-  "-t",
-  String(duration),
   "-an",
   "-c:v",
   "libx264",
   "-preset",
   "fast",
+  "-threads",
+  "2",
   "-crf",
   "20",
   "-pix_fmt",
@@ -67,7 +64,7 @@ const evidence = {
   trim_start_seconds: start,
   export_duration_seconds: duration,
   speed_factor: 1,
-  note: "Original speed. Entire realtime round retained, with pre-roll and final result. Uncut WebM retained separately.",
+  note: "Original speed and uncut source timeline, including setup, the entire realtime round and result. No trimming or time scaling. Original WebM retained separately.",
   source_sha256: createHash("sha256")
     .update(await readFile(source))
     .digest("hex"),

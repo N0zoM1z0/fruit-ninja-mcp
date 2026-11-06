@@ -1,14 +1,14 @@
 # Fruit Ninja MCP
 
-A real, rendered Fruit Ninja game that an agent plays through visible-object state and timed blade trajectories. The intended showcase compares application MCP with screenshot-only vision: both use the same game, physics and collision rules.
+**Realtime application MCP versus screenshot-only GUI**, using the same rendered Fruit Ninja game, game speed, seeded physics/scoring and native browser mouse executor. Local Codex CLI runs `gpt-6.1-terra` with `high` reasoning in both arms.
 
-The first milestone is a useful MCP interface and an actual local Codex CLI trial. This repository does not yet contain a vision benchmark or a recorded demo.
+Once a round starts, fruit keep moving during model inference, screenshots, observations, input calls, focus changes and actor disconnects. No tool advances or freezes time. The evaluator owns the game independently of the actor. See [the comparison protocol](REALTIME-PROTOCOL.md) and [results](RESULTS.md).
 
-The [local trial results](RESULTS.md) include two completed Terra/high playthroughs: **360 points / 100 sliced fruit** and **300 points / 85 sliced fruit**, with no escaped fruit, bomb hits or tool errors. These are MCP-only exploratory runs using the decision clock described below.
+The former decision-clock prototype is archived at Git tag `decision-prototype-v0.1.0`. Its 360/300-point scores are **not realtime evidence**. Current source has no decision-step mode.
 
-## Quick start
+## Setup
 
-Requires Node.js 20.19+ and Chromium. On this machine Chromium is `/usr/bin/chromium`; elsewhere set `FRUIT_NINJA_CHROMIUM` to its executable path.
+Requires Node.js 20.19+ and Chromium (`/usr/bin/chromium` on this machine). Set `FRUIT_NINJA_CHROMIUM` for another executable path.
 
 ```sh
 npm ci
@@ -17,37 +17,38 @@ npm run build
 node dist/cli.js codex-config
 ```
 
-The last command prints an absolute-path Codex configuration using `gpt-6.1-terra` and `high` reasoning. Add that MCP entry to your Codex configuration. Start a conversation with “Play Fruit Ninja, maximize score, and finish the round.” The agent can start its own seeded game.
+The last command prints an absolute-path MCP configuration for Codex. The server prepares one arcade round; the agent reads the rules, inspects the scene and calls `start_game` when ready. Pauses, resets and restarts are disabled after starting.
 
 ```sh
-# Play the original game with a mouse in a normal browser window.
-npm run play
+# MCP stdio server with an optional visible game window.
+node dist/cli.js serve --headed --duration 60 --seed 42 --artifacts artifacts/manual
 
-# MCP server over stdio; optional visible browser and artifact directory.
-node dist/cli.js serve --headed --artifacts artifacts/manual
+# Screenshot-only GUI tools over stdio.
+node dist/cli.js serve --interface gui --headed --duration 60 --seed 42
+
+# Play the unmodified upstream game manually (separate from evaluation).
+npm run play
 ```
 
-Omit `--headed` on a machine without a graphical display. Standard output on `serve` is exclusively MCP protocol traffic.
+Omit `--headed` without a graphical display. Standard output on `serve` contains only MCP protocol traffic. Evaluation uses an independently owned local HTTP MCP host so that closing the actor connection does not terminate the game.
 
-## Tools
+## Interfaces
 
-| Tool             | Purpose                                                                                      |
-| ---------------- | -------------------------------------------------------------------------------------------- |
-| `get_game_rules` | Units, clock, physics, scoring, limits and workflow                                          |
-| `new_game`       | Start/reset a round with mode and seed; optional 5–90 second arcade/zen duration             |
-| `get_scene`      | Current visible fruit/bombs, stable IDs, positions, velocities, hit radii and score          |
-| `swipe`          | One continuous blade-down polyline with timestamps; advances the world while the blade moves |
-| `wait`           | Advance with the blade lifted; optionally stop as soon as an object is visible               |
-| `get_events`     | Slice, bomb, escape and round-finish events with sequence numbers                            |
-| `get_screenshot` | The actual rendered game without advancing time                                              |
+| Application MCP                                                                  | Screenshot GUI                                            |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `get_game_rules`: static rules and units                                         | `get_controls`: the same static rules plus mouse controls |
+| `get_scene`: visible objects, positions, velocities, radii, score and timestamps | `get_screenshot`: real browser image only                 |
+| `start_game`: start the prepared round                                           | `click`: ordinary mouse click on the visible start button |
+| `swipe`: actor-authored timed canvas path                                        | `drag`: actor-authored timed full-image mouse path        |
+| `wait`: sleep in wall time, then return current state                            | `wait`: sleep in wall time, then return an image          |
+| `get_events`, optional `get_screenshot`                                          | Action results contain images with no extracted state     |
 
-Every action returns the next scene, so an agent can plan its next action without an extra observation call. `expected_revision` rejects stale actions before execution. Paths are validated completely before any input or time advance. Calls execute serially.
+The GUI driver also uses MCP as transport. This compares application information with pixels, not two protocols. Both arms use identical native mouse events, collision rules and path limits. There is no OCR, DOM, accessibility or extracted text in the GUI interface. Only the independent evaluator can inspect its hidden game state.
 
-Coordinates are **canvas pixels**, origin upper left; velocities are px/s and gravity is px/s². The screenshot includes the surrounding page, so canvas coordinates differ from whole-image coordinates. Arena dimensions are present in every scene. A swipe uses 2–32 points, lasts 16–1000 ms, and is limited to 5000 px/s. For example, after observing a scene, the agent submits its own path:
+Every path has 2–32 points, lasts 16–1000 requested milliseconds, and is limited to 5000 px/s. Its real execution time is recorded; scheduling overhead is not removed from game time. All corners are preserved. The executor never selects targets, tracks fruit or replans a path.
 
 ```json
 {
-  "expected_revision": 4,
   "points": [
     { "x": 200, "y": 350, "t_ms": 0 },
     { "x": 400, "y": 320, "t_ms": 100 },
@@ -56,31 +57,29 @@ Coordinates are **canvas pixels**, origin upper left; velocities are px/s and gr
 }
 ```
 
-This is a path example, not a preselected target or a built-in strategy. A path through a bomb hits the bomb. All blade samples use the game's existing pointer handlers and collision detector. The server has no object-ID slicing, automatic aiming, path planner, arbitrary JavaScript tool, score setter or future-spawn access.
+This is a coordinate example, not a built-in strategy. MCP paths use canvas pixels, origin upper left; GUI paths use full-screenshot pixels. The MCP response includes the arena dimensions and px/s velocities. Optional `observed_at_ms` records how old an MCP observation was at action acceptance. A revision protects against another action, not the passage of time.
 
-## Clock and reproducibility
-
-The current MCP uses an explicit **decision clock**: thinking, tool discovery, observation and screenshots freeze the world. Only `wait` and `swipe` consume simulation time. Fruit continue moving during a swipe, with fixed 120 Hz physics. Durations round up to the next physics tick. Camera shake and cinematic slow motion are disabled; the fruit art, juice, halves, blade trail, combos and game scoring remain.
-
-This makes LLM play useful without requiring a model response at 60 Hz. It is **not a real-time reaction benchmark**. The runner records actual wall time separately. Any future vision comparison must use the same decision clock, game settings, model and seeded starting conditions.
-
-Spawning has a dedicated seeded RNG and sequential object IDs. Cosmetic particle randomness cannot perturb the next wave. Gameplay effects such as arcade frenzy can still change spawning according to the game's normal rules. Observations contain only objects intersecting the viewport, with no RNG state or spawn schedule.
-
-## Codex CLI trial
+## Realtime comparison
 
 ```sh
-npm run trial -- --duration 20 --seed 42 --output artifacts/trials/terra-high-42
+# One sequential paired baseline: same model, seed, speed, duration and limits.
+npm run compare -- --seed 42 --duration 60 --output artifacts/comparisons/realtime-baseline-42
+
+# One arm for diagnostics.
+npm run trial -- --interface gui --seed 42 --duration 60 --output artifacts/gui-diagnostic
 ```
 
-The runner starts the installed local Codex CLI with `gpt-6.1-terra`, `model_reasoning_effort="high"`, a required MCP server and a single already-started arcade round. User configuration, shell and multi-agent features, web search and project instructions are disabled. The actor works in an empty directory and cannot reset the round. It is instructed to use only the game tools; the event audit checks for other tool use.
+The runner disables user configuration, project instructions, shell, web and multi-agent features. Each actor has an empty workspace and only its assigned server. The GUI starts by clicking; MCP starts through its native start tool. Both may inspect the ready screen before starting. If the actor exits early, the independent game continues to its natural end and is still graded. A setup timeout, late shutdown, invalid interface or clock problem is retained explicitly.
 
-The runner saves the exact command, prompt, CLI version, seed, upstream revision, JSONL model events, usage, wall time, tool counts, final state and action trace. The final scene comes from the game, independently of the agent's written claim. This is an exploratory usability trial; a successful run alone does not establish an advantage over vision.
+Evidence includes prompts, exact arguments, model/CLI settings, source/build/game fingerprints, timestamped native mouse events, independent 100ms state telemetry, screenshots, errors, usage and final scores. The final game state is authoritative. Real-time traces are timing evidence, not deterministic decision-step replay fixtures.
 
-Replay every recorded action and compare the resulting scene hashes, using the same adapter version and settings as the recorded run:
+## Clock and game provenance
 
-```sh
-npm run replay -- --trace artifacts/trials/terra-high-42/game/trace.jsonl --screenshot artifacts/replayed.png
-```
+The clock derives 120 Hz physics ticks from browser monotonic wall time. A timer independent of rendering and actor input pumps the world; delayed callbacks catch up instead of dropping elapsed time. Tests check idle progression, natural wall-time completion, continuing time during screenshots/focus changes, disabled pauses and game survival after actor disconnection. Camera shake and visual slow motion are disabled identically in both arms; launch speeds, gravity and difficulty are not reduced.
+
+The game is [fruit-ninja-dojo](https://github.com/yongqixue99-hue/fruit-ninja-dojo), pinned to `63d0af1906181cceb9486ed85cc2b65ce6e6ba0d`. Setup downloads its self-contained HTML to ignored `.local/game/` and verifies SHA-256 `6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f`. Launch verifies the pin and instruments the game in memory; changed anchors fail closed. Spawn RNG is separated from cosmetic randomness. Gameplay frenzy can still change later spawning through normal rules.
+
+Upstream source/art is not vendored or relicensed. Its repository currently has no explicit license file; this private prototype uses a separately fetched dependency. Confirm permission or replace the dependency before redistributing it. This is a browser remake, not the official Halfbrick game.
 
 ## Verification
 
@@ -91,10 +90,4 @@ npm run build
 npm run format:check
 ```
 
-Tests exercise the actual game in Chromium: frozen observations, visible-only state, timed collisions, atomic invalid/stale actions, moving targets, curved combos, classic failures, seeded spawns, real bombs and MCP schema/capability boundaries. Run `npm run setup` before tests; the suite deliberately requires its real game dependency.
-
-## Game provenance
-
-The visual game is [fruit-ninja-dojo](https://github.com/yongqixue99-hue/fruit-ninja-dojo), pinned to commit `63d0af1906181cceb9486ed85cc2b65ce6e6ba0d`. `npm run setup` downloads its self-contained HTML into ignored `.local/game/` and verifies SHA-256 `6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f`. No game download occurs during an MCP session. The adapter verifies the same hash on every launch, then instruments the game in memory; unexpected integration anchors fail closed.
-
-Upstream game art/source is not vendored or relicensed here. The upstream repository currently has no explicit license file; this private prototype keeps it as a separately fetched dependency. Confirm permission or replace that dependency before redistributing the game. This is a browser remake, not the official Halfbrick game.
+Run setup first. Tests use the actual game and Chromium, including native mouse hits, wall-time progression, natural deadlines, GUI capability boundaries and independent runtime ownership. Historical decision-clock tests and replay code remain available at the archived tag.

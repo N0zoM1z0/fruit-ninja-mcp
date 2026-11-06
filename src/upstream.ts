@@ -62,12 +62,32 @@ export function instrumentGame(html: string): string {
   let result = replaceOnce(
     html,
     "ambientTime+=Math.min(dt,.1);update(dt);",
-    "ambientTime+=Math.min(dt,.1); // decision clock advances only in typed actions",
+    "ambientTime+=Math.min(dt,.1);reefPump(now);",
   );
   result = replaceOnce(
     result,
     "canvas.setPointerCapture(e.pointerId);",
     "if(e.isTrusted)canvas.setPointerCapture(e.pointerId);",
+  );
+  result = replaceOnce(
+    result,
+    "function pause() {",
+    "function pause() { return; // realtime trials never pause\n",
+  );
+  result = replaceOnce(
+    result,
+    "function goHome() {",
+    "function goHome() { if(reefRound) return; // preserve a single continuous round\n",
+  );
+  result = replaceOnce(
+    result,
+    "$('start-button').addEventListener('click', startGame)",
+    "$('start-button').addEventListener('click', reefStartPreparedGame)",
+  );
+  result = replaceOnce(
+    result,
+    "$('restart-button').addEventListener('click', startGame)",
+    "$('restart-button').addEventListener('click', reefStartPreparedGame)",
   );
   const start = result.indexOf("  function spawnWave() {"),
     end = result.indexOf("  function addText(", start);

@@ -1,4 +1,8 @@
-# Local Codex trials
+# Results
+
+The current implementation targets **realtime MCP versus screenshot-only GUI** under [REALTIME-PROTOCOL.md](REALTIME-PROTOCOL.md). The paired realtime baseline will be recorded separately below. None of the historical scores in this file establish realtime play or an advantage over GUI.
+
+## Historical decision-clock trials (not realtime)
 
 Two exploratory MCP-only playthroughs ran on 6 November 2026 with the installed **Codex CLI 0.165.0**, **gpt-6.1-terra**, and **high** reasoning effort. Both completed an arcade round through the assigned MCP tools. The game, rather than the model's final answer, supplied the scores below.
 

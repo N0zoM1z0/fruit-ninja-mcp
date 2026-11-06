@@ -1,6 +1,6 @@
 {
   "name": "fruit-ninja-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "A real Fruit Ninja game with structured observations and timed blade trajectories for agents",
@@ -18,10 +18,10 @@
     "dev": "tsx src/cli.ts serve",
     "play": "tsx src/cli.ts play",
     "trial": "tsx scripts/trial.ts",
-    "replay": "tsx scripts/replay.ts",
+    "compare": "tsx scripts/compare.ts",
     "test": "node --import tsx --test tests/*.test.ts",
-    "format": "prettier --write src scripts tests results README.md RESULTS.md package.json tsconfig*.json",
-    "format:check": "prettier --check src scripts tests results README.md RESULTS.md package.json tsconfig*.json"
+    "format": "prettier --write src scripts tests results README.md RESULTS.md REALTIME-PROTOCOL.md package.json tsconfig*.json",
+    "format:check": "prettier --check src scripts tests results README.md RESULTS.md REALTIME-PROTOCOL.md package.json tsconfig*.json"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

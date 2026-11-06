@@ -2,65 +2,50 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { GameRuntime } from "./runtime.js";
+import { GameRuntime, viewport } from "./runtime.js";
+import type { Interface } from "./types.js";
 
 const point = z
   .object({
-    x: z
-      .number()
-      .finite()
-      .min(0)
-      .describe("Canvas x in pixels, origin at upper left"),
-    y: z
-      .number()
-      .finite()
-      .min(0)
-      .describe("Canvas y in pixels, positive downward"),
-    t_ms: z
-      .number()
-      .int()
-      .min(0)
-      .max(1000)
-      .describe(
-        "Milliseconds since blade-down; first point is 0, later points strictly increase",
-      ),
+    x: z.number().finite().min(0),
+    y: z.number().finite().min(0),
+    t_ms: z.number().int().min(0).max(1000),
   })
   .strict();
-
 export const rules = {
-  clock: "decision",
+  clock: "realtime",
   timing:
-    "The world is frozen while you think or inspect. Only wait and swipe advance simulation; both return the next scene. Real inference time is logged separately. A swipe advances moving fruit along its path, so account for velocity.",
-  coordinates:
-    "Canvas pixels, origin top-left, x rightward, y downward. Arena bounds are in every scene. vx/vy are px/s; gravity is px/s². Only objects intersecting the viewport are returned; no future spawns or RNG state are exposed.",
+    "After starting, the game runs continuously on monotonic wall time, including thinking, all observations, screenshots and input calls. Nothing pauses or advances it by request. Observations become stale while you reason. A path takes real time to execute.",
   physics:
-    "Fixed 120 Hz. For a short future interval t seconds, x≈x0+vx*t and y≈y0+vy*t+0.5*gravity*t². Walls can reflect horizontal velocity. No cinematic slow motion or camera shake in decision mode.",
+    "Fixed 120 Hz, normal game gravity and launch speed. For a short time t, x≈x0+vx*t, y≈y0+vy*t+0.5*g*t². Both arms disable camera shake and visual slow motion; neither arm slows the game.",
   blade: {
     minimum_duration_ms: 16,
     maximum_duration_ms: 1000,
-    maximum_speed_px_s: 5000,
     maximum_points: 32,
+    maximum_speed_px_s: 5000,
     semantics:
-      "One continuous blade-down trajectory; the blade lifts at the end. All segments go through the game's normal collision detector. You choose all coordinates and times; tools do not target IDs or plan paths.",
-  },
-  modes: {
-    classic: "3 escaped fruit or any bomb ends the round; no time limit.",
-    arcade:
-      "60 seconds by default; bombs subtract 10 (floor 0). Every 20 sliced fruit triggers 6 seconds of double points and removes active bombs.",
-    zen: "90 seconds by default; no bombs or escape penalty.",
+      "One continuous mouse-down path, then mouse-up. No targeting or path planning in the executor. Native browser mouse events and the game's collision detector are shared by MCP and GUI.",
   },
   scoring:
-    "Fruit gives 1 point (2 during arcade frenzy). Three or more fruit in a continuous stroke can earn a bonus equal to their fruit points when the stroke finishes; gaps over 340 ms break the combo.",
-  workflow:
-    "Read rules and scene. If ready, new_game. When no suitable fruit is visible, wait with until_objects=true, or wait a chosen duration to let fruit rise. Use the latest scene revision for each action. After an action, plan from its returned scene instead of spending an extra get_scene call. Never run multiple actions concurrently.",
+    "Fruit gives 1 point; 3+ fruit in one stroke can earn a bonus. Gaps over 340ms break combos. Arcade: bombs subtract 10 (floor 0); every 20 sliced fruit triggers 6s of double points and removes active bombs. Classic: a bomb or 3 escapes ends the game. Zen: no bombs or escape penalty.",
+  session:
+    "One prepared round. Start when ready; it never pauses, resets, or restarts. Finishing early does not stop the independent game clock.",
 };
 
-export function buildServer(runtime: GameRuntime, locked = false): McpServer {
+export function buildServer(
+  runtime: GameRuntime,
+  mode: Interface = "mcp",
+): McpServer {
   const server = new McpServer(
-    { name: "fruit-ninja-mcp", version: "0.1.0" },
+    {
+      name: mode === "mcp" ? "fruit-ninja-mcp" : "fruit-ninja-gui",
+      version: "0.2.0",
+    },
     {
       instructions:
-        "Play the real Fruit Ninja game using structured visible-object observations and timed blade paths. Start with get_game_rules and get_scene. The decision clock freezes during thinking; only wait/swipe advance game time. Use the latest revision, act sequentially, and reuse each action's returned scene. Positions are canvas pixels, velocities px/s. Paths collide with fruit AND bombs through the game's own detector. There is no autopilot or future-spawn access.",
+        mode === "mcp"
+          ? "Play a continuously running REALTIME game. Read controls and scene, then start_game once. Thinking, observations and input calls all consume real game time. Use visible-object state and your own timed canvas paths. No reset, pause, future spawns or autopilot. Act sequentially and reuse action results; state may be stale by the time an action executes."
+          : "Operate the REALTIME Fruit Ninja browser using screenshots and native mouse coordinates only. Read get_controls and screenshot, find the start button in the image, click it, then drag through fruit and avoid bombs. The game never pauses during thinking, screenshots or input. No DOM, OCR, object state, app commands, resets or developer tools are available. Coordinates are full-image pixels.",
     },
   );
   function tool<S extends z.ZodRawShape>(
@@ -78,7 +63,7 @@ export function buildServer(runtime: GameRuntime, locked = false): McpServer {
         inputSchema: schema,
         annotations: {
           readOnlyHint: readOnly,
-          destructiveHint: name === "new_game",
+          destructiveHint: false,
           idempotentHint: readOnly,
           openWorldHint: false,
         },
@@ -106,81 +91,122 @@ export function buildServer(runtime: GameRuntime, locked = false): McpServer {
       },
     );
   }
+  const screenshot = async (): Promise<CallToolResult> => ({
+    content: [
+      {
+        type: "image",
+        mimeType: "image/png",
+        data: (await runtime.screenshot()).toString("base64"),
+      },
+    ],
+  });
+  if (mode === "gui") {
+    tool(
+      "get_controls",
+      "Read static game rules and generic mouse controls. No dynamic game state is provided.",
+      {},
+      async () => ({
+        ...rules,
+        viewport,
+        coordinates:
+          "Full screenshot pixels. Find the start button and arena visually. Drag points use t_ms starting at 0.",
+      }),
+      true,
+    );
+    tool(
+      "get_screenshot",
+      "Capture the real browser image. The game continues during capture and while you reason. No extracted text or state accompanies the image.",
+      {},
+      screenshot,
+      true,
+    );
+    tool(
+      "click",
+      "Ordinary native left mouse click in full screenshot pixels; returns the next screenshot. Start by clicking the visible start button.",
+      {
+        x: z.number().finite().min(0).max(viewport.width),
+        y: z.number().finite().min(0).max(viewport.height),
+      },
+      async ({ x, y }) => {
+        await runtime.click(x, y);
+        return screenshot();
+      },
+    );
+    tool(
+      "drag",
+      "Native mouse-down path in full screenshot pixels, then release. 2..32 points; t_ms starts at 0 and strictly increases, total 16..1000ms, max 5000px/s. The path takes real wall time; returns only a screenshot.",
+      { points: z.array(point).min(2).max(32) },
+      async ({ points }) => {
+        await runtime.guiDrag(points);
+        return screenshot();
+      },
+    );
+    tool(
+      "wait",
+      "Sleep 1..3000 real milliseconds with the mouse released, then capture a screenshot. The game keeps moving.",
+      { duration_ms: z.number().int().min(1).max(3000) },
+      async (input) => {
+        await runtime.wait(input);
+        return screenshot();
+      },
+    );
+    return server;
+  }
   tool(
     "get_game_rules",
-    "Read units, time semantics, physics, scoring, trajectory limits and the recommended tool workflow.",
+    "Read realtime timing, shared physics/scoring and bounded input limits.",
     {},
-    async () => ({ ...rules, new_game_available: !locked }),
+    async () => ({
+      ...rules,
+      coordinates:
+        "Canvas pixels, origin top-left, velocities px/s and gravity px/s². Scene includes only current visible objects, with no future spawn or RNG access.",
+    }),
     true,
   );
-  if (!locked)
-    tool(
-      "new_game",
-      "Start/reset your owned game. Choose a reproducible seed. Resets score and events. Trial sessions start automatically and omit this tool.",
-      {
-        mode: z.enum(["classic", "arcade", "zen"]).default("arcade"),
-        seed: z.number().int().min(0).max(4294967295).default(42),
-        duration_seconds: z
-          .number()
-          .int()
-          .min(5)
-          .max(90)
-          .optional()
-          .describe(
-            "Optional shortened/extended arcade or zen round; omitted uses the game's original duration. Not supported in classic.",
-          ),
-      },
-      (args) => runtime.newGame(args),
-    );
   tool(
     "get_scene",
-    "Read the current scene without advancing time. Includes visible fruit/bombs, stable IDs, positions, velocities, hit radii, score and action revision. No future state.",
+    "Read a timestamped CURRENT scene: visible fruit/bombs, velocities, hit radii, score, events and wall-clock audit. Time does not stop. Read rules and prepare before starting.",
     {},
     () => runtime.scene(),
     true,
   );
   tool(
+    "start_game",
+    "Start the one prepared round NOW. From this moment the world moves during inference, screenshots and every call. No reset or restart is permitted.",
+    {},
+    () => runtime.start(),
+  );
+  tool(
     "swipe",
-    "Execute ONE timed blade-down polyline and lift the blade. Fruit keep moving throughout the stroke. Points are canvas pixels with increasing t_ms starting at 0; total 16..1000 ms, max 5000 px/s. Returns next scene and hit/escape events. Stale revisions or invalid paths are rejected before anything changes.",
+    "Execute your timed canvas path using native browser mouse events. The world keeps moving in real time. Returns the current scene/events after execution. No automatic aiming. Optional observed_at_ms records observation age; expected_revision only protects against another action, not advancing time.",
     {
-      expected_revision: z.number().int().min(0),
       points: z.array(point).min(2).max(32),
+      expected_revision: z.number().int().min(0).optional(),
+      observed_at_ms: z.number().finite().min(0).optional(),
     },
-    (args) => runtime.swipe(args),
+    (input) => runtime.swipe(input),
   );
   tool(
     "wait",
-    "Advance 1..3000 ms with the blade lifted. Set until_objects=true to stop at the first visible object (returns immediately if one is already visible); false waits the entire duration. Returns next scene and events.",
-    {
-      expected_revision: z.number().int().min(0),
-      duration_ms: z.number().int().min(1).max(3000),
-      until_objects: z.boolean().default(false),
-    },
-    (args) => runtime.wait(args),
+    "Sleep in real time for 1..3000ms with the blade lifted, then return the current scene. This does not control or pause the game clock.",
+    { duration_ms: z.number().int().min(1).max(3000) },
+    (input) => runtime.wait(input),
   );
   tool(
     "get_events",
-    "Read sliced fruit, bomb hits, escaped fruit and round-end events after a sequence number; does not advance time.",
+    "Read actual slice, escape, bomb and round events since a sequence number. The game keeps running.",
     {
       after_seq: z.number().int().min(0).default(0),
       limit: z.number().int().min(1).max(200).default(100),
     },
-    (args) => runtime.events(args.after_seq, args.limit),
+    ({ after_seq, limit }) => runtime.events(after_seq, limit),
     true,
   );
   tool(
     "get_screenshot",
-    "View the real rendered game. Does not advance the decision clock. Prefer get_scene for compact observations; screenshots are useful to inspect the visual result.",
+    "Inspect the real rendered browser. Capture and inference time count toward the running game.",
     {},
-    async () => ({
-      content: [
-        {
-          type: "image",
-          mimeType: "image/png",
-          data: (await runtime.screenshot()).toString("base64"),
-        },
-      ],
-    }),
+    screenshot,
     true,
   );
   return server;
@@ -188,19 +214,15 @@ export function buildServer(runtime: GameRuntime, locked = false): McpServer {
 
 export async function serve(
   runtime: GameRuntime,
-  locked = false,
+  mode: Interface = "mcp",
 ): Promise<void> {
-  const server = buildServer(runtime, locked);
-  let closing = false;
+  const server = buildServer(runtime, mode);
   const close = async () => {
-    if (closing) return;
-    closing = true;
     await server.close();
     await runtime.close();
   };
   process.once("SIGINT", () => void close());
   process.once("SIGTERM", () => void close());
-  const transport = new StdioServerTransport();
   server.server.onclose = () => void runtime.close();
-  await server.connect(transport);
+  await server.connect(new StdioServerTransport());
 }

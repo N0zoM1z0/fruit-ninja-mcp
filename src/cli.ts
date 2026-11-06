@@ -18,13 +18,14 @@ async function main(): Promise<void> {
       mode: { type: "string", default: "arcade" },
       seed: { type: "string", default: "42" },
       duration: { type: "string" },
+      interface: { type: "string", default: "mcp" },
       help: { type: "boolean", short: "h" },
     },
   });
   const command = positionals[0] ?? "serve";
   if (values.help) {
     console.log(
-      "fruit-ninja-mcp setup | serve [--headed] [--artifacts DIR] [--locked --mode arcade --seed 42 --duration 20] | play | codex-config",
+      "fruit-ninja-mcp setup | serve [--interface mcp|gui] [--headed] [--artifacts DIR] [--mode arcade --seed 42 --duration 60] | play | codex-config",
     );
     return;
   }
@@ -62,15 +63,14 @@ async function main(): Promise<void> {
     artifacts: values.artifacts,
   });
   try {
-    if (values.locked)
-      await runtime.newGame({
-        mode: values.mode as GameMode,
-        seed: Number(values.seed),
-        ...(values.duration
-          ? { duration_seconds: Number(values.duration) }
-          : {}),
-      });
-    await serve(runtime, values.locked);
+    await runtime.prepare({
+      mode: values.mode as GameMode,
+      seed: Number(values.seed),
+      ...(values.duration ? { duration_seconds: Number(values.duration) } : {}),
+    });
+    if (!["mcp", "gui"].includes(values.interface!))
+      throw new Error("Choose mcp or gui interface");
+    await serve(runtime, values.interface as "mcp" | "gui");
   } catch (error) {
     await runtime.close();
     throw error;

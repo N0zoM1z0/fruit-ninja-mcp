@@ -1,9 +1,9 @@
 {
-  "name": "fruit-ninja-mcp",
-  "version": "0.2.0",
+  "name": "fruit-ninja-self-mcp",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
-  "description": "A real Fruit Ninja game with structured observations and timed blade trajectories for agents",
+  "description": "Realtime Fruit Ninja: screenshot GUI versus agent-built MCP, with a black-box builder sandbox (based on N0zoM1z0/fruit-ninja-mcp)",
   "engines": {
     "node": ">=20.19"
   },
@@ -16,19 +16,25 @@
     "typecheck": "tsc --noEmit",
     "start": "node dist/cli.js serve",
     "dev": "tsx src/cli.ts serve",
-    "play": "tsx src/cli.ts play",
+    "play": "tsx scripts/play.ts",
     "trial": "tsx scripts/trial.ts",
     "compare": "tsx scripts/compare.ts",
     "validate:optimization": "tsx scripts/validate-optimization.ts",
     "export:video": "tsx scripts/export-video.ts",
-    "test": "node --import tsx --test tests/*.test.ts",
-    "format": "prettier --write src scripts tests results recordings README.md RESULTS.md REALTIME-PROTOCOL.md OPTIMIZATION.md package.json tsconfig*.json",
-    "format:check": "prettier --check src scripts tests results recordings README.md RESULTS.md REALTIME-PROTOCOL.md OPTIMIZATION.md package.json tsconfig*.json"
+    "test": "node --import tsx --test --test-concurrency=1 tests/*.test.ts",
+    "format": "prettier --write src scripts tests dev-fixtures sandbox/public results recordings README.md RESULTS.md REALTIME-PROTOCOL.md OPTIMIZATION.md ARCHITECTURE.md NOTICE.md package.json tsconfig*.json",
+    "format:check": "prettier --check src scripts tests dev-fixtures sandbox/public results recordings README.md RESULTS.md REALTIME-PROTOCOL.md OPTIMIZATION.md ARCHITECTURE.md NOTICE.md package.json tsconfig*.json",
+    "package": "tsx scripts/package.ts",
+    "builder": "tsx scripts/builder.ts",
+    "preview": "tsx scripts/preview.ts",
+    "test:unit": "node --import tsx --test tests/unit-*.test.ts",
+    "pilot": "tsx scripts/pilot.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",
     "playwright-core": "1.64.1",
-    "zod": "4.6.7"
+    "zod": "4.6.7",
+    "acorn": "8.15.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

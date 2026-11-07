@@ -1,0 +1,117 @@
+{
+  "endpoint": {
+    "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "temperature": 0.3,
+    "max_tokens": 2048,
+    "request_timeout_ms": 300000,
+    "extra_body": {
+      "top_p": 0.9,
+      "stream": false,
+      "reasoning_effort": "high"
+    }
+  },
+  "system": "You are playing a realtime browser game through tools.",
+  "user": "Play ONE 60-second REALTIME arcade round of Fruit Ninja. Maximize score by slicing fruit, aim for combos, and avoid bombs. The round is prepared but not started; start it when you are ready. From the start onward the game runs continuously during your thinking and every tool call; it never pauses, resets or restarts. Keep playing until the round ends. The independent evaluator reads the final score from the game.\n\nUse only the tools provided to you. Each tool call may perform at most one native mouse input (one path or one click). Paths have 2..32 points with integer t_ms starting at 0, last 16..1000 ms and move at most 5000 px/s.\n\nYour interface is an MCP server that was built for this game by another agent. Read its tool descriptions, then use its tools to start and play the round.",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "game_state",
+        "description": "Read the live Fruit Ninja Dojo state: phase (menu/playing/result), mode, score, misses, seconds remaining, the airborne fruits and bombs with positions and velocities in arena coordinates, and the start button position. Read-only; sends no input.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "start_round",
+        "description": "Click the start button with a native mouse click to begin the prepared round. Only a native click can start the round. Returns the resulting game state.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "slice",
+        "description": "Perform one blade stroke: the server observes the arena, plans a single native mouse path that sweeps through as many fruits as possible while keeping clear of bombs, and executes it. If no fruit is airborne it waits briefly for the next wave. Returns the score gained and the new state. If the round has not been started yet, this call presses the start button instead and reports reason \"round-started\".",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "max_duration_ms": {
+              "description": "Upper bound on the stroke duration in milliseconds (default 900).",
+              "type": "integer",
+              "minimum": 20,
+              "maximum": 1000
+            },
+            "speed": {
+              "description": "Blade speed in arena px/s used while planning (default 3200).",
+              "type": "number",
+              "minimum": 600,
+              "maximum": 4800
+            },
+            "bomb_margin": {
+              "description": "Extra clearance in px kept from bomb centres (default 26).",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200
+            },
+            "wait_ms": {
+              "description": "How long to wait for fruit to appear before giving up (default 2500).",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5000
+            }
+          },
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "slice_fruit",
+        "description": "Perform one blade stroke aimed at a single fruit id reported by game_state, then continue through any other fruit that lies along the way. Use this when you want precise control (for example to pick off a fruit near a bomb).",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "fruit_id": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991,
+              "description": "The id of the fruit to slice, from game_state."
+            },
+            "max_duration_ms": {
+              "type": "integer",
+              "minimum": 20,
+              "maximum": 1000
+            },
+            "speed": {
+              "type": "number",
+              "minimum": 600,
+              "maximum": 4800
+            },
+            "bomb_margin": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200
+            }
+          },
+          "required": [
+            "fruit_id"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        }
+      }
+    }
+  ]
+}

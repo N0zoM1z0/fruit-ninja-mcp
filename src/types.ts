@@ -13,11 +13,8 @@ export interface ObservationResult {
   waited_ms: number;
   new_fruit_ids: number[];
 }
-export interface TimedPoint {
-  x: number;
-  y: number;
-  t_ms: number;
-}
+export type { TimedPoint } from "./public/executor.js";
+import type { TimedPoint } from "./public/executor.js";
 export interface NewGame {
   mode: GameMode;
   seed: number;

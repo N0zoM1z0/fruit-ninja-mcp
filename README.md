@@ -1,121 +1,110 @@
-# Fruit Ninja MCP
+# Fruit Ninja: GUI vs agent-built MCP
 
-A realtime Fruit Ninja browser game with two agent interfaces: structured application MCP and screenshot-only GUI. Both use the same game, physics, scoring and native mouse executor. The game keeps moving during inference, observations and input calls.
+Infrastructure for comparing a **screenshot-only GUI** player with a player that uses an **MCP
+server built by an agent** that explored the game as a black box. Both play the same pinned,
+realtime browser game under the same clock, scoring and native-mouse executor.
 
-The evaluation runner uses local Codex CLI with `gpt-6.1-terra` / `high`. The best tested configuration is **coverage guidance + async execution + compact MCP feedback**; it must be selected explicitly. On held-out seeds 2026 / 7, it scored **225 / 357**, versus baseline MCP **55 / 25** and GUI with the same guidance and executor **28 / 68**. Each condition has one attempt per seed; these results do not establish a stable win rate. See [results and limitations](RESULTS.md).
+The [Phase 1 pilot](docs/PHASE1-PILOT.md) used DeepSeek V4.1 Flash to build an MCP, then play
+one 60-second round per interface: **1268 points with the self-built MCP, 28 with GUI**.
+The MCP selects targets and plans each stroke; this measures observation plus automation,
+not observation alone. One builder session and one seed do not establish benchmark performance.
+See the [mechanism analysis](docs/PHASE2-MCP-MECHANISM.md) for how it works and its limitations.
 
-[Watch the optimized MCP recording](recordings/optimized-seed42-v1/README.md): one uncut, original-speed take, 189 points.
+The project builds on the original game integration, GUI interface, scoring, telemetry and
+video pipeline (see [NOTICE](NOTICE.md)). Phase 0 infrastructure checks used developer fixtures
+and scripted models; the earlier prebuilt-MCP experiment remains an evaluator-only reference
+([legacy README](docs/LEGACY-README.md)).
 
-## Setup and use
+## How it fits together
 
-Requires Node.js 20.19+ and Chromium. The runtime checks `/usr/bin/chromium`, `/usr/bin/chromium-browser` and `/usr/bin/google-chrome`; set `FRUIT_NINJA_CHROMIUM` for another location. Setup downloads and verifies the pinned game; it does not install Chromium.
+```
+ builder LLM ──tools──► builder controller (host) ──docker exec──► builder sandbox (offline)
+                         build: freeze by SHA-256                    packaged game, Chromium,
+                         smoke: fresh play sandbox                   fn-inspect, fn-port
+                         handoff ─────────────► frozen mcp/
+ player LLM ──tools──► evaluator ──stdio──► play sandbox (offline): frozen mcp/ only
+                         │                     └── unix socket ──► game port
+                         │                                         adapter calls + native input
+                         └── refereed game (Chromium, host only): referee via private CDP handle
+ GUI player ──tools──► same game: get_controls / get_screenshot / click / drag
+```
+
+- **Packaged game:** the pinned upstream HTML plus public evaluation rules. These are a
+  wall-clock physics pump, seeded spawns and trusted-input-only gameplay, with mode, motion
+  and geometry locked once prepared, and a no-network, no-eval CSP. This is all the builder
+  receives.
+- **Refereed game:** the same build plus a private referee inside the game closure. It is
+  captured into an evaluator-held handle and removed from `window` before any agent code
+  runs.
+- **Hardening:** after preparing the round, the host removes host hooks and scripts. It
+  freezes JavaScript and DOM built-ins (Canvas 2D stays wrappable for observation), then
+  injects the agent's frozen adapter.
+- **Game port:** the generated MCP's only channel. It offers adapter calls (JSON, no pixels)
+  and the GUI's executor, with at most one native input per player tool call.
+
+Details, controls and known gaps: [ARCHITECTURE.md](ARCHITECTURE.md). Verified results for
+commit `b5482c2`: [docs/PHASE0-EVIDENCE.md](docs/PHASE0-EVIDENCE.md). Independent review notes:
+[docs/reviews/2026-11-07-phase0-independent-audit.md](docs/reviews/2026-11-07-phase0-independent-audit.md).
+Phase 1 pilot with DeepSeek V4.1 Flash: [docs/PHASE1-PILOT.md](docs/PHASE1-PILOT.md). The builder-visible
+contract is [sandbox/public/CONTRACT.md](sandbox/public/CONTRACT.md), and the port API is
+[PORT.md](sandbox/public/PORT.md).
+
+## Setup and one-command checks
+
+The host needs Docker and git. Everything else runs in project-labelled containers (Node 22,
+Debian Chromium and ffmpeg, pinned base images). Setup downloads the game and verifies it by
+SHA-256; game bytes are never committed.
+
+The Makefile passes the host daemon's API version to the container's Docker client, including
+when the host daemon is older. `make shell` forwards the credential variables named by
+`LLM_ENV` (default `DEEPSEEK_API_KEY`) to the evaluator only; export them before opening it.
 
 ```sh
-npm ci
-npm run setup
-npm run build
-
-# Print an absolute-path MCP configuration to add to Codex.
-node dist/cli.js codex-config --mcp-profile async --feedback compact
-
-# Or start a stdio server directly; --headed requires a graphical display.
-node dist/cli.js serve --mcp-profile async --feedback compact --headed --duration 60 --seed 42 --artifacts artifacts/manual
-
-# Screenshot-only GUI interface.
-node dist/cli.js serve --interface gui --mcp-profile async --headed --duration 60 --seed 42
-
-# Play the unmodified upstream game manually, outside evaluation.
-npm run play
+make setup      # evaluator image, npm ci, game download, build, packaged game + image scan
+make images     # builder and play sandbox images from scanned minimal contexts
+make check      # typecheck and format check
+make test       # full suite: unit, browser, sandbox and end-to-end pipeline
+make preview    # scripted builder → fixture handoff → MCP play → GUI play → MP4 videos
+make all        # all of the above
 ```
 
-The server prepares one round. Read the rules and inspect the ready screen before starting; after start, pause, reset and restart are disabled. Omit `--headed` for headless use. Standard output from `serve` contains only MCP protocol traffic. Defaults are `--interface mcp --mcp-profile standard --feedback full`, arcade mode and seed 42.
+`make preview ARGS="--duration 10 --output artifacts/preview-1"` writes `summary.json`, full
+traces and `mcp/game/game.mp4` and `gui/game/game.mp4`, original-speed and uncut. Remove
+leftover containers with `make clean-containers`; it only touches this project's labels.
 
-## Tools and action contract
+## Runners
 
-| Application MCP                                                       | Screenshot GUI                                  |
-| --------------------------------------------------------------------- | ----------------------------------------------- |
-| `get_game_rules`: static rules and units                              | `get_controls`: static rules and mouse controls |
-| `get_scene`: visible objects, velocities, radii, score and timestamps | `get_screenshot`: actual browser image          |
-| `start_game`: start the prepared round                                | `click`: click the visible start button         |
-| `swipe`: timed canvas path                                            | `drag`: timed full-image path                   |
-| `wait`: wall-time sleep, then current state                           | `wait`: wall-time sleep, then screenshot        |
-| `get_events`, `get_screenshot`                                        | No extracted application state                  |
-
-The GUI driver also uses MCP transport: the comparison is application state versus pixels. GUI tools expose no OCR, DOM, accessibility tree or extracted text. Both interfaces use the same native mouse events and collision rules. MCP observations contain only currently visible objects, with no future spawns or RNG state.
-
-Each path has **2–32 points**, starts at `t_ms: 0`, uses strictly increasing integer times and lasts **16–1000 requested ms**. Coordinates must be inside the relevant bounds; each segment is limited to **5000 px/s**. MCP uses canvas pixels with a top-left origin; GUI uses full-screenshot pixels. For example:
-
-```json
-{
-  "points": [
-    { "x": 200, "y": 350, "t_ms": 0 },
-    { "x": 400, "y": 320, "t_ms": 100 },
-    { "x": 600, "y": 350, "t_ms": 200 }
-  ]
-}
-```
-
-The executor interpolates actor-supplied coordinates, preserves every corner and releases the mouse after each path. It skips overdue interior samples; actual duration includes scheduling overhead and can exceed the requested duration. It never selects targets or replans. Optional MCP `expected_revision` detects intervening actions; it does not detect aging observations. `observed_at_ms` records observation age at acceptance.
-
-| Option                             | Behavior                                                                                                                                                                           |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--mcp-profile standard` (default) | Actions return after execution.                                                                                                                                                    |
-| `--mcp-profile async`              | Replaces `swipe` / `drag` with `submit_swipe` / `submit_drag`; returns acceptance and a current observation while one fixed path executes. Busy requests accept and queue nothing. |
-| `--mcp-profile fresh`              | Experimental MCP `observe` tool, visibility-triggered waits and public kinematic lifetime estimates. GUI retains standard behavior.                                                |
-| `--feedback compact`               | MCP rounds positions, velocities and radii to one decimal, removes fruit names and scene diagnostics; full state remains in artifacts. GUI images are unchanged.                   |
-
-Coverage guidance is an **actor prompt**, selected with `--policy coverage` in evaluation. For interactive use, ask the actor to choose useful 600–900ms paths when safe, account for stale observations, reuse action results and plan during async execution. The server supplies no sweep or aiming policy. See [optimization experiments](OPTIMIZATION.md).
-
-## Run comparisons and record video
-
-Trials require an authenticated local `codex` CLI with access to the selected model. The recorded experiments used CLI 0.165.0. Build first, and give each run a new output directory.
+All three runners use any OpenAI-compatible chat-completions endpoint (local or remote).
+Keys are read from the environment variable you name and never enter sandboxes or traces.
+`--mock NAME` selects a developer mock instead, which performs no inference.
 
 ```sh
-# Sequential baseline pair: MCP, then GUI.
-npm run compare -- --seed 42 --duration 60 --output artifacts/baseline-new
-
-# Same coverage guidance and async executor in both arms.
-npm run compare -- --policy coverage --mcp-profile async --feedback compact --seed 2026 --output artifacts/paired-new
-
-# One optimized MCP trial.
-npm run trial -- --policy coverage --mcp-profile async --feedback compact --seed 42 --duration 60 --output artifacts/optimized-new
-
-# Six sequential 60-second trials on fixed held-out seeds 2026 and 7.
-npm run validate:optimization -- --mcp-profile async --feedback compact --output artifacts/validation-new
-
-# Record both arms, then export complete, original-speed MP4s.
-npx playwright-core install ffmpeg
-npm run compare -- --record-video --seed 42 --duration 60 --output artifacts/recorded-new
-npm run export:video -- --trial artifacts/recorded-new/mcp
-npm run export:video -- --trial artifacts/recorded-new/gui
+# Builder: explore the packaged game and hand off an MCP (Phase 1 runs real models).
+npm run builder -- --llm-base-url http://127.0.0.1:8080/v1 --llm-model MODEL --output artifacts/build-1
+# GUI play and generated-MCP play of the same seed and duration.
+npm run play -- --interface gui --llm-base-url URL --llm-model MODEL --llm-api-key-env KEY_VAR --seed 42 --duration 60
+npm run play -- --interface mcp --handoff artifacts/build-1/handoff.json --llm-base-url URL --llm-model MODEL --seed 42 --duration 60
+# Export a recorded run.
+npm run export:video -- --trial artifacts/play/RUN
 ```
 
-MP4 export also requires `ffmpeg` and `ffprobe` on PATH. [The recorded pair](recordings/seed42-v2/README.md) includes export hashes and frame validation.
+Run these inside the evaluator container (`make shell`). Each run directory holds:
 
-The evaluator owns the game through a local HTTP MCP host independently of the actor connection. Each actor gets an empty workspace and only its assigned server; user configuration, project instructions, shell, web and multi-agent features are disabled. A started round continues to its natural end if the actor exits early. Artifacts retain prompts, arguments, fingerprints, native input timing, independent 100ms telemetry, screenshots, usage, errors and final scores. Raw artifacts are local and ignored by Git; committed summaries and videos link to their provenance. Realtime traces are timing evidence, not deterministic replay fixtures. See [the comparison protocol](REALTIME-PROTOCOL.md).
+- `provenance.json`: commit, image IDs, game hashes, endpoint (no key)
+- `actor/` (or the builder run root): `prompt.json`, `llm.jsonl` (requests and responses) and
+  `tools.jsonl` (every call with timing and result)
+- `port.jsonl`, `mcp-stdio.jsonl` and `mcp-stderr.log` (MCP play)
+- `game/`: telemetry, native input samples, frames and video
+- `events.json` and `result.json`: score, clock audit, integrity and failure reasons
 
 ## Code layout
 
-| Path                                                   | Responsibility                                                                          |
-| ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `src/cli.ts`, `src/server.ts`, `src/host.ts`           | CLI, interface-specific tools, evaluator-owned HTTP transport                           |
-| `src/upstream.ts`, `src/bridge.ts`                     | Pinned game loading, in-memory instrumentation, realtime clock and visible-state bridge |
-| `src/runtime.ts`, `src/pointer.ts`                     | Browser lifecycle, observations, shared native input, async ownership and telemetry     |
-| `src/observation.ts`, `src/compact.ts`, `src/types.ts` | Fresh/compact feedback and shared types                                                 |
-| `src/trial.ts`, `src/tool-audit.ts`, `scripts/`        | Actor isolation, evaluation, reporting and video export                                 |
-| `tests/`, `results/`, `recordings/`                    | Automated checks, preserved experiment summaries and review videos                      |
-
-## Game provenance and verification
-
-The browser remake is [fruit-ninja-dojo](https://github.com/yongqixue99-hue/fruit-ninja-dojo), pinned to `63d0af1906181cceb9486ed85cc2b65ce6e6ba0d`, SHA-256 `6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f`. Setup stores its HTML in ignored `.local/game/`; launch verifies the hash and instruments it in memory. Changed integration anchors fail closed. Upstream source/art is not vendored or relicensed; verify dependency permissions before redistribution. This is not the official Halfbrick game.
-
-The clock derives 120 Hz physics ticks from monotonic wall time and catches up after delayed callbacks. Both interfaces disable camera shake and visual slow motion; launch speeds, gravity and difficulty are preserved. Spawn RNG is separate from cosmetic randomness, while normal arcade frenzy can change later spawning through gameplay.
-
-```sh
-npm run typecheck
-npm test
-npm run build
-npm run format:check
-```
-
-Run setup first. Tests use the actual game and Chromium to check wall-time progression, natural completion, native input, async ownership, GUI information boundaries and telemetry timing. The earlier decision-clock prototype is archived at `decision-prototype-v0.1.0`; its scores and tests are historical, and current source has no decision-step mode.
+| Path                              | Visibility              | Responsibility                                                                       |
+| --------------------------------- | ----------------------- | ------------------------------------------------------------------------------------ |
+| `src/public/`                     | shipped to sandboxes    | executor, lockdown, game port and client, dev game, `fn-*` helpers                   |
+| `src/upstream.ts`                 | private (output public) | pinned game, public rules patch, packaged build                                      |
+| `src/evaluator/`                  | private                 | referee, sandboxes, builder controller, freeze, smoke, policy, LLM loop, play runner |
+| `src/runtime.ts`, `src/server.ts` | private                 | refereed game runtime; GUI tools and legacy reference MCP                            |
+| `sandbox/`                        | images and public docs  | Dockerfiles, toolchain lockfile, CONTRACT, PORT, NOTICE                              |
+| `dev-fixtures/`                   | developer only          | fixture MCP variants and scripted mock actors; never in images                       |
+| `tests/`                          | private                 | unit, boundary, port, sandbox and pipeline tests                                     |

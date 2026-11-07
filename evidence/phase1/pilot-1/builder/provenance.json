@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-07T03:49:44.184Z",
+  "repository": {
+    "name": "fruit-ninja-self-mcp",
+    "version": "0.3.0",
+    "commit": "4d7fde35f3488c96c167afd6f4401a4c2d924028",
+    "dirty": false
+  },
+  "node": "v22.23.4",
+  "platform": "linux-x64",
+  "upstream": {
+    "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+    "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+    "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+    "file": "index.html",
+    "license": null
+  },
+  "packaged_game_sha256": "3e1cc23825ccb405f238ebd4d00b0136f29eb03cbb92dc25908ff86bc713753d",
+  "images": {
+    "builder": "sha256:82dc5a2a8b6e810aaf9140715daa38fe8a992720e7e66d51e02680cd024b43f2",
+    "play": "sha256:995f7ea2e7104bb557dead7352a82fd337b67da4de501c1ab56b66c0d96527f6"
+  },
+  "argv": [
+    "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/scripts/pilot.ts",
+    "--llm-config",
+    "config/deepseek-v4.1-flash.json",
+    "--builder-max-tokens",
+    "32768",
+    "--output",
+    "artifacts/phase1/pilot-1"
+  ],
+  "role": "builder",
+  "run": "bmw5v7alz1bc2f4",
+  "label": "phase1_pilot",
+  "llm": {
+    "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash"
+  }
+}

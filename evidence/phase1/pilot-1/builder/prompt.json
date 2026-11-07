@@ -1,0 +1,217 @@
+{
+  "endpoint": {
+    "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "temperature": 0.3,
+    "max_tokens": 32768,
+    "request_timeout_ms": 300000,
+    "extra_body": {
+      "top_p": 0.9,
+      "stream": false,
+      "reasoning_effort": "high"
+    }
+  },
+  "system": "You are the Builder. You explore unfamiliar software as a black box and build an MCP server for it. You have only the controller tools listed. There is no network.",
+  "user": "# Builder contract\n\nYou receive an unfamiliar piece of software as a black box: a packaged single-page browser\ngame at `/opt/target/game/index.html`, described by `/opt/target/manifest.json`. Explore it\nand build an **MCP server** that lets a later player agent play it well in real time. You\nare not told how the player will be evaluated. No gameplay MCP, game API or solution is\nprovided.\n\n## Your sandbox\n\n- Offline: no network, no package installation. Unprivileged user, read-only system.\n- Writable: `/work` (scratch) and `/output` (your deliverable). Both are discarded after the\n  session except what `build` freezes.\n- Available: Node.js 22, Chromium at `/usr/bin/chromium`, and the toolchain in\n  `/opt/toolchain/node_modules` (`@modelcontextprotocol/sdk`, `zod`, `playwright-core`,\n  `acorn`). Bare imports of these resolve from any directory.\n- Public helpers: `node /opt/toolchain/fn/bin/fn-inspect.js` (static JS analysis),\n  `node /opt/toolchain/fn/bin/fn-port.js` (runs the game behind the same game port your MCP\n  gets at play time), `node /opt/toolchain/fn/bin/fn-mcp.js` (talk to your own stdio MCP), and\n  `/opt/toolchain/fn/port-client.js` (optional port client).\n- You may inspect everything shipped to a user, including the browser-delivered JavaScript,\n  and you may run the game in your own Chromium with Playwright for exploration.\n\n## Controller tools\n\n`exec(argv, timeout_ms, cwd, stdin)`, `read_file(path, max_bytes)`,\n`write_file(path, content, encoding, executable)` (only under `/output/`),\n`inspect_js(op, args, file)`, `build()`, `smoke(sha256)` and `handoff(sha256, notes)`.\nEvery call and its full input and output are recorded.\n\n## Deliverable\n\n```\n/output/\n  mcp/launch.sh      executable; starts your MCP server on stdio\n  mcp/...            server code and an optional in-page adapter\n  mcp/deps/          any extra dependencies (a README if there are none)\n  manifest.json      {\"tools\": [{\"name\", \"mechanism\"}], \"adapter\": \"mcp/adapter.js\" | null}\n  intermediate/      your exploration evidence (scripts, notes, outputs)\n  docs/README.md     notes for humans\n```\n\nOnly `mcp/` is deployed, read-only, at `/opt/mcp` in a fresh offline sandbox that has Node.js\nand the same toolchain but **no browser, no display and no game files**. `launch.sh` must not\nassume `/output`; use paths relative to its own directory. stdout must carry only MCP\nJSON-RPC; write diagnostics to stderr. There is no setup step and no network.\n\nAt play time your server reaches the live game only through the **game port** described in\n`PORT.md` (environment variable `FN_GAME_PORT`). The port runs your declared adapter inside the\ngame page and executes native mouse input with the same limits as a human-like GUI player.\n\n## Rules\n\n- Tools take data arguments only, never code, scripts or expressions.\n- Do not build a generic screen, mouse or keyboard driver: that is the GUI condition, not an\n  application MCP. MCP tools must not return images; pixels are withheld from the port.\n- Input reaches the game only as native mouse input through the port: at most one input (one\n  path or one click) per player tool call. Dispatched DOM events are ignored by the game.\n- Your adapter may observe the page, including by wrapping Canvas 2D rendering calls. It must\n  not alter game rules, geometry, timing or input; the host freezes JavaScript built-ins before\n  loading it, and integrity violations invalidate a session.\n- Handle situations you did not see while building; the round, timing and spawns vary.\n- Declare each tool and the mechanism it uses in `manifest.json`. Mark tools needing human\n  review with `\"free_form\": true`.\n\n## Build, smoke, handoff\n\n`build` validates `/output` (required files, regular files only, modes 0644/0755, safe paths,\nmanifest) and freezes it by SHA-256. `smoke` deploys a frozen artifact into a fresh play\nsandbox with a fresh game and checks initialize, `tools/list`, strict stdout and the\ninterface rules above; it returns full logs. Passing smoke does not show that your tools\nwork; test them yourself with `fn-port`. `handoff` hands off one artifact that passed smoke\nand ends the session. Frozen artifacts are never repaired.\n\n\n---\n\n# Game port\n\nHTTP/1.1 with JSON bodies over the unix socket in `FN_GAME_PORT`\n(`/run/fn/port.sock` at play time). Successful replies contain `\"ok\": true`; failures contain\n`\"ok\": false` and `{\"error\": {\"code\", \"message\"}}`. The port returns no game state of its\nown: no scores, objects, events or images.\n\n| Request                | Body                                           | Result                                                              |\n| ---------------------- | ---------------------------------------------- | ------------------------------------------------------------------- |\n| `GET /v1/info`         |                                                | viewport, coordinate system, input limits, profile, adapter exports |\n| `GET /v1/status`       |                                                | generic executor status: pending and previous action                |\n| `POST /v1/adapter`     | `{\"fn\": \"name\", \"args\": <json>}`               | `{\"value\": <json>}` returned by your adapter                        |\n| `POST /v1/input/path`  | `{\"points\": [{\"x\",\"y\",\"t_ms\"}], \"wait\": true}` | executes one native mouse-down path, then mouse-up                  |\n| `POST /v1/input/click` | `{\"x\", \"y\"}`                                   | one native left click                                               |\n\n**Coordinates** are page CSS pixels of the 1440x960 viewport, origin top-left.\n\n**Paths** have 2–32 points; `t_ms` is an integer that starts at 0 and strictly increases; a\npath lasts 16–1000 ms; every segment is at most 5000 px/s. The executor interpolates your\npoints on wall time and never aims or replans. One path executes at a time; a request while\nbusy is rejected (`BUSY`) and nothing is queued. In the `standard` profile a path request\nreturns after mouse-up; in the `async` profile `\"wait\": false` returns at acceptance.\n\n**Input budget** at play time: one input (path or click) per player tool call, and none outside\na tool call (`INPUT_BUDGET_EXCEEDED`, `NO_ACTIVE_TOOL_CALL`).\n\n**Adapter.** If `manifest.json` names `\"adapter\": \"mcp/adapter.js\"`, the host evaluates that file\nonce in the page's main world after the game has initialized and the round is prepared, as a\nCommonJS-style module body: assign functions to `exports` (or `module.exports`). `POST\n/v1/adapter` calls `exports[fn](args)` (it may be async) with a 2 s limit. Results must be JSON,\nat most 256 KiB, and must not contain image data (`PIXELS_WITHHELD`). Before your adapter runs,\nthe host freezes JavaScript and DOM built-ins (Canvas 2D rendering interfaces stay wrappable),\nremoves script elements and host hooks, and the page forbids `eval`/`new Function` and all\nnetwork access.\n\n**Errors** include `BAD_REQUEST`, `INVALID_PATH`, `INVALID_CLICK`, `BUSY`, `ROUND_NOT_PLAYING`,\n`ADAPTER_MISSING`, `ADAPTER_ERROR`, `ADAPTER_TIMEOUT`, `RESULT_TOO_LARGE`, `PIXELS_WITHHELD`,\n`INPUT_BUDGET_EXCEEDED`, `NO_ACTIVE_TOOL_CALL` and `NOT_FOUND`.\n\nDuring building, `fn-port --adapter /output/mcp/adapter.js --socket /work/port.sock` serves the\nsame API with a fresh game (no input budget), so you can run\n`FN_GAME_PORT=/work/port.sock /output/mcp/launch.sh` against it.\n\n\n---\n\nSession budget: at most 200 model turns and 3 hours of wall time. Nothing is handed off automatically; call handoff before the budget ends.",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "exec",
+        "description": "Run a command (argv array, no shell unless you invoke one) inside your offline sandbox as an unprivileged user. Long commands must finish within timeout_ms (max 600000).",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "argv": {
+              "minItems": 1,
+              "maxItems": 256,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "timeout_ms": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 600000
+            },
+            "cwd": {
+              "type": "string"
+            },
+            "stdin": {
+              "type": "string",
+              "maxLength": 1048576
+            }
+          },
+          "required": [
+            "argv"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "read_file",
+        "description": "Read up to max_bytes (default 256 KiB, max 1 MiB) of a file inside the sandbox.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "max_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1048576
+            }
+          },
+          "required": [
+            "path"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "write_file",
+        "description": "Write a file under /output/ (your deliverable). encoding utf8 or base64; executable sets mode 0755, else 0644.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "content": {
+              "type": "string",
+              "maxLength": 16777216
+            },
+            "encoding": {
+              "default": "utf8",
+              "type": "string",
+              "enum": [
+                "utf8",
+                "base64"
+              ]
+            },
+            "executable": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "path",
+            "content"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "inspect_js",
+        "description": "Static analysis of the shipped browser JavaScript (default: the packaged game). op: scripts | symbols [maxDepth] | search REGEX [context] [max] | lines START END | refs IDENTIFIER.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "enum": [
+                "scripts",
+                "symbols",
+                "search",
+                "lines",
+                "refs"
+              ]
+            },
+            "args": {
+              "default": [],
+              "maxItems": 4,
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "build",
+        "description": "Validate and freeze /output by content hash. Returns the artifact sha256 or the validation error.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "smoke",
+        "description": "Deploy a frozen artifact into a fresh offline play sandbox with a fresh game: initialize, tools/list, strict stdout and interface policy. Returns full logs.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "sha256"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "handoff",
+        "description": "Hand off a frozen artifact that passed smoke. This ends your session.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "sha256"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

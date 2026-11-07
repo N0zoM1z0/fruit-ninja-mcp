@@ -1,0 +1,141 @@
+{
+  "endpoint": {
+    "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "temperature": 0.3,
+    "max_tokens": 2048,
+    "request_timeout_ms": 300000,
+    "extra_body": {
+      "top_p": 0.9,
+      "stream": false,
+      "reasoning_effort": "high"
+    }
+  },
+  "system": "You are playing a realtime browser game through tools.",
+  "user": "Play ONE 60-second REALTIME arcade round of Fruit Ninja. Maximize score by slicing fruit, aim for combos, and avoid bombs. The round is prepared but not started; start it when you are ready. From the start onward the game runs continuously during your thinking and every tool call; it never pauses, resets or restarts. Keep playing until the round ends. The independent evaluator reads the final score from the game.\n\nUse only the tools provided to you. Each tool call may perform at most one native mouse input (one path or one click). Paths have 2..32 points with integer t_ms starting at 0, last 16..1000 ms and move at most 5000 px/s.\n\nYour interface is screenshot-only GUI: read get_controls, take screenshots, find the start button in the image and click it, then drag through fruit using full-image pixel coordinates.",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_controls",
+        "description": "Read static game rules and generic mouse controls. No dynamic game state is provided.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "get_screenshot",
+        "description": "Capture the real browser image. The game continues during capture and while you reason. No extracted text or state accompanies the image.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "click",
+        "description": "Ordinary native left mouse click in full screenshot pixels; returns the next screenshot. Start by clicking the visible start button.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1440
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 960
+            }
+          },
+          "required": [
+            "x",
+            "y"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "drag",
+        "description": "Native mouse-down path in full screenshot pixels, then release. 2..32 points; t_ms starts at 0 and strictly increases, total 16..1000ms, max 5000px/s. The path takes real wall time; returns only a screenshot.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "points": {
+              "minItems": 2,
+              "maxItems": 32,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "y": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "t_ms": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "t_ms"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "points"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "wait",
+        "description": "Sleep 1..3000 real milliseconds with the mouse released, then capture a screenshot. The game keeps moving.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "duration_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 3000
+            }
+          },
+          "required": [
+            "duration_ms"
+          ],
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

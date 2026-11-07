@@ -1,0 +1,223 @@
+{
+  "note": "Phase 1 pilot: one real builder session and one round per interface. Not a benchmark.",
+  "provenance": {
+    "schema_version": 1,
+    "created_at": "2026-11-07T03:49:44.037Z",
+    "repository": {
+      "name": "fruit-ninja-self-mcp",
+      "version": "0.3.0",
+      "commit": "4d7fde35f3488c96c167afd6f4401a4c2d924028",
+      "dirty": false
+    },
+    "node": "v22.23.4",
+    "platform": "linux-x64",
+    "upstream": {
+      "repository": "https://github.com/yongqixue99-hue/fruit-ninja-dojo",
+      "revision": "63d0af1906181cceb9486ed85cc2b65ce6e6ba0d",
+      "sha256": "6e072f6efc0f2bb69c98dede80ed524deda20f0004d27b7beb2e80f5c4ddf96f",
+      "file": "index.html",
+      "license": null
+    },
+    "packaged_game_sha256": "3e1cc23825ccb405f238ebd4d00b0136f29eb03cbb92dc25908ff86bc713753d",
+    "images": {
+      "builder": "sha256:82dc5a2a8b6e810aaf9140715daa38fe8a992720e7e66d51e02680cd024b43f2",
+      "play": "sha256:995f7ea2e7104bb557dead7352a82fd337b67da4de501c1ab56b66c0d96527f6"
+    },
+    "argv": [
+      "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/scripts/pilot.ts",
+      "--llm-config",
+      "config/deepseek-v4.1-flash.json",
+      "--builder-max-tokens",
+      "32768",
+      "--output",
+      "artifacts/phase1/pilot-1"
+    ],
+    "role": "phase1-pilot"
+  },
+  "model": {
+    "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "temperature": 0.3,
+    "max_tokens": 2048,
+    "request_timeout_ms": 300000,
+    "extra_body": {
+      "top_p": 0.9,
+      "stream": false,
+      "reasoning_effort": "high"
+    }
+  },
+  "builder_max_tokens": 32768,
+  "game": {
+    "mode": "arcade",
+    "seed": 42,
+    "duration_seconds": 60
+  },
+  "builder": {
+    "handoff": "c34c30daa3e8dfbb5cf909d5ab945a8918244a396dfba6b61448eb59dc175b46",
+    "smoke": "pass",
+    "tools": [
+      "game_state",
+      "start_round",
+      "slice",
+      "slice_fruit"
+    ],
+    "frozen": [
+      "22ea1861d5b4892e3a01f03f99479596e8da11d2027288978497f1b28deef38b",
+      "59beab51251c6043b6f3e075e17f694608eee058b58b30544a5b5cce4c0058a8",
+      "6f1052a121bd42596f7a5871aa60881ec361bac6d81c60cca38fee64b2ce3f9d",
+      "c34c30daa3e8dfbb5cf909d5ab945a8918244a396dfba6b61448eb59dc175b46"
+    ],
+    "smokes": {
+      "22ea1861d5b4892e3a01f03f99479596e8da11d2027288978497f1b28deef38b": "pass",
+      "59beab51251c6043b6f3e075e17f694608eee058b58b30544a5b5cce4c0058a8": "pass",
+      "6f1052a121bd42596f7a5871aa60881ec361bac6d81c60cca38fee64b2ce3f9d": "pass",
+      "c34c30daa3e8dfbb5cf909d5ab945a8918244a396dfba6b61448eb59dc175b46": "pass"
+    },
+    "wall_seconds": 1753.882,
+    "agent": {
+      "stop_reason": "stopped",
+      "error": null,
+      "steps": 146,
+      "tool_calls": 160,
+      "tool_errors": 1,
+      "usage": {
+        "prompt_tokens": 23304808,
+        "completion_tokens": 161012,
+        "total_tokens": 23465820,
+        "prompt_tokens_details.cached_tokens": 23133184,
+        "reasoning_tokens": 113968
+      },
+      "finish_reasons": {
+        "tool_calls": 146
+      },
+      "truncations": 0,
+      "compactions": 0,
+      "llm_latency_ms": {
+        "n": 146,
+        "median": 1185,
+        "p90": 11041,
+        "max": 81399
+      }
+    }
+  },
+  "mcp": {
+    "score": 1268,
+    "stats": {
+      "score": 1268,
+      "sliced": 328,
+      "missed": 0,
+      "escaped_fruit": 8,
+      "bombs_hit": 0,
+      "max_combo": 12,
+      "spawned_fruit": 346
+    },
+    "valid_gameplay": true,
+    "failure_reasons": [],
+    "completed_round": true,
+    "clock_valid": true,
+    "max_clock_drift_ms": 39.064,
+    "legal_paths": 50,
+    "legal_clicks": 1,
+    "attributed_slices": 328,
+    "integrity_violations": [],
+    "port": {
+      "requests": 244,
+      "rejected": {},
+      "adapter_calls": 193
+    },
+    "agent": {
+      "stop_reason": "final_message",
+      "error": null,
+      "steps": 54,
+      "tool_calls": 53,
+      "tool_errors": 0,
+      "usage": {
+        "prompt_tokens": 297814,
+        "completion_tokens": 2601,
+        "total_tokens": 300415,
+        "prompt_tokens_details.cached_tokens": 274432,
+        "reasoning_tokens": 928
+      },
+      "finish_reasons": {
+        "tool_calls": 53,
+        "stop": 1
+      },
+      "truncations": 0,
+      "compactions": 0,
+      "llm_latency_ms": {
+        "n": 54,
+        "median": 374,
+        "p90": 574,
+        "max": 1541
+      }
+    },
+    "wall_seconds": 67.791,
+    "video": {
+      "mp4": "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/artifacts/phase1/pilot-1/mcp/game/game.mp4",
+      "sha256": "68a41d76521bfaee33da2c946b95e201645b39ec0ad87d750d4b13dcea109b35",
+      "duration_seconds": 66.04,
+      "all_source_frames_retained": true
+    }
+  },
+  "gui": {
+    "score": 28,
+    "stats": {
+      "score": 28,
+      "sliced": 18,
+      "missed": 0,
+      "escaped_fruit": 136,
+      "bombs_hit": 0,
+      "max_combo": 4,
+      "spawned_fruit": 158
+    },
+    "valid_gameplay": true,
+    "failure_reasons": [],
+    "completed_round": true,
+    "clock_valid": true,
+    "max_clock_drift_ms": 94.344,
+    "legal_paths": 18,
+    "legal_clicks": 1,
+    "attributed_slices": 18,
+    "integrity_violations": [],
+    "port": {
+      "requests": 0,
+      "rejected": {},
+      "adapter_calls": 0
+    },
+    "agent": {
+      "stop_reason": "final_message",
+      "error": null,
+      "steps": 25,
+      "tool_calls": 25,
+      "tool_errors": 1,
+      "usage": {
+        "prompt_tokens": 161058,
+        "completion_tokens": 6502,
+        "total_tokens": 167560,
+        "prompt_tokens_details.cached_tokens": 86784,
+        "reasoning_tokens": 3574,
+        "prompt_tokens_details.image_tokens": 39010
+      },
+      "finish_reasons": {
+        "tool_calls": 24,
+        "stop": 1
+      },
+      "truncations": 0,
+      "compactions": 0,
+      "llm_latency_ms": {
+        "n": 25,
+        "median": 1621,
+        "p90": 2503,
+        "max": 2632
+      }
+    },
+    "wall_seconds": 69.223,
+    "video": {
+      "mp4": "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/artifacts/phase1/pilot-1/gui/game/game.mp4",
+      "sha256": "8cb9506c63ae9e48cfd408647bc869a668680c38db9b0363474ad297fd5dadc9",
+      "duration_seconds": 69.24,
+      "all_source_frames_retained": true
+    }
+  }
+}

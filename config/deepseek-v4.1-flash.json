@@ -1,0 +1,9 @@
+{
+  "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "temperature": 0.3,
+  "max_tokens": 2048,
+  "request_timeout_ms": 300000,
+  "extra_body": { "top_p": 0.9, "stream": false, "reasoning_effort": "high" }
+}

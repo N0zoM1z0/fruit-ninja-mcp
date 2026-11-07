@@ -3,4 +3,6 @@ dist/
 .local/
 artifacts/
 .env
+.env.*
 coverage/
+*.log

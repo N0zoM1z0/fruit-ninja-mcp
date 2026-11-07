@@ -6,6 +6,11 @@ Host: `ssh reef` (Debian 13, Docker 29.1.3), fresh clone at
 All results come from developer fixtures and scripted mock models. No LLM was called and no
 benchmark score was measured.
 
+> Recorded in the former standalone repository `kaoru0822-kitauji/fruit-ninja-self-mcp`, before
+> Phase 0 moved to branch `feat/self-built-mcp` of `N0zoM1z0/fruit-ninja-mcp`. Commit hashes are
+> unchanged; the clone URL and reef paths below are historical. Independent review notes on this
+> evidence: [reviews/2026-11-07-phase0-independent-audit.md](reviews/2026-11-07-phase0-independent-audit.md).
+
 ```sh
 git clone git@github.com:kaoru0822-kitauji/fruit-ninja-self-mcp.git release-b5482c2
 cd release-b5482c2

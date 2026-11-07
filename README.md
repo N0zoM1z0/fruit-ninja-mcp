@@ -4,10 +4,10 @@ Infrastructure for comparing a **screenshot-only GUI** player with a player that
 server built by an agent** that explored the game as a black box. Both play the same pinned,
 realtime browser game under the same clock, scoring and native-mouse executor.
 
-This repository is **Phase 0** of [the plan](docs/plan_p0.md): rebuilt infrastructure,
-validated with a developer-only fixture MCP and scripted mock models. No model has built an
-MCP here, and no benchmark score has been measured. It builds on
-[N0zoM1z0/fruit-ninja-mcp](https://github.com/N0zoM1z0/fruit-ninja-mcp) (history preserved; see
+This branch (`feat/self-built-mcp`) is **Phase 0** of [the plan](docs/plan_p0.md): rebuilt
+infrastructure, validated with a developer-only fixture MCP and scripted mock models. No model
+has built an MCP here, and no benchmark score has been measured. It builds on `main` of
+[N0zoM1z0/fruit-ninja-mcp](https://github.com/N0zoM1z0/fruit-ninja-mcp) (see
 [NOTICE](NOTICE.md)) and keeps its game integration, GUI interface, scoring, telemetry and
 video pipeline. The earlier prebuilt-MCP experiment is preserved as an evaluator-only reference
 ([legacy README](docs/LEGACY-README.md)).
@@ -40,7 +40,8 @@ video pipeline. The earlier prebuilt-MCP experiment is preserved as an evaluator
   and the GUI's executor, with at most one native input per player tool call.
 
 Details, controls and known gaps: [ARCHITECTURE.md](ARCHITECTURE.md). Verified results for
-commit `b5482c2`: [docs/PHASE0-EVIDENCE.md](docs/PHASE0-EVIDENCE.md). The builder-visible
+commit `b5482c2`: [docs/PHASE0-EVIDENCE.md](docs/PHASE0-EVIDENCE.md). Independent review notes:
+[docs/reviews/2026-11-07-phase0-independent-audit.md](docs/reviews/2026-11-07-phase0-independent-audit.md). The builder-visible
 contract is [sandbox/public/CONTRACT.md](sandbox/public/CONTRACT.md), and the port API is
 [PORT.md](sandbox/public/PORT.md).
 

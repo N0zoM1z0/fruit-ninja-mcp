@@ -41,7 +41,8 @@ video pipeline. The earlier prebuilt-MCP experiment is preserved as an evaluator
 
 Details, controls and known gaps: [ARCHITECTURE.md](ARCHITECTURE.md). Verified results for
 commit `b5482c2`: [docs/PHASE0-EVIDENCE.md](docs/PHASE0-EVIDENCE.md). Independent review notes:
-[docs/reviews/2026-11-07-phase0-independent-audit.md](docs/reviews/2026-11-07-phase0-independent-audit.md). The builder-visible
+[docs/reviews/2026-11-07-phase0-independent-audit.md](docs/reviews/2026-11-07-phase0-independent-audit.md).
+Phase 1 pilot with DeepSeek V4.1 Flash: [docs/PHASE1-PILOT.md](docs/PHASE1-PILOT.md). The builder-visible
 contract is [sandbox/public/CONTRACT.md](sandbox/public/CONTRACT.md), and the port API is
 [PORT.md](sandbox/public/PORT.md).
 

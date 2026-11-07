@@ -1,0 +1,200 @@
+{
+  "schema_version": 3,
+  "interface": "gui",
+  "label": "phase1_pilot",
+  "run": "pmw5wb4sjc5e0f7",
+  "clock": "realtime",
+  "record_video": true,
+  "profile": "standard",
+  "seed": 42,
+  "duration_seconds": 60,
+  "llm": {
+    "base_url": "https://compoundingloop--ep-deepseek-v4-1-flash-server.us-west.modal.direct/v1",
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash"
+  },
+  "frozen": null,
+  "interface_policy": null,
+  "image_results_blocked": [],
+  "port": {
+    "requests": 0,
+    "rejected": {},
+    "adapter_calls": 0
+  },
+  "legal_paths": 18,
+  "legal_clicks": 1,
+  "agent": {
+    "steps": 25,
+    "tool_calls": 25,
+    "tool_errors": 1,
+    "stop_reason": "final_message",
+    "final_message": "The 60-second arcade round has ended. \n\n**Final Results:**\n- **Score: 28 points**\n- Fruit sliced: 18\n- Best combo: 4 (4-combo)\n- New personal best!\n\nThe round is complete. I sliced 18 fruit across the 60 seconds, landing several multi-fruit combos (a 3-combo and a 4-combo) for bonus points, and successfully avoided all bombs. The independent evaluator will read the final score of **28** from the game.",
+    "usage": {
+      "prompt_tokens": 161058,
+      "completion_tokens": 6502,
+      "total_tokens": 167560,
+      "prompt_tokens_details.cached_tokens": 86784,
+      "reasoning_tokens": 3574,
+      "prompt_tokens_details.image_tokens": 39010
+    },
+    "llm_latency_ms": [
+      570,
+      1310,
+      990,
+      2503,
+      1846,
+      1568,
+      1398,
+      2547,
+      2632,
+      1598,
+      1245,
+      1993,
+      2423,
+      2189,
+      1780,
+      1529,
+      1981,
+      1549,
+      1742,
+      1655,
+      2057,
+      1599,
+      1567,
+      1496,
+      1621
+    ],
+    "finish_reasons": {
+      "tool_calls": 24,
+      "stop": 1
+    },
+    "truncations": 0,
+    "compactions": 0
+  },
+  "round_started": true,
+  "completed_round": true,
+  "clock_valid": true,
+  "maximum_telemetry_clock_drift_ms": 94.344,
+  "integrity": {
+    "violations": [],
+    "unattributed_slices": 0,
+    "lockdown": true,
+    "baseline": {
+      "rect": {
+        "x": 39,
+        "y": 92,
+        "width": 1362,
+        "height": 817
+      },
+      "W": 1362,
+      "H": 817,
+      "lockdown": true
+    },
+    "config": {
+      "mode": "arcade",
+      "duration_seconds": 60
+    }
+  },
+  "score": 28,
+  "stats": {
+    "score": 28,
+    "sliced": 18,
+    "missed": 0,
+    "escaped_fruit": 136,
+    "bombs_hit": 0,
+    "max_combo": 4,
+    "spawned_fruit": 158
+  },
+  "attributed_slices": 18,
+  "valid_gameplay": true,
+  "failure_reasons": [],
+  "wall_seconds": 69.223,
+  "final_scene": {
+    "schema_version": 2,
+    "round": 1,
+    "revision": 19,
+    "tick": 7200,
+    "phase": "finished",
+    "mode": "arcade",
+    "clock": "realtime",
+    "elapsed_ms": 60000,
+    "remaining_ms": 0,
+    "arena": {
+      "width": 1362,
+      "height": 817
+    },
+    "gravity": 841.51,
+    "clock_audit": {
+      "started_at_ms": 3691,
+      "observed_at_ms": 67904.7,
+      "wall_elapsed_ms": 64213.7,
+      "finished_wall_elapsed_ms": 60008.3,
+      "max_pump_gap_ms": 55
+    },
+    "stats": {
+      "score": 28,
+      "sliced": 18,
+      "missed": 0,
+      "escaped_fruit": 136,
+      "bombs_hit": 0,
+      "max_combo": 4,
+      "spawned_fruit": 158
+    },
+    "objects": [
+      {
+        "id": 165,
+        "kind": "fruit",
+        "fruit": "apple",
+        "x": 855.619,
+        "y": 758.609,
+        "vx": 0,
+        "vy": 934.094,
+        "radius": 49.44,
+        "hit_radius": 50.429
+      },
+      {
+        "id": 168,
+        "kind": "fruit",
+        "fruit": "plum",
+        "x": 637.403,
+        "y": 359.694,
+        "vx": -28.575,
+        "vy": -277.588,
+        "radius": 46.08,
+        "hit_radius": 47.002
+      },
+      {
+        "id": 169,
+        "kind": "fruit",
+        "fruit": "plum",
+        "x": 847.977,
+        "y": 308.783,
+        "vx": 0,
+        "vy": -339.298,
+        "radius": 46.08,
+        "hit_radius": 47.002
+      },
+      {
+        "id": 170,
+        "kind": "fruit",
+        "fruit": "kiwi",
+        "x": 1058.561,
+        "y": 359.557,
+        "vx": 28.587,
+        "vy": -277.172,
+        "radius": 45.6,
+        "hit_radius": 46.512
+      },
+      {
+        "id": 171,
+        "kind": "bomb",
+        "fruit": null,
+        "x": 76.032,
+        "y": 419.698,
+        "vx": 0,
+        "vy": -202.431,
+        "radius": 46.08,
+        "hit_radius": 38.246
+      }
+    ]
+  }
+}

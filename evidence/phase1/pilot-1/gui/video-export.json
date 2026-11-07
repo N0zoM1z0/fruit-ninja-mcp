@@ -1,0 +1,67 @@
+{
+  "source": "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/artifacts/phase1/pilot-1/gui/game/game.webm",
+  "output": "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/artifacts/phase1/pilot-1/gui/game/game.mp4",
+  "speed_factor": 1,
+  "note": "Original speed and uncut source timeline, including setup, the realtime round and result. No trimming or time scaling.",
+  "source_sha256": "155206956914ced56cc6d09b6b35a45bfad4c521d889ace7e867762b42073c6c",
+  "output_sha256": "8cb9506c63ae9e48cfd408647bc869a668680c38db9b0363474ad297fd5dadc9",
+  "validation": {
+    "webm": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "vp9",
+          "width": 1440,
+          "height": 960,
+          "r_frame_rate": "25/1",
+          "nb_read_packets": "1731"
+        }
+      ],
+      "format": {
+        "duration": "69.240000"
+      }
+    },
+    "mp4": {
+      "programs": [],
+      "streams": [
+        {
+          "codec_name": "h264",
+          "width": 1440,
+          "height": 960,
+          "r_frame_rate": "25/1",
+          "nb_read_packets": "1731"
+        }
+      ],
+      "format": {
+        "duration": "69.240000"
+      }
+    },
+    "all_source_frames_retained": true,
+    "duration_seconds": 69.24
+  },
+  "ffmpeg_args": [
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-y",
+    "-i",
+    "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/artifacts/phase1/pilot-1/gui/game/game.webm",
+    "-an",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "fast",
+    "-threads",
+    "2",
+    "-crf",
+    "20",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    "-fps_mode",
+    "passthrough",
+    "/home/zijianzhou/fruit-ninja-mcp-phase1/4d7fde3/artifacts/phase1/pilot-1/gui/game/game.mp4"
+  ],
+  "score": 28
+}

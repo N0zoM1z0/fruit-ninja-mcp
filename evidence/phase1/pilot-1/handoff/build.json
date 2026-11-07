@@ -1,0 +1,186 @@
+{
+  "sha256": "c34c30daa3e8dfbb5cf909d5ab945a8918244a396dfba6b61448eb59dc175b46",
+  "files": {
+    "docs/README.md": {
+      "sha256": "f7b8d009263944ab6a11bcd80255791b7e8e0cfc88bef88232766a5e0357ca77",
+      "mode": 420,
+      "bytes": 4646
+    },
+    "intermediate/NOTES.md": {
+      "sha256": "4415a3fcef6885cf6a09d98a39b51ac6880cba8f94a39eb85626e0d4d5029b1a",
+      "mode": 420,
+      "bytes": 4801
+    },
+    "intermediate/agent.mjs": {
+      "sha256": "666186ff5feb1bbc050697c02c9a786851500186b66676c3d5f6d24ad3eb1692",
+      "mode": 420,
+      "bytes": 1307
+    },
+    "intermediate/calib.mjs": {
+      "sha256": "0c05bd858ec26d85c2ee916c4aa5eb07710eb0cbf8b141df24a67f5a64529e1f",
+      "mode": 420,
+      "bytes": 1271
+    },
+    "intermediate/final.mjs": {
+      "sha256": "b83a7da7279cd1b52cb4a7b7c21adc260c087e50f1953464d466853af432b97f",
+      "mode": 420,
+      "bytes": 1609
+    },
+    "intermediate/final2.mjs": {
+      "sha256": "04ae9d5ec7d9395d4deb824a06df33b458f2ce66d046bbd9aefc993f8430a572",
+      "mode": 420,
+      "bytes": 1318
+    },
+    "intermediate/mcp.sh": {
+      "sha256": "4fa61701879323841aafcb13aed69cb2dab9d1fff231d69e767faa00d1a9c8a1",
+      "mode": 420,
+      "bytes": 309
+    },
+    "intermediate/mkdiag.mjs": {
+      "sha256": "45315834dc951fafc792e41ab9e5484b9f22bf902fd6f0125d818e4ce3571774",
+      "mode": 420,
+      "bytes": 859
+    },
+    "intermediate/patch1.mjs": {
+      "sha256": "503c60528093db78c35cc6e345ce481be0971745ffa414da31d99534681c8cea",
+      "mode": 420,
+      "bytes": 1162
+    },
+    "intermediate/patch10.mjs": {
+      "sha256": "5384a91755cc7ec3552349abc341f7df97bcc41f7c80c02460c93a5411fd67ae",
+      "mode": 420,
+      "bytes": 581
+    },
+    "intermediate/patch11.mjs": {
+      "sha256": "33de861dcf002ea248b229eea9e34e2fdbb993224e57ba2d0ff46131426d04ae",
+      "mode": 420,
+      "bytes": 706
+    },
+    "intermediate/patch2.mjs": {
+      "sha256": "5b43f5283a64a7aea213dde43464e759aef1e8de8bd55d3706510502c470a4c4",
+      "mode": 420,
+      "bytes": 1868
+    },
+    "intermediate/patch3.mjs": {
+      "sha256": "36989ce1bb0040a5a22f99310ca900db3837e7e160d2ce317f81b2bebfcb4da9",
+      "mode": 420,
+      "bytes": 557
+    },
+    "intermediate/patch4.mjs": {
+      "sha256": "fd69221c35f492ccd735e6788c7e95563699c40a03f9edb841498421c06f81a4",
+      "mode": 420,
+      "bytes": 2546
+    },
+    "intermediate/patch5.mjs": {
+      "sha256": "82514aa67c1df50a852091ad4b0c5c04bd0f8c7b9a57a37490db04867de54864",
+      "mode": 420,
+      "bytes": 1462
+    },
+    "intermediate/patch6.mjs": {
+      "sha256": "adce28cb91b10e8ddce6ce4ec90cf5559cc834f4df9e69e13fb60257cb6532b6",
+      "mode": 420,
+      "bytes": 2509
+    },
+    "intermediate/patch7.mjs": {
+      "sha256": "7048e26ab109c841bfbbb5e1ae15cd468e0195d4d3b09c14fc8d2dbb4adcabef",
+      "mode": 420,
+      "bytes": 1287
+    },
+    "intermediate/patch8.mjs": {
+      "sha256": "1ad634247f4ff8040721b5859c7d46e0ee74445c80d403cb2c2ffc1d0aa6b772",
+      "mode": 420,
+      "bytes": 2294
+    },
+    "intermediate/patch9.mjs": {
+      "sha256": "732c5eb82fac1b6165eb77b3d767fa52bff46c5c1eca56d2f6cd53751e55ee43",
+      "mode": 420,
+      "bytes": 1212
+    },
+    "intermediate/pc.mjs": {
+      "sha256": "503a2db0c1c34ab8afd545e9a8d58335daa6efbfc003fd86ac063a74ab786386",
+      "mode": 420,
+      "bytes": 640
+    },
+    "intermediate/probe-adapter.js": {
+      "sha256": "fd7c3578a70dba4a5d9b0c3ab44976fdf738a4ef29f5dc1b27c2c1d6785d54ba",
+      "mode": 420,
+      "bytes": 3772
+    },
+    "intermediate/start-port.sh": {
+      "sha256": "9ad93783341236051c3fc1af65ef1bbc7b6f5a88d8c08460fd7c07ecf4070aa5",
+      "mode": 420,
+      "bytes": 502
+    },
+    "intermediate/test3.mjs": {
+      "sha256": "2ff6bfb02c92f935d90077e1df457e61d9c5d8242d4469378065296ea979976d",
+      "mode": 420,
+      "bytes": 1716
+    },
+    "intermediate/test6.mjs": {
+      "sha256": "92d5ebfe210fe81ff7da64a6e99023016bfad4c7fd356c94d3eeab257119b63c",
+      "mode": 420,
+      "bytes": 1924
+    },
+    "intermediate/test7.mjs": {
+      "sha256": "b66bc6dedb0137f4219ac76ed588af49b47aed18a399fee0fdc957657108ff32",
+      "mode": 420,
+      "bytes": 1878
+    },
+    "intermediate/test8.mjs": {
+      "sha256": "923e86539886e5476d548a52ead393457a9b207ea6c8eb625a72020aa983c06d",
+      "mode": 420,
+      "bytes": 1637
+    },
+    "manifest.json": {
+      "sha256": "39db535d3738161319df5267decce32242b66bcdd5824a05080b9229f2010998",
+      "mode": 420,
+      "bytes": 586
+    },
+    "mcp/adapter.js": {
+      "sha256": "3ea40a0b86bc90c0b5537ba2e93f029ecca13248abd19d015b6da6f367070f09",
+      "mode": 420,
+      "bytes": 16206
+    },
+    "mcp/deps/README.md": {
+      "sha256": "2a2dda0a1cbafbdd61607f99dd7eeff28054562aa404cb4e9b1d52bab86157cc",
+      "mode": 420,
+      "bytes": 575
+    },
+    "mcp/launch.sh": {
+      "sha256": "c8d4988c184a5db502dddef61b3c48706f719ccd12b0b1972069d54c4df43473",
+      "mode": 493,
+      "bytes": 224
+    },
+    "mcp/server.js": {
+      "sha256": "f101a30447838232454ccc782097d9d7196c0791f55037cd68c482c7d80f21bc",
+      "mode": 420,
+      "bytes": 10472
+    }
+  },
+  "manifest": {
+    "tools": [
+      {
+        "name": "game_state",
+        "mechanism": "adapter:observe (in-page Canvas 2D observation + HUD DOM read); no input"
+      },
+      {
+        "name": "start_round",
+        "mechanism": "input/click on the start button (one native left click)"
+      },
+      {
+        "name": "slice",
+        "mechanism": "adapter:plan (in-page trajectory planning) + input/path (one native mouse-down path)"
+      },
+      {
+        "name": "slice_fruit",
+        "mechanism": "adapter:plan with target fruit id + input/path (one native mouse-down path)"
+      }
+    ],
+    "adapter": "mcp/adapter.js"
+  },
+  "adapter": {
+    "path": "mcp/adapter.js",
+    "sha256": "3ea40a0b86bc90c0b5537ba2e93f029ecca13248abd19d015b6da6f367070f09"
+  },
+  "frozen_at": "2026-11-07T04:18:49.196Z"
+}

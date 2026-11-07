@@ -1,0 +1,21 @@
+{
+  "tools": [
+    {
+      "name": "game_state",
+      "mechanism": "adapter:observe (in-page Canvas 2D observation + HUD DOM read); no input"
+    },
+    {
+      "name": "start_round",
+      "mechanism": "input/click on the start button (one native left click)"
+    },
+    {
+      "name": "slice",
+      "mechanism": "adapter:plan (in-page trajectory planning) + input/path (one native mouse-down path)"
+    },
+    {
+      "name": "slice_fruit",
+      "mechanism": "adapter:plan with target fruit id + input/path (one native mouse-down path)"
+    }
+  ],
+  "adapter": "mcp/adapter.js"
+}

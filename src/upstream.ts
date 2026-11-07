@@ -67,6 +67,27 @@ export const contentSecurityPolicy =
  */
 const rulesSource = String.raw`
   // ===== Evaluation rules (public): realtime clock, seeded spawns, trusted input only =====
+  // Capture native operations before adapters run. Event instances can have shadowing
+  // own properties even when their prototypes are frozen. Only these private snapshots
+  // reach collision detection; native getters brand-check every coalesced sample.
+  const reefPointerGetters = Object.fromEntries([
+    [MouseEvent.prototype, ['clientX', 'clientY', 'button']],
+    [PointerEvent.prototype, ['pointerId']],
+    [Event.prototype, ['timeStamp', 'type']],
+  ].flatMap(([prototype, names]) => names.map(name =>
+    [name, Object.getOwnPropertyDescriptor(prototype, name).get])));
+  const reefCoalesced = PointerEvent.prototype.getCoalescedEvents;
+  const reefPreventDefault = Event.prototype.preventDefault;
+  const reefCanvasRect = Element.prototype.getBoundingClientRect.bind(canvas);
+  const reefApply = Reflect.apply;
+  function reefReadPointer(event) {
+    if (event.isTrusted !== true) return null; // isTrusted is unforgeable on native events.
+    const sample = {isTrusted: true};
+    try {
+      for (const [name, get] of Object.entries(reefPointerGetters)) sample[name] = reefApply(get, event, []);
+    } catch { return null; }
+    return sample;
+  }
   var reefTick = 0, reefRound = 0, reefEntityId = 0, reefLocked = false, reefFinished = false;
   var reefConfig = {mode: 'arcade', seed: 42, duration_seconds: 60};
   var reefStartedAt = null, reefFinishedWall = null, reefLastPump = 0, reefMaxGap = 0, reefPumping = false;
@@ -171,6 +192,20 @@ export function applyRules(html: string, hooks: string): string {
     "ambientTime+=Math.min(dt,.1);reefPump(now);",
   );
   // Gameplay accepts native (trusted) pointer input only; dispatched events are ignored.
+  result = result.replaceAll(
+    "canvas.getBoundingClientRect()",
+    "reefCanvasRect()",
+  );
+  result = replaceOnce(
+    result,
+    "canvas.addEventListener('pointerdown', e => {",
+    "canvas.addEventListener('pointerdown', raw => { const e = reefReadPointer(raw); if (!e) return;",
+  );
+  result = replaceOnce(
+    result,
+    "e.preventDefault(); initAudio();",
+    "reefApply(reefPreventDefault, raw, []); initAudio();",
+  );
   result = replaceOnce(
     result,
     "if (phase !== 'playing' || e.button !== 0 || pointer) return;",
@@ -183,8 +218,18 @@ export function applyRules(html: string, hooks: string): string {
   );
   result = replaceOnce(
     result,
+    "canvas.addEventListener('pointermove', e => {",
+    "canvas.addEventListener('pointermove', raw => { const e = reefReadPointer(raw); if (!e) return;",
+  );
+  result = replaceOnce(
+    result,
+    "e.preventDefault(); let samples=[];try{samples=e.getCoalescedEvents?.()||[];}catch{}\n    for(const sample of samples)moveBlade(sample);",
+    "reefApply(reefPreventDefault, raw, []); let samples=[];try{samples=reefCoalesced?reefApply(reefCoalesced,raw,[]):[];}catch{}\n    for(const native of samples){const sample=reefReadPointer(native);if(sample)moveBlade(sample);}",
+  );
+  result = replaceOnce(
+    result,
     "function endPointer(e) { if(pointer&&",
-    "function endPointer(e) { if(e.isTrusted!==true)return; if(pointer&&",
+    "function endPointer(raw) { const e=reefReadPointer(raw); if(!e)return; if(pointer&&",
   );
   result = replaceOnce(
     result,

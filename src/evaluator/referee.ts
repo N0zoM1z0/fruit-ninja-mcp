@@ -67,7 +67,7 @@ function refereeHooks(key: string): string {
   }
   function reefOnFinish() { reefCheck(); reefEvent('round_finished'); }
   function reefRect() {
-    const r = canvas.getBoundingClientRect();
+    const r = reefCanvasRect();
     return {x: r.x, y: r.y, width: r.width, height: r.height};
   }
   // Rule/geometry integrity: agent code may not alter the arena, mode, motion or lockdown.

@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import { test } from "node:test";
 import { root } from "../src/upstream.js";
 import { runBuilder } from "../src/evaluator/builder.js";
+import type { Handoff } from "../src/evaluator/handoff.js";
 import { runPlay } from "../src/evaluator/play.js";
 import { smoke } from "../src/evaluator/acceptance.js";
 import { freeze } from "../src/evaluator/freeze.js";
@@ -22,7 +23,7 @@ import {
 
 const enabled = process.env.FNSM_DOCKER === "1";
 let base = "";
-let handoffFrozen = "";
+let handoff: Handoff | null = null;
 const lines = async (path: string) =>
   (await readFile(path, "utf8"))
     .trim()
@@ -101,7 +102,7 @@ test(
       JSON.parse(await readFile(resolve(base, "builder/handoff.json"), "utf8"))
         .sha256 === result.handoff.sha256,
     );
-    handoffFrozen = result.handoff.frozen;
+    handoff = result.handoff;
   },
 );
 
@@ -109,9 +110,9 @@ test(
   "handed-off MCP loads dynamically and its legal tool slices fruit in the live game",
   { skip: !enabled },
   async () => {
-    assert.ok(handoffFrozen, "requires the builder handoff");
+    assert.ok(handoff, "requires the builder handoff");
     const r = await play("mcp-positive", positivePolicy(), {
-      frozen: handoffFrozen,
+      handoff,
       label: "developer_fixture:positive",
     });
     assert.deepEqual(r.failure_reasons, []);

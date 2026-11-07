@@ -19,6 +19,7 @@ import {
 } from "../public/port.js";
 import type { Scene } from "../types.js";
 import { verifyFrozen, type FrozenRecord } from "./freeze.js";
+import { verifyHandoff, type Handoff } from "./handoff.js";
 import {
   interfacePolicy,
   resultViolations,
@@ -44,8 +45,10 @@ export type PlayInterface = "gui" | "mcp";
 export interface PlayOptions {
   output: string;
   interface: PlayInterface;
-  /** Frozen artifact directory (contains build.json and mcp/); MCP mode only. */
+  /** Raw frozen developer fixture; mutually exclusive with validated handoff replay. */
   frozen?: string;
+  /** Full builder handoff; verified before launching a game or MCP. */
+  handoff?: Handoff;
   seed: number;
   duration: number;
   profile?: "standard" | "async";
@@ -230,8 +233,19 @@ export async function runPlay(options: PlayOptions) {
     options.duration > 90
   )
     throw new Error("Invalid seed or duration (5..90)");
-  if (options.interface === "mcp" && !options.frozen)
-    throw new Error("MCP play requires a frozen artifact");
+  if (options.frozen !== undefined && options.handoff !== undefined)
+    throw new Error("choose either handoff replay or a raw frozen fixture");
+  let frozenRoot = options.frozen;
+  let frozen: FrozenRecord | null = null;
+  if (options.interface === "mcp") {
+    if (options.handoff !== undefined) {
+      const verified = await verifyHandoff(options.handoff);
+      frozenRoot = verified.root;
+      frozen = verified.record;
+    } else if (frozenRoot) frozen = await verifyFrozen(frozenRoot);
+    else throw new Error("MCP play requires a handoff or raw frozen fixture");
+  } else if (options.handoff !== undefined || frozenRoot !== undefined)
+    throw new Error("artifacts are only supported in MCP mode");
   await mkdir(output, { recursive: false });
   const runId = newRunId("p");
   const began = performance.now();
@@ -256,7 +270,6 @@ export async function runPlay(options: PlayOptions) {
   const blocked: { tool: string; violations: string[] }[] = [];
   let legalPaths = 0,
     legalClicks = 0;
-  let frozen: FrozenRecord | null = null;
   let policy: PolicyResult | null = null;
   let agent: AgentResult | null = null;
   let setupError: string | null = null;
@@ -297,10 +310,10 @@ export async function runPlay(options: PlayOptions) {
         },
       };
     } else {
-      frozen = await verifyFrozen(options.frozen!);
-      if (frozen.adapter)
+      const record = frozen!;
+      if (record.adapter)
         await runtime.injectAdapter(
-          await readFile(resolve(options.frozen!, frozen.adapter.path), "utf8"),
+          await readFile(resolve(frozenRoot!, record.adapter.path), "utf8"),
         );
       const gate = new CallGate();
       const socketDir = await makeSocketDir(runId);
@@ -313,7 +326,7 @@ export async function runPlay(options: PlayOptions) {
       closers.push(() => port.close());
       const transport = new StrictStdioTransport(
         "docker",
-        playArgs(runId, resolve(options.frozen!, "mcp"), socketDir),
+        playArgs(runId, resolve(frozenRoot!, "mcp"), socketDir),
         resolve(output, "mcp-stdio.jsonl"),
         resolve(output, "mcp-stderr.log"),
       );
@@ -328,7 +341,7 @@ export async function runPlay(options: PlayOptions) {
       const tools = (
         await withTimeout(client.listTools(), 15_000, "tools/list")
       ).tools;
-      policy = interfacePolicy(tools, frozen.manifest);
+      policy = interfacePolicy(tools, record.manifest);
       if (!policy.ok && !options.allowPolicyFailure)
         throw new Error(`INTERFACE_REJECTED: ${policy.reasons.join(", ")}`);
       let callId = 0;

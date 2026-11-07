@@ -10,6 +10,7 @@ import {
 } from "node:fs/promises";
 import { join, posix, relative, resolve } from "node:path";
 import { parse } from "acorn";
+import { isDeepStrictEqual } from "node:util";
 import { sha256 } from "../upstream.js";
 
 export interface Bundle {
@@ -178,12 +179,18 @@ export async function freeze(
 }
 
 /** Re-hash a frozen artifact before deployment; any change, addition or link fails closed. */
-export async function verifyFrozen(root: string): Promise<FrozenRecord> {
+export async function verifyFrozen(
+  root: string,
+  expectedSha256?: string,
+): Promise<FrozenRecord> {
   const record = JSON.parse(
     await readFile(resolve(root, "build.json"), "utf8"),
   ) as FrozenRecord;
   if (inventoryDigest(record.files) !== record.sha256)
     throw new Error("frozen inventory digest mismatch");
+  if (expectedSha256 !== undefined && record.sha256 !== expectedSha256)
+    throw new Error("handoff artifact digest mismatch");
+  const bundle: Bundle = { files: {} };
   const seen = new Set<string>();
   const walk = async (directory: string) => {
     for (const name of await readdir(directory)) {
@@ -195,11 +202,14 @@ export async function verifyFrozen(root: string): Promise<FrozenRecord> {
         if (rel === "build.json") continue;
         const row = record.files[rel];
         if (!row) throw new Error(`unexpected file in frozen artifact: ${rel}`);
+        const data = await readFile(path);
         if (
-          sha256(await readFile(path)) !== row.sha256 ||
-          (stat.mode & 0o777) !== row.mode
+          sha256(data) !== row.sha256 ||
+          (stat.mode & 0o777) !== row.mode ||
+          data.length !== row.bytes
         )
           throw new Error(`frozen bytes or mode changed: ${rel}`);
+        bundle.files[rel] = { mode: row.mode, base64: data.toString("base64") };
         seen.add(rel);
       } else throw new Error(`links and special files are forbidden: ${rel}`);
     }
@@ -208,5 +218,15 @@ export async function verifyFrozen(root: string): Promise<FrozenRecord> {
   const absent = Object.keys(record.files).filter((p) => !seen.has(p));
   if (absent.length)
     throw new Error(`frozen files missing: ${absent.join(", ")}`);
-  return record;
+  // build.json is a record, not the source of executable metadata. Reconstruct it
+  // from the inventory-protected bytes and reject stale or edited copied fields.
+  const { inventory, manifest, adapter } = validateBundle(bundle);
+  if (inventoryDigest(inventory) !== record.sha256)
+    throw new Error("frozen inventory digest mismatch");
+  if (
+    !isDeepStrictEqual(record.manifest, manifest) ||
+    !isDeepStrictEqual(record.adapter, adapter)
+  )
+    throw new Error("frozen metadata mismatch");
+  return { ...record, files: inventory, manifest, adapter };
 }

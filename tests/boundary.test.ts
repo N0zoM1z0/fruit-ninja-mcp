@@ -183,6 +183,125 @@ test("dispatched DOM events cannot start or slice; native input can, and slices 
   }
 });
 
+test("adapter-shadowed native events cannot turn an empty submitted path into gameplay effects", async () => {
+  const stats = [];
+  for (const mutate of [false, true]) {
+    const g = await GameRuntime.launch();
+    try {
+      await g.prepare({ mode: "arcade", seed: 42, duration_seconds: 6 });
+      await g.injectAdapter(`
+        const canvas = document.getElementById('game');
+        let observed = 0, mutated = 0, forgedCalls = 0;
+        window.addEventListener('pointermove', e => {
+          if (!e.isTrusted || e.target !== canvas || !(e.buttons & 1)) return;
+          observed++;
+          if (!${mutate}) return;
+          const r = canvas.getBoundingClientRect(), samples = [];
+          for (let y = r.top + 120, row = 0; y < r.bottom - 15; y += 32, row++)
+            for (const x of row % 2 ? [r.right - 5, r.left + 5] : [r.left + 5, r.right - 5])
+              samples.push({clientX: x, clientY: y, timeStamp: e.timeStamp, isTrusted: true});
+          Object.defineProperty(e, 'getCoalescedEvents', {value: () => { forgedCalls++; return samples; }});
+          Object.defineProperty(e, 'clientX', {value: r.right - 5});
+          Object.defineProperty(e, 'clientY', {value: r.bottom - 15});
+          mutated++;
+        }, true);
+        module.exports = {counts: () => ({observed, mutated, forgedCalls})};
+      `);
+      const start = (await g.page.locator("#start-button").boundingBox())!;
+      await g.click(start.x + start.width / 2, start.y + start.height / 2);
+      // Independently check every issued native movement against the submitted path.
+      const issued: { x: number; y: number }[] = [];
+      const move = g.page.mouse.move.bind(g.page.mouse);
+      g.page.mouse.move = async (x, y, options) => {
+        issued.push({ x, y });
+        await move(x, y, options);
+      };
+      const points = [
+        { x: 50, y: 110, t_ms: 0 },
+        { x: 51, y: 110, t_ms: 1000 },
+      ];
+      for (let i = 0; i < 6; i++) {
+        const result = await g.portPath(points);
+        assert.deepEqual(
+          result.events.filter(
+            (e) => e.type === "fruit_sliced" || e.type === "bomb_hit",
+          ),
+          [],
+        );
+      }
+      assert.ok(issued.length > 6);
+      assert.ok(issued.every((p) => p.x >= 50 && p.x <= 51 && p.y === 110));
+      const counts = (await g.adapterCall("counts", null)) as any;
+      assert.ok(
+        counts.observed > 0,
+        "adapters can still observe native events",
+      );
+      assert.equal(counts.mutated, mutate ? counts.observed : 0);
+      assert.equal(
+        counts.forgedCalls,
+        0,
+        "collision detection never invokes the shadowed method",
+      );
+      const scene = await g.scene();
+      assert.equal(scene.phase, "finished");
+      assert.ok(scene.stats.spawned_fruit > 0);
+      assert.equal(scene.stats.sliced, 0, "an empty path cannot slice fruit");
+      assert.equal(scene.stats.bombs_hit, 0);
+      assert.deepEqual((await g.integrity()).violations, []);
+      stats.push(scene.stats);
+    } finally {
+      await g.close();
+    }
+  }
+  assert.deepEqual(
+    stats[1],
+    stats[0],
+    "event mutation adds no gameplay effect",
+  );
+});
+
+test("native down, move and up data remain authoritative when an adapter shadows input and geometry", async () => {
+  const g = await game();
+  try {
+    await g.injectAdapter(`
+      const canvas = document.getElementById('game');
+      const rect = canvas.getBoundingClientRect();
+      Object.defineProperty(canvas, 'getBoundingClientRect', {value: () => ({...rect, left: -10000, top: -10000, width: 1, height: 1})});
+      // Captured native functions must also be invoked without consulting mutable
+      // own properties on the functions themselves (Function.prototype is frozen).
+      for (const [prototype, names] of [[MouseEvent.prototype, ['clientX', 'clientY', 'button']], [PointerEvent.prototype, ['pointerId']], [Event.prototype, ['timeStamp', 'type']]])
+        for (const name of names) {
+          const get = Object.getOwnPropertyDescriptor(prototype, name).get;
+          if (Object.isExtensible(get)) Object.defineProperty(get, 'call', {value: () => name === 'type' ? 'pointercancel' : 1});
+        }
+      for (const fn of [Event.prototype.preventDefault, PointerEvent.prototype.getCoalescedEvents])
+        if (fn && Object.isExtensible(fn)) Object.defineProperty(fn, 'call', {value: () => {throw new Error('shadowed native call');}});
+      const seen = {pointerdown: 0, pointermove: 0, pointerup: 0};
+      for (const type of Object.keys(seen)) window.addEventListener(type, e => {
+        if (!e.isTrusted || e.target !== canvas) return;
+        seen[type]++;
+        for (const [name, value] of Object.entries({clientX: 50, clientY: 110, button: 1, pointerId: 9999, timeStamp: 1, type: 'pointercancel'}))
+          Object.defineProperty(e, name, {value});
+        Object.defineProperty(e, 'preventDefault', {value: () => {throw new Error('shadowed preventDefault');}});
+      }, true);
+      module.exports = {seen: () => seen};
+    `);
+    const start = (await g.page.locator("#start-button").boundingBox())!;
+    await g.click(start.x + start.width / 2, start.y + start.height / 2);
+    const target = await pathThrough(g, await visibleFruit(g));
+    const result = await g.portPath(target.points);
+    assert.ok(
+      result.events.some((e) => e.type === "fruit_sliced"),
+      "the submitted native path still cuts real fruit",
+    );
+    const seen = (await g.adapterCall("seen", null)) as Record<string, number>;
+    assert.ok(Object.values(seen).every((n) => n > 0));
+    assert.deepEqual((await g.integrity()).violations, []);
+  } finally {
+    await g.close();
+  }
+});
+
 test("an adapter runs after hardening: hidden-state and hooking attempts fail, geometry tampering is detected", async () => {
   const g = await game();
   try {

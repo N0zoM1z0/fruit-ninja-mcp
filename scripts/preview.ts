@@ -63,7 +63,7 @@ const mcpModel = await startMockLlm(positivePolicy(), {
 const mcp = await runPlay({
   output: resolve(out, "mcp"),
   interface: "mcp",
-  frozen: built.handoff.frozen,
+  handoff: built.handoff,
   seed,
   duration,
   llm: { base_url: mcpModel.base_url, model: "mock-positive-actor" },

@@ -27,7 +27,9 @@ environment. Tests check this with a canary key.
   - a wall-clock 120 Hz pump;
   - a seeded spawn RNG, set once through the one-shot `__fnPrepare`;
   - pause, home and restart disabled;
-  - gameplay and start accept trusted (native) events only;
+  - gameplay and start accept trusted (native) events only; collision input uses captured
+    native getters, the native coalesced-event method and native canvas geometry, so
+    adapter-owned event properties and methods do not affect blade coordinates;
   - mode, motion effects and arena geometry locked after prepare;
   - a CSP with no network and no string compilation in page contexts.
 - **Refereed** (per session): the same rules plus a referee hook block inside the closure. It
@@ -37,25 +39,33 @@ environment. Tests check this with a canary key.
 
 ## Controls and how they are tested
 
-| Shortcut or risk                  | Control                                                                                                  | Test                                |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Builder sees internals            | Image contexts assembled from public files only and scanned for private markers; images scanned again    | `package` scan, `sandbox.test`      |
-| Supplied gameplay MCP             | None exists in images; the legacy reference MCP is evaluator-only                                        | image scan                          |
-| Reading referee state             | Referee only behind a host-held handle; key deleted; scripts removed; no extra port routes               | `boundary.test`, privileged fixture |
-| Seeds or future spawns            | Seed passed once through a one-shot hook that self-deletes; not in page source                           | `boundary.test`                     |
-| Synthetic DOM input               | Gameplay and start ignore `isTrusted !== true`                                                           | `boundary.test`, privileged fixture |
-| Hooking input, geometry or timing | Lockdown freezes built-in constructors, prototypes and global bindings                                   | `boundary.test`, privileged fixture |
-| CSS geometry tampering            | Referee compares canvas rect, arena, mode and motion to a baseline; any violation invalidates            | `boundary.test`, privileged fixture |
-| Unattributed slices               | Every slice must occur during a host-executed stroke                                                     | all play tests                      |
-| GUI wrapper                       | Static policy rejects screen/mouse/keyboard primitives; port withholds pixels; image results are blocked | GUI-wrapper fixture                 |
-| Generic code executor             | Static policy rejects code tools, arguments and descriptions; adapter frozen by hash                     | `unit-policy.test`                  |
-| Autopilot                         | One native input per player tool call, none outside a call; one path at a time, never queued             | privileged fixture, `port.test`     |
-| No-op MCP                         | Success requires a started, completed round, legal paths and slices                                      | no-op fixture                       |
-| Clock manipulation                | External telemetry drift and finish-time audit                                                           | all play tests                      |
-| Tampered artifact                 | Inventory re-hashed before smoke and play; links and extra files rejected                                | `unit-policy.test`                  |
+| Shortcut or risk                  | Control                                                                                                    | Test                                |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Builder sees internals            | Image contexts assembled from public files only and scanned for private markers; images scanned again      | `package` scan, `sandbox.test`      |
+| Supplied gameplay MCP             | None exists in images; the legacy reference MCP is evaluator-only                                          | image scan                          |
+| Reading referee state             | Referee only behind a host-held handle; key deleted; scripts removed; no extra port routes                 | `boundary.test`, privileged fixture |
+| Seeds or future spawns            | Seed passed once through a one-shot hook that self-deletes; not in page source                             | `boundary.test`                     |
+| Synthetic DOM input               | Gameplay and start ignore `isTrusted !== true`                                                             | `boundary.test`, privileged fixture |
+| Hooking input, geometry or timing | Captured native input/geometry operations plus lockdown of built-ins and global bindings                   | `boundary.test`, privileged fixture |
+| CSS geometry tampering            | Referee compares canvas rect, arena, mode and motion to a baseline; any violation invalidates              | `boundary.test`, privileged fixture |
+| Unattributed slices               | Every slice must occur during a host-executed stroke                                                       | all play tests                      |
+| GUI wrapper                       | Static policy rejects screen/mouse/keyboard primitives; port withholds pixels; image results are blocked   | GUI-wrapper fixture                 |
+| Generic code executor             | Static policy rejects code tools, arguments and descriptions; adapter frozen by hash                       | `unit-policy.test`                  |
+| Autopilot                         | One native input per player tool call, none outside a call; one path at a time, never queued               | privileged fixture, `port.test`     |
+| No-op MCP                         | Success requires a started, completed round, legal paths and slices                                        | no-op fixture                       |
+| Clock manipulation                | External telemetry drift and finish-time audit                                                             | all play tests                      |
+| Tampered artifact                 | Inventory re-hashed before smoke and play; links and extra files rejected                                  | `unit-policy.test`                  |
+| Inconsistent handoff or metadata  | Replay binds passing smoke and claimed hash to verified files; manifest and adapter metadata reconstructed | `unit-handoff.test`                 |
 
 A play result is `valid_gameplay` only when `failure_reasons` is empty. Scores are always
 reported raw, whatever the validity.
+
+`--handoff` replay validates the full builder record before launching the game or MCP:
+the smoke must pass for the claimed artifact, and its digest must match the re-hashed
+inventory. Runtime manifest and adapter metadata come from the verified artifact bytes;
+inconsistent copies in `build.json` are rejected. `--frozen` is a separate developer-fixture
+path: it verifies the same bytes and metadata without claiming a passing builder smoke.
+The two inputs are mutually exclusive.
 
 ## Parity between play modes
 

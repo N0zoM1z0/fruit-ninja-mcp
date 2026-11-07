@@ -14,15 +14,9 @@ import { smoke, type SmokeResult } from "./acceptance.js";
 import { runAgent, type AgentResult, type LlmEndpoint } from "./llm.js";
 import { provenance } from "./provenance.js";
 import { BuilderSandbox, newRunId } from "./sandbox.js";
+import { type Handoff, verifyHandoff } from "./handoff.js";
 
-export interface Handoff {
-  sha256: string;
-  frozen: string;
-  smoke: SmokeResult;
-  notes: string | null;
-  builder_run: string;
-  handed_off_at: string;
-}
+export type { Handoff } from "./handoff.js";
 const ok = (value: unknown): CallToolResult => ({
   content: [{ type: "text", text: JSON.stringify(value) }],
 });
@@ -157,7 +151,7 @@ export class BuilderController {
       throw new Error(
         "handoff requires a passing smoke of this exact artifact",
       );
-    this.handoff = {
+    const handoff: Handoff = {
       sha256: sha,
       frozen: entry.root,
       smoke: smoked,
@@ -165,6 +159,8 @@ export class BuilderController {
       builder_run: this.output,
       handed_off_at: new Date().toISOString(),
     };
+    await verifyHandoff(handoff);
+    this.handoff = handoff;
     await writeFile(
       resolve(this.output, "handoff.json"),
       JSON.stringify(this.handoff, null, 2) + "\n",

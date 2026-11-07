@@ -31,11 +31,11 @@ const { values } = parseArgs({
     "allow-policy-failure": { type: "boolean", default: false },
   },
 });
-const frozen =
-  values.frozen ??
-  (values.handoff
-    ? JSON.parse(await readFile(values.handoff, "utf8")).frozen
-    : undefined);
+if (values.frozen !== undefined && values.handoff !== undefined)
+  throw new Error("choose either --handoff replay or a raw --frozen fixture");
+const handoff = values.handoff
+  ? JSON.parse(await readFile(values.handoff, "utf8"))
+  : undefined;
 const { llm, close } = await endpoint(values, {
   gui: () => guiPolicy(),
   positive: () => positivePolicy(),
@@ -50,7 +50,8 @@ try {
   const result = await runPlay({
     output,
     interface: values.interface as "gui" | "mcp",
-    frozen,
+    frozen: values.frozen,
+    handoff,
     seed: Number(values.seed),
     duration: Number(values.duration),
     profile: values.profile as "standard" | "async",

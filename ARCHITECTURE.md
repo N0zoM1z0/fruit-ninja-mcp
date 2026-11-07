@@ -66,6 +66,11 @@ environment. Tests check this with a canary key.
 A play result is `valid_gameplay` only when `failure_reasons` is empty. Scores are always
 reported raw, whatever the validity.
 
+Blocking paths, async submissions and clicks share an input gate: an active input rejects
+overlaps before they reach the runtime queue. An adapter-call deadline is terminal for the
+run: the evaluator closes the browser, rejects further referee reads and saves an invalid
+result, including when synchronous adapter code blocks the renderer.
+
 `--handoff` replay validates the full builder record before launching the game or MCP:
 the smoke must pass for the claimed artifact, and its digest must match the re-hashed
 inventory. Runtime manifest and adapter metadata come from the verified artifact bytes;

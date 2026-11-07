@@ -62,7 +62,11 @@ test(
   { skip: !enabled },
   async () => {
     await mkdir(resolve(root, "artifacts"), { recursive: true });
-    base = await mkdtemp(resolve(root, "artifacts/test-pipeline-"));
+    base = resolve(
+      await mkdtemp(resolve(root, "artifacts/test-pipeline-")),
+      "nested",
+      "run",
+    );
     const result = await withMock(
       builderScript(await fixtureFiles("positive")),
       (llm) =>
@@ -277,7 +281,7 @@ test(
   async () => {
     const r = await withMock(guiPolicy(8), (llm) =>
       runPlay({
-        output: resolve(base, "gui"),
+        output: resolve(base, "nested-gui", "run"),
         interface: "gui",
         seed: 42,
         duration: 6,
@@ -297,7 +301,9 @@ test(
       ),
       r.failure_reasons.join(),
     );
-    const tools = await lines(resolve(base, "gui/actor/tools.jsonl"));
+    const tools = await lines(
+      resolve(base, "nested-gui/run/actor/tools.jsonl"),
+    );
     assert.ok(
       tools.some(
         (t) =>
@@ -306,5 +312,43 @@ test(
           t.result.content[0].sha256,
       ),
     );
+  },
+);
+
+test(
+  "a synchronous adapter loop terminates the run and writes an invalid result",
+  { skip: !enabled, timeout: 15000 },
+  async () => {
+    const bundle = await fixtureBundle("positive");
+    bundle.files["mcp/adapter.js"].base64 = Buffer.from(
+      Buffer.from(bundle.files["mcp/adapter.js"].base64, "base64").toString() +
+        "\nexports.observe = () => { while (true) {} };\n",
+    ).toString("base64");
+    const { root: frozen } = await freeze(
+      bundle,
+      resolve(base, "stuck-adapter"),
+    );
+    const started = performance.now();
+    const r = await play(
+      "stuck-adapter-play",
+      ({ step }) => ({
+        tool_calls: [{ name: step === 1 ? "start_round" : "observe" }],
+      }),
+      { frozen },
+    );
+    assert.equal(r.valid_gameplay, false);
+    assert.ok(
+      r.failure_reasons.some((reason) => reason.includes("ADAPTER_TIMEOUT")),
+      r.failure_reasons.join(),
+    );
+    assert.ok(
+      performance.now() - started < 12000,
+      "timeout must bound the whole run, including cleanup",
+    );
+    const saved = JSON.parse(
+      await readFile(resolve(base, "stuck-adapter-play/result.json"), "utf8"),
+    );
+    assert.equal(saved.valid_gameplay, false);
+    assert.equal(saved.agent.stop_reason, "stopped");
   },
 );

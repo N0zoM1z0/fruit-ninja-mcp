@@ -77,6 +77,10 @@ export const chromiumArgs = [
 
 /** Evaluator-owned game. The referee is reachable only through a private CDP handle. */
 export class GameRuntime {
+  private fatalAdapterError: Error | null = null;
+  get failureReason(): string | null {
+    return this.fatalAdapterError?.message ?? null;
+  }
   private queue: Promise<unknown> = Promise.resolve();
   private persistence: Promise<unknown> = Promise.resolve();
   private closed = false;
@@ -230,6 +234,7 @@ export class GameRuntime {
     fn: (r: any, arg: any) => unknown,
     arg?: unknown,
   ): Promise<any> {
+    if (this.fatalAdapterError) throw this.fatalAdapterError;
     try {
       return await this.referee.evaluate(fn as any, arg);
     } catch (error) {
@@ -336,6 +341,7 @@ export class GameRuntime {
     args: unknown,
     timeoutMs = 2000,
   ): Promise<unknown> {
+    if (this.fatalAdapterError) throw this.fatalAdapterError;
     if (this.closed) throw new Error("Game session is closed");
     if (!this.adapter) throw new Error("ADAPTER_MISSING: no adapter is loaded");
     if (!this.adapterExports.includes(fn))
@@ -350,13 +356,16 @@ export class GameRuntime {
           [fn, args] as const,
         ),
         new Promise((_, reject) => {
-          timer = setTimeout(
-            () =>
-              reject(
-                new Error(`ADAPTER_TIMEOUT: ${fn} exceeded ${timeoutMs}ms`),
-              ),
-            timeoutMs,
-          );
+          timer = setTimeout(() => {
+            const error = new Error(
+              `ADAPTER_TIMEOUT: ${fn} exceeded ${timeoutMs}ms`,
+            );
+            this.fatalAdapterError = error;
+            // Browser.close uses the browser connection, so it can interrupt a renderer
+            // blocked in synchronous adapter code. Further referee calls fail immediately.
+            void this.browser.close({ reason: error.message }).catch(() => {});
+            reject(error);
+          }, timeoutMs);
         }),
       ]);
     } finally {
@@ -625,9 +634,13 @@ export class GameRuntime {
     while (this.telemetryBusy) await sleep(10);
     await this.persistence;
     const video = this.page.video();
-    await this.page.context().close();
-    if (video && this.artifacts)
-      await rename(await video.path(), resolve(this.artifacts, "game.webm"));
+    try {
+      await this.page.context().close();
+      if (video && this.artifacts)
+        await rename(await video.path(), resolve(this.artifacts, "game.webm"));
+    } catch (error) {
+      if (!this.fatalAdapterError) throw error;
+    }
     await this.browser.close();
   }
 }

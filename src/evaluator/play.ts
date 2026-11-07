@@ -2,7 +2,7 @@
 // GUI: screenshot/click/drag tools (in-process MCP). MCP: a frozen agent-built MCP runs in an
 // offline sandbox and reaches the game only through the game port (adapter + native input).
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -91,6 +91,7 @@ export class CallGate implements PortGate {
 
 /** Evaluator port backend: the SAME runtime executor as GUI drag/click; generic status only. */
 export class RuntimeBackend implements PortBackend {
+  private inputPending = false;
   constructor(
     readonly runtime: GameRuntime,
     readonly profile: "standard" | "async",
@@ -143,7 +144,24 @@ export class RuntimeBackend implements PortBackend {
   status() {
     return this.generic();
   }
-  async path(points: TimedPoint[], wait: boolean) {
+  private async input<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.inputPending || this.runtime.actionStatus().pending_action)
+      throw new PortError(
+        "BUSY",
+        "an input is executing; nothing was queued",
+        409,
+      );
+    this.inputPending = true;
+    try {
+      return await operation();
+    } finally {
+      this.inputPending = false;
+    }
+  }
+  path(points: TimedPoint[], wait: boolean) {
+    return this.input(() => this.executePath(points, wait));
+  }
+  private async executePath(points: TimedPoint[], wait: boolean) {
     const map = (error: unknown): never => {
       const message = String(error instanceof Error ? error.message : error);
       if (/ROUND_NOT_PLAYING/.test(message))
@@ -181,13 +199,15 @@ export class RuntimeBackend implements PortBackend {
     };
   }
   async click(x: number, y: number) {
-    await this.runtime.click(x, y).catch((error) => {
-      throw new PortError(
-        "INVALID_CLICK",
-        String(error instanceof Error ? error.message : error).slice(0, 300),
-      );
+    return this.input(async () => {
+      await this.runtime.click(x, y).catch((error) => {
+        throw new PortError(
+          "INVALID_CLICK",
+          String(error instanceof Error ? error.message : error).slice(0, 300),
+        );
+      });
+      return { accepted: true };
     });
-    return { accepted: true };
   }
 }
 
@@ -246,6 +266,7 @@ export async function runPlay(options: PlayOptions) {
     else throw new Error("MCP play requires a handoff or raw frozen fixture");
   } else if (options.handoff !== undefined || frozenRoot !== undefined)
     throw new Error("artifacts are only supported in MCP mode");
+  await mkdir(dirname(output), { recursive: true });
   await mkdir(output, { recursive: false });
   const runId = newRunId("p");
   const began = performance.now();
@@ -398,7 +419,8 @@ export async function runPlay(options: PlayOptions) {
         deadlineMs: (options.timeoutSeconds ?? options.duration + 120) * 1000,
         vision: options.interface === "gui",
         shouldStop: () =>
-          finishedAt !== null && performance.now() - finishedAt > 3000,
+          runtime.failureReason !== null ||
+          (finishedAt !== null && performance.now() - finishedAt > 3000),
       });
     } finally {
       clearInterval(watcher);

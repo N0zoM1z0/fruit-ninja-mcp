@@ -2,7 +2,7 @@
 // packaged game and these exploration/handoff tools only. No gameplay MCP, referee or secret
 // is mounted into its sandbox; credentials stay in this host process.
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { posix, resolve } from "node:path";
+import { dirname, posix, resolve } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
@@ -291,6 +291,7 @@ export async function runBuilder(
   options: BuilderOptions,
 ): Promise<BuilderResult> {
   const output = resolve(options.output);
+  await mkdir(dirname(output), { recursive: true });
   await mkdir(output, { recursive: false });
   const runId = newRunId("b");
   const began = performance.now();

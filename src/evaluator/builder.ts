@@ -320,10 +320,18 @@ export async function runBuilder(
     await client.connect(a);
     const tools = (await client.listTools()).tools;
     const prompt = await builderPrompt();
+    const maxSteps = options.maxSteps ?? 400,
+      timeoutSeconds = options.timeoutSeconds ?? 3 * 3600;
     const agent = await runAgent({
       llm: options.llm,
       system: prompt.system,
-      user: prompt.user,
+      user: `${prompt.user}\n\n---\n\nSession budget: at most ${maxSteps} model turns and ${Math.round((timeoutSeconds / 3600) * 10) / 10} hours of wall time. Nothing is handed off automatically; call handoff before the budget ends.`,
+      maxToolResultChars: 24_000,
+      compaction: {
+        triggerChars: 1_200_000,
+        targetChars: 600_000,
+        keepRecent: 30,
+      },
       session: {
         tools,
         call: async (name, args) =>
@@ -332,8 +340,8 @@ export async function runBuilder(
           })) as CallToolResult,
       },
       traceDir: output,
-      maxSteps: options.maxSteps ?? 400,
-      deadlineMs: (options.timeoutSeconds ?? 3 * 3600) * 1000,
+      maxSteps,
+      deadlineMs: timeoutSeconds * 1000,
       shouldStop: () => controller.handoff !== null,
     });
     const result: BuilderResult = {

@@ -27,7 +27,8 @@
     "package": "tsx scripts/package.ts",
     "builder": "tsx scripts/builder.ts",
     "preview": "tsx scripts/preview.ts",
-    "test:unit": "node --import tsx --test tests/unit-*.test.ts"
+    "test:unit": "node --import tsx --test tests/unit-*.test.ts",
+    "pilot": "tsx scripts/pilot.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

@@ -32,6 +32,14 @@ export interface AgentOptions {
   /** Keep only this many most recent images in the conversation. */
   keepImages?: number;
   shouldStop?: () => boolean;
+  /** Cap on tool-result text sent to the model; the full result stays in the trace. */
+  maxToolResultChars?: number;
+  /** Elide older tool results once the conversation exceeds triggerChars. */
+  compaction?: {
+    triggerChars: number;
+    targetChars: number;
+    keepRecent: number;
+  };
 }
 export interface AgentResult {
   steps: number;
@@ -41,13 +49,36 @@ export interface AgentResult {
     "final_message" | "max_steps" | "deadline" | "stopped" | "llm_error";
   final_message: string | null;
   error?: string;
-  usage: {
+  /** Sum of every numeric usage field reported by the endpoint (incl. reasoning/cached). */
+  usage: Record<string, number> & {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
   };
   llm_latency_ms: number[];
+  finish_reasons: Record<string, number>;
+  truncations: number;
+  compactions: number;
 }
+function addUsage(total: Record<string, number>, usage: unknown, prefix = "") {
+  if (!usage || typeof usage !== "object") return;
+  for (const [key, value] of Object.entries(usage))
+    if (typeof value === "number")
+      total[prefix + key] = (total[prefix + key] ?? 0) + value;
+    else if (value && typeof value === "object")
+      addUsage(total, value, `${key}.`);
+}
+const conversationChars = (messages: any[]) =>
+  messages.reduce(
+    (n, m) =>
+      n +
+      (typeof m.content === "string"
+        ? m.content.length
+        : JSON.stringify(m.content ?? "").length) +
+      (m.reasoning_content?.length ?? 0) +
+      JSON.stringify(m.tool_calls ?? "").length,
+    0,
+  );
 const functionName = (name: string) =>
   name.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
 const textOf = (result: CallToolResult) =>
@@ -140,7 +171,12 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
     final_message: null,
     usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
     llm_latency_ms: [],
+    finish_reasons: {},
+    truncations: 0,
+    compactions: 0,
   };
+  const maxToolChars = options.maxToolResultChars ?? 24_000;
+  let consecutiveTruncations = 0;
   const deadline = performance.now() + options.deadlineMs;
   while (result.steps < options.maxSteps) {
     if (options.shouldStop?.()) {
@@ -239,23 +275,39 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
         body: reply,
       }) + "\n",
     );
-    for (const k of [
-      "prompt_tokens",
-      "completion_tokens",
-      "total_tokens",
-    ] as const)
-      result.usage[k] += Number(reply?.usage?.[k] ?? 0);
+    addUsage(result.usage, reply?.usage);
+    const finish = String(reply?.choices?.[0]?.finish_reason ?? "unknown");
+    result.finish_reasons[finish] = (result.finish_reasons[finish] ?? 0) + 1;
     const message = reply?.choices?.[0]?.message;
     if (!message) {
       result.stop_reason = "llm_error";
       result.error = "response has no message";
       return result;
     }
+    // Interleaved reasoning is returned to the model with its own turn.
     messages.push({
       role: "assistant",
       content: message.content ?? null,
+      ...(message.reasoning_content
+        ? { reasoning_content: message.reasoning_content }
+        : {}),
       ...(message.tool_calls?.length ? { tool_calls: message.tool_calls } : {}),
     });
+    if (finish === "length") result.truncations++;
+    if (!message.tool_calls?.length && finish === "length") {
+      // A reply cut off by max_tokens is not a final answer.
+      if (++consecutiveTruncations >= 3) {
+        result.stop_reason = "llm_error";
+        result.error = "three consecutive replies truncated at max_tokens";
+        return result;
+      }
+      messages.push({
+        role: "user",
+        content: `[harness] Your previous reply was cut off at the max_tokens limit (${body.max_tokens}) before it finished. Continue.`,
+      });
+      continue;
+    }
+    consecutiveTruncations = 0;
     if (!message.tool_calls?.length) {
       result.stop_reason = "final_message";
       result.final_message = message.content ?? null;
@@ -268,9 +320,17 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       let output: CallToolResult;
       const callStarted = performance.now();
       try {
-        args = call.function?.arguments
-          ? JSON.parse(call.function.arguments)
-          : {};
+        try {
+          args = call.function?.arguments
+            ? JSON.parse(call.function.arguments)
+            : {};
+        } catch (error) {
+          throw new Error(
+            finish === "length"
+              ? `Tool call arguments were cut off at the max_tokens limit (${body.max_tokens}) and are not valid JSON`
+              : `Tool call arguments are not valid JSON: ${(error as Error).message}`,
+          );
+        }
         if (!byFunction.has(call.function?.name))
           throw new Error(`Unknown tool ${call.function?.name}`);
         if (!args || typeof args !== "object" || Array.isArray(args))
@@ -314,9 +374,45 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       messages.push({
         role: "tool",
         tool_call_id: call.id,
-        content: textResult.slice(0, 200_000),
+        content:
+          textResult.length > maxToolChars
+            ? `${textResult.slice(0, maxToolChars)}\n[harness] Output truncated to ${maxToolChars} of ${textResult.length} characters; request a narrower range for the rest.`
+            : textResult,
       });
       if (options.shouldStop?.()) break;
+    }
+    if (
+      options.compaction &&
+      conversationChars(messages) > options.compaction.triggerChars
+    ) {
+      // Bound context and cost: stub out older tool results (full text stays in tools.jsonl).
+      const { targetChars, keepRecent } = options.compaction;
+      const toolIndexes = messages.flatMap((m, i) =>
+        m.role === "tool" ? [i] : [],
+      );
+      let elided = 0;
+      for (const i of toolIndexes.slice(
+        0,
+        Math.max(0, toolIndexes.length - keepRecent),
+      )) {
+        if (conversationChars(messages) <= targetChars) break;
+        const m = messages[i];
+        if (typeof m.content === "string" && m.content.length > 400) {
+          elided += m.content.length;
+          m.content = `${m.content.slice(0, 300)}\n[harness] Older tool output elided (${m.content.length} characters) to bound context.`;
+        }
+      }
+      result.compactions++;
+      await appendFile(
+        llmTrace,
+        JSON.stringify({
+          kind: "compaction",
+          step: result.steps,
+          t_ms: now(),
+          elided_chars: elided,
+          conversation_chars: conversationChars(messages),
+        }) + "\n",
+      );
     }
     if (options.vision && images.length) {
       messages.push({

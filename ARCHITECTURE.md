@@ -32,6 +32,12 @@ environment. Tests check this with a canary key.
     adapter-owned event properties and methods do not affect blade coordinates;
   - mode, motion effects and arena geometry locked after prepare;
   - a CSP with no network and no string compilation in page contexts.
+
+  Both builds also translate the player-visible Chinese UI to English with an exact-phrase
+  table (`src/localization.ts`). It is applied in memory after the pinned file is
+  hash-verified, leaves markup, DOM ids and logic unchanged, and fails closed if upstream
+  text changes.
+
 - **Refereed** (per session): the same rules plus a referee hook block inside the closure. It
   handles events, stats, visible-object state, stroke attribution and integrity checks. It
   registers under a random one-time key; the evaluator captures it into a CDP handle and

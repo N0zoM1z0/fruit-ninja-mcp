@@ -9,7 +9,7 @@ import {
 import type { FixtureFile } from "./fixtures.js";
 
 export const GUI_LAYOUT = {
-  start: { x: 230, y: 554 },
+  start: { x: 252, y: 541 },
   canvas: { left: 39, top: 92, width: 1362, height: 817 },
 };
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));

@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { localize } from "./localization.js";
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const upstream = {
@@ -174,8 +175,9 @@ const publicHooks = String.raw`
 
 /** Apply the public rules patch and the given hook block to the pinned upstream HTML. */
 export function applyRules(html: string, hooks: string): string {
+  // English UI first (exact-phrase table; the pinned bytes were already hash-verified).
   let result = replaceOnce(
-    html,
+    localize(html),
     '<meta charset="UTF-8">',
     `<meta charset="UTF-8">\n  <meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicy}">`,
   );

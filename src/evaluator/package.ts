@@ -38,6 +38,8 @@ export async function writePackage() {
       sha256: upstream.sha256,
       license: upstream.license,
     },
+    ui_language:
+      "en (upstream zh-CN text translated by the evaluation build; markup, ids and logic unchanged)",
     packaged: {
       file: "game/index.html",
       sha256: sha256(html),

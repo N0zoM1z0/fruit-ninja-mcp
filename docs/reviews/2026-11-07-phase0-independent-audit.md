@@ -6,6 +6,12 @@
 > file references below still apply. The findings were not addressed when the work was migrated;
 > they are kept as written, apart from naming.
 
+Current status: `687ec0b` subsequently hardened native pointer consumption and bound handoff
+replay to the verified artifact and passing smoke. Regression tests cover those fixes. The
+pixel-filtering and internal-planning limitations below remain; see
+[current architecture](../../ARCHITECTURE.md#known-gaps-accepted-for-phase-0) and the
+[Phase 1 interpretation](../PHASE1-PILOT.md#interpretation-and-limitations).
+
 **Overall: FAIL — gameplay input integrity is bypassable without a referee violation.**
 
 Reviewed `kaoru0822-kitauji/fruit-ninja-self-mcp`: implementation

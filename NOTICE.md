@@ -4,9 +4,9 @@
 [N0zoM1z0/fruit-ninja-mcp](https://github.com/N0zoM1z0/fruit-ninja-mcp) builds on its `main` at
 commit `921455712a49eaa4a265ca7014a269b9d2dc3a03`, with complete history and authorship. Phase 0
 was first developed in the private standalone repository `kaoru0822-kitauji/fruit-ninja-self-mcp`
-and moved here with its commit hashes unchanged. The repository is private and contains no
-license file, so no license is granted. Obtain the owners' permission before any wider
-distribution.
+and moved here with its commit hashes unchanged. This repository is publicly viewable but
+contains no license file; public visibility does not grant a license to reuse or redistribute
+the code.
 
 **Game.** The game is [fruit-ninja-dojo](https://github.com/yongqixue99-hue/fruit-ninja-dojo) by
 yongqixue99-hue, pinned to `63d0af1906181cceb9486ed85cc2b65ce6e6ba0d` (SHA-256

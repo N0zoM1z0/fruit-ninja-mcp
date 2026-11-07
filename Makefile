@@ -9,9 +9,11 @@ EVALUATOR := $(PROJECT)/evaluator:$(TAG)
 # Names (never values) of credential variables passed to the evaluator only, not to sandboxes.
 LLM_ENV ?= DEEPSEEK_API_KEY
 DOCKER_GID := $(shell stat -c %g /var/run/docker.sock 2>/dev/null || echo 0)
+# The pinned container CLI may be newer than the host daemon. Use the daemon's API.
+DOCKER_API_VERSION ?= $(shell docker version --format '{{.Server.APIVersion}}' 2>/dev/null)
 RUN := docker run --rm --user $(shell id -u):$(shell id -g) --group-add $(DOCKER_GID) \
 	--label fnsm.project=$(PROJECT) --label fnsm.role=evaluator --shm-size 1g --cpus 4 --memory 8g \
-	-e HOME=/tmp -e FNSM_IMAGE_TAG=$(TAG) -e FNSM_DOCKER=1 -e npm_config_cache=$(CURDIR)/.local/npm-cache -e npm_config_update_notifier=false $(foreach v,$(LLM_ENV),-e $(v)) \
+	-e HOME=/tmp -e FNSM_IMAGE_TAG=$(TAG) -e FNSM_DOCKER=1 -e DOCKER_API_VERSION=$(DOCKER_API_VERSION) -e npm_config_cache=$(CURDIR)/.local/npm-cache -e npm_config_update_notifier=false $(foreach v,$(LLM_ENV),-e $(v)) \
 	-v /var/run/docker.sock:/var/run/docker.sock -v $(CURDIR):$(CURDIR) -w $(CURDIR) $(EVALUATOR)
 
 .PHONY: all evaluator setup images test check preview pilot shell clean-containers
@@ -46,7 +48,7 @@ pilot:
 
 shell:
 	docker run --rm -it --user $(shell id -u):$(shell id -g) --group-add $(DOCKER_GID) \
-		-e HOME=/tmp -e FNSM_IMAGE_TAG=$(TAG) -e FNSM_DOCKER=1 \
+		-e HOME=/tmp -e FNSM_IMAGE_TAG=$(TAG) -e FNSM_DOCKER=1 -e DOCKER_API_VERSION=$(DOCKER_API_VERSION) $(foreach v,$(LLM_ENV),-e $(v)) \
 		-v /var/run/docker.sock:/var/run/docker.sock -v $(CURDIR):$(CURDIR) -w $(CURDIR) $(EVALUATOR) bash
 
 clean-containers:

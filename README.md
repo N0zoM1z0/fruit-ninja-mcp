@@ -4,12 +4,15 @@ Infrastructure for comparing a **screenshot-only GUI** player with a player that
 server built by an agent** that explored the game as a black box. Both play the same pinned,
 realtime browser game under the same clock, scoring and native-mouse executor.
 
-This branch (`feat/self-built-mcp`) is **Phase 0** of [the plan](docs/plan_p0.md): rebuilt
-infrastructure, validated with a developer-only fixture MCP and scripted mock models. No model
-has built an MCP here, and no benchmark score has been measured. It builds on `main` of
-[N0zoM1z0/fruit-ninja-mcp](https://github.com/N0zoM1z0/fruit-ninja-mcp) (see
-[NOTICE](NOTICE.md)) and keeps its game integration, GUI interface, scoring, telemetry and
-video pipeline. The earlier prebuilt-MCP experiment is preserved as an evaluator-only reference
+The [Phase 1 pilot](docs/PHASE1-PILOT.md) used DeepSeek V4.1 Flash to build an MCP, then play
+one 60-second round per interface: **1268 points with the self-built MCP, 28 with GUI**.
+The MCP selects targets and plans each stroke; this measures observation plus automation,
+not observation alone. One builder session and one seed do not establish benchmark performance.
+See the [mechanism analysis](docs/PHASE2-MCP-MECHANISM.md) for how it works and its limitations.
+
+The project builds on the original game integration, GUI interface, scoring, telemetry and
+video pipeline (see [NOTICE](NOTICE.md)). Phase 0 infrastructure checks used developer fixtures
+and scripted models; the earlier prebuilt-MCP experiment remains an evaluator-only reference
 ([legacy README](docs/LEGACY-README.md)).
 
 ## How it fits together
@@ -51,6 +54,10 @@ contract is [sandbox/public/CONTRACT.md](sandbox/public/CONTRACT.md), and the po
 The host needs Docker and git. Everything else runs in project-labelled containers (Node 22,
 Debian Chromium and ffmpeg, pinned base images). Setup downloads the game and verifies it by
 SHA-256; game bytes are never committed.
+
+The Makefile passes the host daemon's API version to the container's Docker client, including
+when the host daemon is older. `make shell` forwards the credential variables named by
+`LLM_ENV` (default `DEEPSEEK_API_KEY`) to the evaluator only; export them before opening it.
 
 ```sh
 make setup      # evaluator image, npm ci, game download, build, packaged game + image scan

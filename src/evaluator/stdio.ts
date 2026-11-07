@@ -44,6 +44,9 @@ export class StrictStdioTransport implements Transport {
         ...(process.env.DOCKER_HOST
           ? { DOCKER_HOST: process.env.DOCKER_HOST }
           : {}),
+        ...(process.env.DOCKER_API_VERSION
+          ? { DOCKER_API_VERSION: process.env.DOCKER_API_VERSION }
+          : {}),
       },
     });
     this.child = child;

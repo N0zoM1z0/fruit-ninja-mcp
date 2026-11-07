@@ -77,8 +77,10 @@ The two inputs are mutually exclusive.
 
 Both modes use the same refereed build, prepare call, hardening, wall clock, start mechanism (a
 native click on the start button), `validatePath`/`executeTimedPath` executor, limits (2–32
-points, 16–1000 ms, 5000 px/s), single-path rule, and run directory layout. They differ only in
-observation (pixels versus the agent's adapter) and in the one-line interface description.
+points, 16–1000 ms, 5000 px/s), single-path rule, and run directory layout. Their tools differ:
+GUI supplies pixels and actor-authored paths; a generated MCP supplies its own observations
+and may select targets and plan a single path within each call. The Phase 1 pilot therefore
+compares observation plus automation, not observation alone.
 
 ## Known gaps (accepted for Phase 0)
 
@@ -89,6 +91,9 @@ observation (pixels versus the agent's adapter) and in the one-line interface de
 - The adapter shares the page realm. Built-ins are frozen and geometry is audited, but a
   sufficiently clever adapter might find an untested way to influence the page. Game objects
   are unreachable through built-ins, and the integrity checks invalidate detected tampering.
+- Pixel filtering is heuristic: image blocks, data URLs and large base64 payloads are rejected,
+  but numeric pixel arrays can pass. Static tool policy and the input budget do not prove that
+  an arbitrary generated MCP obeys semantic restrictions; inspect its frozen implementation.
 - The 32-bit spawn LCG could in principle be inferred from observed spawns.
 - Hidden functional acceptance probes run by a model are Phase 1; smoke checks the protocol and
   interface only.

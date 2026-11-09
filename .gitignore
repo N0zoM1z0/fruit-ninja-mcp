@@ -6,3 +6,4 @@ artifacts/
 .env.*
 coverage/
 *.log
+__pycache__/

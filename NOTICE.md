@@ -21,3 +21,10 @@ repository. This is not the official Halfbrick game.
 **Dependencies.** npm packages are pinned by lockfiles (`package-lock.json`,
 `sandbox/toolchain/package-lock.json`) and installed at setup; base images are pinned by digest
 in the `Makefile`.
+
+**Windows research target.** `native/setup.py` acquires a hash-pinned third-party
+historical Fruit Ninja HD archive locally. The inspected executable is Halfbrick
+game software, distinct from the browser remake. Archive provenance and hashes
+do not establish publisher authenticity. Binaries, assets, Wine state, decompiled
+output and recordings are not vendored. The DXVK compatibility backport is an
+altered upstream source patch under [the zlib/libpng license](native/DXVK-LICENSE.txt).

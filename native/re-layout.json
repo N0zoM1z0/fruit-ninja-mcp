@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "target": {
+    "file": "FruitNinja.exe",
+    "sha256": "1c40a38a42bd21ce7cc7e769a056c4338c44df9ef257c8efebd01144a4ebce3d",
+    "image_base": "0x400000",
+    "architecture": "x86",
+    "byte_order": "little"
+  },
+  "status": "static-layout-confirmed; runtime-validation-owned-by-host",
+  "entities": {
+    "manager_address": "0x5bfaf0",
+    "list_descriptors_pointer_address": "0x5c0b00",
+    "descriptor_stride": 12,
+    "descriptor_head_offset": 0,
+    "descriptor_count_offset": 4,
+    "node_size": 12,
+    "node_next_offset": 0,
+    "node_previous_offset": 4,
+    "node_entity_offset": 8,
+    "evidence": [
+      "ev_d20eb99e496ca78ede46efd6a72c457e06bdc636516b7da65fd9c4b084f3796b",
+      "ev_6e859e7751f79fa37e9b6fd4f309d8461beba0721275d9ecb1a5c1bd6d44018d",
+      "ev_b0c917704850ea8f53de9522d72fea482353aafd25c0473196bff528e20551dc"
+    ]
+  },
+  "common": {
+    "vtable_offset": 0,
+    "flags_offset": 12,
+    "pending_removal_mask": 16,
+    "position_f32_offsets": [16, 20, 24],
+    "velocity_f32_offsets": [28, 32, 36],
+    "collider_pointer_offset": 56,
+    "collider_radius_f32_offset": 20,
+    "entity_type_u8_offset": 53,
+    "radius_units": "linear world units, not squared",
+    "radius_evidence": [
+      "ev_2d858add85921521f660315d21edc806cc54affda14dbeb6c24ac3ab6fa13f4b",
+      "ev_f68ef4064c436c8a4235fa269a6e30106924d14bd272ebf300a34008c3462d63"
+    ]
+  },
+  "fruit": {
+    "type_index": 0,
+    "vtable_address": "0x551be0",
+    "allocation_size": 396,
+    "sliced_u8_offset": 184,
+    "physics_enabled_u8_offset": 112,
+    "time_scale_f32_offset": 152,
+    "acceleration_f32_offsets": [160, 164, 168],
+    "frozen_u8_offset": 364,
+    "spawn_delay_f32_offset": 116,
+    "slice_pending_f32_offset": 188,
+    "evidence": [
+      "ev_310e0d453bb21bd11e7a403a93fe85cc27b5ce3b2aa2b7a75c419860fb8f549e",
+      "ev_6277f79ec5a36bee460f76fe6c694d8de3f9e49ea5e8c1f8d681dd8a15a30ba3",
+      "ev_6fa7d392e95ec32f0352f6cd17983c3e19c23e5f34cafcffc93f1c5601a457e6",
+      "ev_5b9c290ed57881f38ac9400b52f5326f505a03307df956172db7dfc19340e869",
+      "ev_1e4ebe49a16ad4d255e80471684f54c7be6087816c83e473ba04b1a5de5f1d7a",
+      "ev_4f7d3a3c025fd210f7950458968b95b0a0ade0e0bea3d3630389e927a371ce7d"
+    ],
+    "kind_u8_offset": 60,
+    "combo_group_i32_offset": 132,
+    "metadata": {
+      "table_pointer_address": "0x5b2adc",
+      "record_stride": 824,
+      "reward_i32_offset": 788,
+      "configured_effect_i32_offset": 812,
+      "note": "Configured effect keys are used as a priority hint; they are not a decoded active-effect state."
+    }
+  },
+  "bomb": {
+    "type_index": 1,
+    "vtable_address": "0x551b28",
+    "allocation_size": 176,
+    "exploded_u8_offset": 104,
+    "physics_enabled_u8_offset": 128,
+    "time_scale_f32_offset": 168,
+    "acceleration_f32_offsets": [140, 144, 148],
+    "spawn_delay_f32_offset": 164,
+    "evidence": [
+      "ev_065a4978bc2a32d0666a99fbfffe585d30c0743e894f212e86d4ab99d50d8a30",
+      "ev_6a617be852a90eeb83ebbbbc0b272b98100c19519b180aff3dcd78f683205ce5",
+      "ev_c67c4c363b6a101fd87f0e857b3ef1da9d1a4074780f64ce6762475a1e257c87",
+      "ev_4f7d3a3c025fd210f7950458968b95b0a0ade0e0bea3d3630389e927a371ce7d"
+    ]
+  },
+  "motion": {
+    "world_y_axis": "up",
+    "position_factor": 60,
+    "velocity_world_per_second": "stored_velocity * 60 * entity_time_scale",
+    "acceleration_world_per_second_squared": "stored_acceleration * 60 * entity_time_scale^2",
+    "default_acceleration_y": -12,
+    "default_gravity_world_per_second_squared": -720,
+    "limitations": [
+      "Outer frame speed and freeze effects can modify simulation time; calibrate actual wall-time motion during runtime.",
+      "World-to-screen centering was independently confirmed by host runtime, not by these static tools.",
+      "The cumulative integer simulation clock truncates milliseconds per frame; measured wall-time scaling therefore has frame quantization error."
+    ],
+    "evidence": [
+      "ev_6277f79ec5a36bee460f76fe6c694d8de3f9e49ea5e8c1f8d681dd8a15a30ba3",
+      "ev_6fa7d392e95ec32f0352f6cd17983c3e19c23e5f34cafcffc93f1c5601a457e6",
+      "ev_d045bee2b36f078e144ae4ebda759ad546293d8c06af5fe90fc8e4de0822ac46"
+    ]
+  },
+  "camera": {
+    "virtual_width": "aspect > 1.5 ? 320*aspect : 480",
+    "virtual_height": "aspect > 1.5 ? 320 : 480/aspect",
+    "screen_x": "left + (world_x + virtual_width/2) * width/virtual_width",
+    "screen_y": "top + (virtual_height/2 - world_y) * height/virtual_height",
+    "evidence": [
+      "ev_e6b2de6f65a906475fa55343f81b9b1ca3d9a64b71d67f323d276b90286cdf1a",
+      "ev_af2ed7f24769f7ef62c10529103a428c4a02271f120811275734dd4e624caac5"
+    ],
+    "centering_status": "confirmed separately by host runtime",
+    "effects": {
+      "position_f32_offsets": [332, 336, 340],
+      "zoom_f32_offset": 344,
+      "rotation_u16_offset": 348,
+      "evidence": [
+        "ev_1dbeb8e7f76c3b01a2fa7b46170205563c13b0ff03a97344f385826c74e8ffaf"
+      ],
+      "active_f32_offset": 352,
+      "shake_f32_offsets": [324, 328],
+      "offset": "(position_x - shake_x, position_y - shake_y)",
+      "rotation_radians": "((rotation_u16 >> 4) * 2*pi) / 4096",
+      "world_to_centered_screen": "rotate(+angle, (world - offset) / zoom)",
+      "native_input_inverse": "offset + zoom * rotate(-angle, centered_screen)"
+    }
+  },
+  "globals": {
+    "dispatch_phase_u8_address": "0x5b3070",
+    "mode_i32_address": "0x5b3074",
+    "score_i32_address": "0x5b308c",
+    "lives_u8_address": "0x5b3088",
+    "frame_dt_f32_address": "0x5b30ac",
+    "config_pointer_address": "0x5b30c0",
+    "limitations": [
+      "Dispatch phase 2 includes the menu and cannot identify a running round alone.",
+      "Use host-observed native start transition with remaining>0, endflag=0 and paused=0; menu transition semantics still need runtime validation.",
+      "TimeControl may slow game seconds during bonuses; do not equate remaining with wall time."
+    ],
+    "evidence": [
+      "ev_3b964269cc240ee0451a7b4bb4c1af0fc8e0767ac560849d1cb735bda5e9bb13",
+      "ev_f3983600cd2cf6c67fef2ef99171c7be5a7ad9ebfff3b9b937ce1f4c4258a7a5",
+      "ev_28aa6ecb808443e0a8f44ad7883e24dd387ebb24aff87db34a8f0e45149ac822",
+      "ev_8abae02e5c8b2c07f6213137c05915a1b95710197d997d89bb54ea3b5538c85a",
+      "ev_f8ded783897ef618709ab04542921160cb6681b90ceec6fddb54c8e9745e1950"
+    ],
+    "camera_pointer_address": "0x5b30bc",
+    "paused_u8_address": "0x5b3072",
+    "round_ended_u8_address": "0x5b3078",
+    "game_over_screen_pointer_address": "0x5b31dc",
+    "countdown_gate_u8_address": "0x5b31e8",
+    "countdown_ready_u8_address": "0x5b3215",
+    "remaining_time": {
+      "base_pointer_address": "0x5b30c0",
+      "offset": 260,
+      "type": "f32",
+      "unit": "game-seconds"
+    },
+    "simulation_ticks_u32_address": "0x5b3210"
+  }
+}

@@ -28,7 +28,15 @@
     "builder": "tsx scripts/builder.ts",
     "preview": "tsx scripts/preview.ts",
     "test:unit": "node --import tsx --test tests/unit-*.test.ts",
-    "pilot": "tsx scripts/pilot.ts"
+    "pilot": "tsx scripts/pilot.ts",
+    "windows:setup": "python3 native/setup.py",
+    "windows:rea": "node native/investigate.mjs",
+    "windows:serve": "node native/cli.mjs serve",
+    "windows:gui": "node native/cli.mjs serve --interface gui",
+    "windows:demo": "node native/demo.mjs",
+    "test:windows": "node --test tests/native-*.test.mjs",
+    "windows:compare": "node native/compare.mjs",
+    "windows:compose": "node native/compose.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.1",

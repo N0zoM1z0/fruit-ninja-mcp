@@ -1,5 +1,11 @@
 # Fruit Ninja: GUI vs agent-built MCP
 
+The [Windows native version](native/README.md) runs Fruit Ninja HD under Wine,
+using REA/Ghidra-recovered process state and the existing interception strategy.
+It includes native MCP and screenshot GUI interfaces, a reproducible analysis
+driver, game-only video recordings, a scripted MCP client (`npm run windows:demo`),
+and a real Codex comparison (`npm run windows:compare`, default: Terra high).
+
 Infrastructure for comparing a **screenshot-only GUI** player with a player that uses an **MCP
 server built by an agent** that explored the game as a black box. Both play the same pinned,
 realtime browser game under the same clock, scoring and native-mouse executor.
